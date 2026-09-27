@@ -198,4 +198,15 @@ Puede consultar su información académica, plan de estudios, oferta académica 
 historial académico. También puede realizar y consultar sus inscripciones durante los períodos
 habilitados para ello.
 
+# COSAS AÑADIDAS POR MI
 
+## Datos de Historial Académico
+- Código
+- Código alumno
+- Código sección
+- Código profesor
+- Período académico
+- Estado
+    - Aprobado
+    - Reprobado
+    - Cursando
