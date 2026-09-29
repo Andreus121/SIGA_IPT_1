@@ -11,11 +11,11 @@
 - Carrera (código de la carrera)
 - Plan de estudios (código del plan de estudio)
 - Estado
-    -REGULAR: habilitado para hacer sus estudios
-    -POSTERGACIÓN: estudiante que detuvó/canceló sus estudios
-    -RETIRO TEMPORAL: estudiante que ha interrumpido sus estudios
-    -EGRESADO: estidoamte que aprobó todo  el plan de estudio
-    -ELIMINADO: reprobó una asignatura dos veces
+    - REGULAR: habilitado para hacer sus estudios
+    - POSTERGACIÓN: estudiante que detuvó/canceló sus estudios
+    - RETIRO TEMPORAL: estudiante que ha interrumpido sus estudios
+    - EGRESADO: estidoamte que aprobó todo  el plan de estudio
+    - ELIMINADO: reprobó una asignatura dos veces
 
 ## Reglas de negocio
 
@@ -39,12 +39,14 @@ Toda carrera tendrá una duración de dos años (4 semestres)
 - Estado
     - ACTIIVA
     - INACTIVA
-- Código de plan te estudio **Agregada por mi**
 
 ## Datos plan de estudio
 
 - Código
 - Código de carrera
+- Estado
+    - VIGENTE
+    - NO_VIGENTE
 
 ## Reglas de negocio
 
@@ -61,11 +63,11 @@ Toda carrera tendrá una duración de dos años (4 semestres)
 ## Datos de una asignatura
 
 - Código
+- Código de plan de estudio
 - Nombre
 - Semestre (valor del 1 al 4)
 - TEL (teoría, Ejercicios y Laboratorio)
 - SCT (créditos academicos)
-- Prerequisitos
 
 ## Reglas de negocio
 
@@ -75,9 +77,6 @@ Toda carrera tendrá una duración de dos años (4 semestres)
 - Los prerrequisitos deben ser de semestres anteriores de la asignatura del mismo plan de estudio
 - Una asignatura que forme parte del historial académico de un estudiante no puede ser eliminada del sistema
 - Las modificaciones a una asignatura no modifican la información registrade en el historial académico de un estudiante
-
-**AGREGADO POR MI (suposiciones)**
-- El contexto nunca dice que una asignatura es de un plan de estudio, así que las asignaturas se pueden compartir entre planes de estudio e incluso carreras
 
 # Gestión de docentes
 
@@ -127,7 +126,7 @@ Toda carrera tendrá una duración de dos años (4 semestres)
 - Periodo académico
 - Docente
 - Capacidad de estudiantes
-- Horario
+- Horario **-> se creó una tabla nueva para esto**
 
 ## Datos de periodo academico
 - Periodo académico (2027-2)
@@ -138,7 +137,7 @@ debe registrar las matriculas de los alumnos (info utilizada en la toma de ramos
 no sé que más
 
 ## Reglas de negocio
-- Al crear un perído académico tiene estado inicial **ABIERTO**
+- Al crear un perído académico tiene estado inici- Código de plan te estudio **Agregada por mi**al **ABIERTO**
 - Toda sección debe tener un docente con estado ACITVO al momento de hacer la asignación
 - La capacidad de una sección debe ser **mayor que** cero y no podrá superar los 60 estudiantes
 - La cantidad de estudiantes inscritos no puede superar la capacidad maxima de la sección
@@ -200,12 +199,51 @@ habilitados para ello.
 
 # COSAS AÑADIDAS POR MI
 
+Estas cosas que añado son cosas que mencionan en el enunciado y pueden pasar desapercibidos
+
+## Datos de Prerequisitos
+- Código
+- Código del plan de estudio
+- Código de la asignatura
+- Código de la asignatura que es requisito
+
+## Datos de horario de seccion
+- Código
+- Código de sección
+- Código de periodo
+- Día
+- Modulo
+
+## Datos de registro (tomar un ramo)
+- Código
+- Rut estudiante
+- Código del curso
+- Código de la sección
+- Código del periodo académico
+- Fecha de registro
+- Nota Final
+- Estado
+    - Registrado
+    - Cancelado (desinscribir el ramo)
+
+## Datos de Matricula
+- Código
+- Rut estudiante
+- Periodo Académico
+- Fecha de matricula
+- Estado
+    - Activa
+    - Suspendida
+    - Retirada
+    - Anulada
+
 ## Datos de Historial Académico
 - Código
 - Código alumno
 - Código sección
 - Código profesor
 - Período académico
+- Nota final
 - Estado
     - Aprobado
     - Reprobado
