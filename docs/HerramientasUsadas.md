@@ -16,3 +16,7 @@ Razones:
 
 Razones:
 1. Cuando modifico un archivo y el servidor está ejecutandose, se actualiza solo con los cambios sin tener que reiniciar
+
+## Patrones de diseño
+1. Separation of Concerns (separación de intereses) que es dividir un sistema en varias secciones, en este caso como entity, service, repository, etc.
+2. 

@@ -201,6 +201,13 @@ habilitados para ello.
 
 Estas cosas que añado son cosas que mencionan en el enunciado y pueden pasar desapercibidos
 
+## Datos de Usuario
+- Id
+- Correo
+- contraseña
+- role
+- activado (booleano)
+
 ## Datos de Prerequisitos
 - Código
 - Código del plan de estudio

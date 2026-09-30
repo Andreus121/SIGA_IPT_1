@@ -17,9 +17,6 @@ public class StudentEntity {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String code;
-
-    @Column(nullable = false, unique = true)
     private String run;
 
     @Column(nullable = false)
