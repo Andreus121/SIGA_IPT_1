@@ -17,6 +17,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -79,7 +82,7 @@ public class StudentService {
         return mapStudentToResponseDto(student);
     }
 
-
+    // Actualiza un estudiante ya existente
     @Transactional
     public StudentResponseDto updateStudent(Long id, StudentUpdateDto dto) {
         StudentEntity student = studentRepository.findById(id)
@@ -156,18 +159,40 @@ public class StudentService {
         return mapStudentToResponseDto(studentRepository.save(student));
     }
 
-    /* Funciones por implementar a futuro (planificando)
+    // Retorna los datos de un estudiante por Id
     @Transactional(readOnly = true)
-    public StudentResponseDto getStudentById(Long id) {}
+    public StudentResponseDto getStudentById(Long id) {
+        StudentEntity student = studentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado."));
+        return mapStudentToResponseDto(student);
+    }
 
+    // Retorna datos de un estudiante por run
     @Transactional(readOnly = true)
-    public StudentResponseDto getStudentByRun(String run) {}
+    public StudentResponseDto getStudentByRun(String run) {
+        StudentEntity student = studentRepository.findByRun(run)
+                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado."));
+        return mapStudentToResponseDto(student);
+    }
 
+    // Retorna datos de un estudiante por su correo
     @Transactional(readOnly = true)
-    public List<StudentResponseDto> getAllStudents() {}
-    */
+    public StudentResponseDto getStudentByEmail(String email) {
+        StudentEntity student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado."));
+        return mapStudentToResponseDto(student);
+    }
 
-    // Funciones auxiliares para pasar a dto
+    // Retorna toda la lista de estudiantes (echa por si sirve en algo)
+    // CONSULTA PESADA
+    @Transactional(readOnly = true)
+    public List<StudentResponseDto> getAllStudents() {
+        return studentRepository.findAll().stream()
+                .map(this::mapStudentToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    // Funciones auxiliares para pasar a dto.
     private StudentResponseDto mapStudentToResponseDto(StudentEntity student) {
         return StudentResponseDto.builder()
                 .id(student.getId())

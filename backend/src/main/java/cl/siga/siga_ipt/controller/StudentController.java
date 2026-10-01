@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/students")
@@ -24,25 +26,33 @@ public class StudentController {
         return new ResponseEntity<>(studentService.registerStudent(dto), HttpStatus.CREATED);
     }
 
+    // Put para actualizar un estudiante ya existente
     @PutMapping("/{id}")
     public ResponseEntity<StudentResponseDto> updateStudent(@PathVariable Long id, @Valid @RequestBody StudentUpdateDto dto){
         return new ResponseEntity<>(studentService.updateStudent(id, dto), HttpStatus.OK);
     }
 
-    /* Funciones por implementar
-    @GetMapping
-    public ResponseEntity<List<StudentResponseDto>> getAllStudents() {
-    }
-
-
+    // Get para traer datos de un estudiante por su id
     @GetMapping("/{id}")
     public ResponseEntity<StudentResponseDto> getStudentById(@PathVariable Long id) {
+        return new ResponseEntity<>(studentService.getStudentById(id), HttpStatus.OK);
     }
 
+    // Get para traer datos de un estudiante por su run
     @GetMapping("/run/{run}")
     public ResponseEntity<StudentResponseDto> getStudentByRun(@PathVariable String run) {
+        return new ResponseEntity<>(studentService.getStudentByRun(run), HttpStatus.OK);
     }
 
+    // Get para traer datos de un estudiante por su email
+    @GetMapping("/email/{email}")
+    public ResponseEntity<StudentResponseDto> getStudentByEmail(@PathVariable String email) {
+        return new ResponseEntity<>(studentService.getStudentByEmail(email), HttpStatus.OK);
+    }
 
-    */
+    // Get para TODOS los estudiantes (consulta pesada)
+    @GetMapping
+    public ResponseEntity<List<StudentResponseDto>> getAllStudents() {
+        return new ResponseEntity<>(studentService.getAllStudents(), HttpStatus.OK);
+    }
 }
