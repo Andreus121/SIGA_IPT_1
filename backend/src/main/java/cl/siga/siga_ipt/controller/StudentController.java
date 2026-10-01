@@ -2,6 +2,7 @@ package cl.siga.siga_ipt.controller;
 
 import cl.siga.siga_ipt.dto.StudentCreateDto;
 import cl.siga.siga_ipt.dto.StudentResponseDto;
+import cl.siga.siga_ipt.dto.StudentUpdateDto;
 import cl.siga.siga_ipt.service.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +24,16 @@ public class StudentController {
         return new ResponseEntity<>(studentService.registerStudent(dto), HttpStatus.CREATED);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<StudentResponseDto> updateStudent(@PathVariable Long id, @Valid @RequestBody StudentUpdateDto dto){
+        return ResponseEntity.ok(studentService.updateStudent(id, dto));
+    }
+
     /* Funciones por implementar
     @GetMapping
     public ResponseEntity<List<StudentResponseDto>> getAllStudents() {
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<StudentResponseDto> getStudentById(@PathVariable Long id) {
@@ -36,8 +43,6 @@ public class StudentController {
     public ResponseEntity<StudentResponseDto> getStudentByRun(@PathVariable String run) {
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<StudentResponseDto> updateStudent(
-    }
+
     */
 }

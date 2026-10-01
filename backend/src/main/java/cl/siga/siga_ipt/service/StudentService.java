@@ -3,6 +3,7 @@ package cl.siga.siga_ipt.service;
 
 import cl.siga.siga_ipt.dto.StudentCreateDto;
 import cl.siga.siga_ipt.dto.StudentResponseDto;
+import cl.siga.siga_ipt.dto.StudentUpdateDto;
 import cl.siga.siga_ipt.entity.CareerEntity;
 import cl.siga.siga_ipt.entity.StudentEntity;
 import cl.siga.siga_ipt.entity.StudyPlanEntity;
@@ -11,10 +12,7 @@ import cl.siga.siga_ipt.enums.CareerStatus;
 import cl.siga.siga_ipt.enums.Role;
 import cl.siga.siga_ipt.enums.StudentStatus;
 import cl.siga.siga_ipt.enums.StudyPlanStatus;
-import cl.siga.siga_ipt.repository.StudentRepository;
-import cl.siga.siga_ipt.repository.UserRepository;
-import cl.siga.siga_ipt.repository.CareerRepository;
-import cl.siga.siga_ipt.repository.StudyPlanRepository;
+import cl.siga.siga_ipt.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +26,8 @@ public class StudentService {
     private final UserRepository userRepository;
     private final CareerRepository careerRepository;
     private final StudyPlanRepository studyPlanRepository;
+    private final RegistrationRepository registrationRepository;
+    private final AcademicHistoryRepository academicHistoryRepository;
 
     // Registrar un estudiante nuevo en la tabla de estudiantes
     @Transactional
@@ -79,20 +79,90 @@ public class StudentService {
         return mapStudentToResponseDto(student);
     }
 
-    /* Funciones por implementar a futuro (planificando)
-    @Override
-    @Transactional
-    public StudentResponseDto updateStudent(Long id, StudentUpdateDto dto) {}
 
-    @Override
+    @Transactional
+    public StudentResponseDto updateStudent(Long id, StudentUpdateDto dto) {
+        StudentEntity student = studentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado."));
+
+        // Actualización de Nombre Completo
+        // Ver si está en blanco (no requiere cambio)
+        if (dto.getFullName() != null && !dto.getFullName().isBlank()) {
+            // Guardar nombre nuevo
+            student.setFullName(dto.getFullName());
+        }
+
+        // Actualización de Email
+        // Ver si está en blanco (no requiere cambio)
+        if (dto.getEmail() != null && !dto.getEmail().equalsIgnoreCase(student.getEmail())) {
+            // Verificar si ya existe ese correo
+            if (studentRepository.existsByEmail(dto.getEmail()) || userRepository.existsByEmail(dto.getEmail())) {
+                // Indicar que el correo está ocupado
+                throw new IllegalArgumentException("El nuevo correo electrónico ya está en uso.");
+            }
+
+            // Actualizar email en Student y en User
+            userRepository.findByEmail(student.getEmail()).ifPresent(user -> {
+                user.setEmail(dto.getEmail());
+                userRepository.save(user);
+            });
+            student.setEmail(dto.getEmail());
+        }
+
+        // Cambio de Carrera y Plan de Estudio
+        // Verificar que no esté en blanco o sea la misma que ya tenía
+        if (dto.getCareerCode() != null && !dto.getCareerCode().equals(student.getCareerCode())) {
+            // Regla: Solo se puede modificar mientras no tenga inscripciones ni historial académico
+            // Revisar registrationRepository (periodo académico actual)
+            boolean hasRegistrations = registrationRepository.existsByStudentRun(student.getRun());
+            // Revisar historial académico (periodos académicos pasados)
+            boolean hasHistory = academicHistoryRepository.existsByStudentRun(student.getRun());
+
+            // Si ya tiene historial no se puede cambiar de carrera
+            if (hasRegistrations || hasHistory) {
+                throw new IllegalStateException("No se puede cambiar la carrera de un estudiante que posee inscripciones o historial académico.");
+            }
+
+            // Buscar la nueva carrera
+            CareerEntity career = careerRepository.findByCode(dto.getCareerCode())
+                    // Avisar si no existe
+                    .orElseThrow(() -> new IllegalArgumentException("La nueva carrera no existe."));
+
+            // Verificar que la nueva carrera esté activa
+            if (career.getStatus() != CareerStatus.ACTIVE) {
+                // Avisar si no está activa
+                throw new IllegalStateException("No se puede cambiar a una carrera INACTIVA.");
+            }
+
+            // Buscar el plan de estudio elegido
+            StudyPlanEntity currentPlan = studyPlanRepository.findByCareerCodeAndStatus(career.getCode(), StudyPlanStatus.CURRENT)
+                    // Si el plan de estudio no está vigente, avisar
+                    .orElseThrow(() -> new IllegalStateException("La nueva carrera no tiene un plan vigente."));
+
+            // Guardar nueva carrera y plan de estudio
+            student.setCareerCode(career.getCode());
+            student.setStudyPlanCode(currentPlan.getCode());
+        }
+
+        // Cambio manual de Estado por el ADMIN
+        if (dto.getStatus() != null) {
+            // Regla: Estados EGRESADO y ELIMINADO no se pueden asignar manualmente
+            if (dto.getStatus() == StudentStatus.GRADUATED || dto.getStatus() == StudentStatus.DROPPED) {
+                throw new IllegalArgumentException("Los estados EGRESADO y ELIMINADO son gestionados automáticamente por el sistema.");
+            }
+            student.setStatus(dto.getStatus());
+        }
+
+        return mapStudentToResponseDto(studentRepository.save(student));
+    }
+
+    /* Funciones por implementar a futuro (planificando)
     @Transactional(readOnly = true)
     public StudentResponseDto getStudentById(Long id) {}
 
-    @Override
     @Transactional(readOnly = true)
     public StudentResponseDto getStudentByRun(String run) {}
 
-    @Override
     @Transactional(readOnly = true)
     public List<StudentResponseDto> getAllStudents() {}
     */
