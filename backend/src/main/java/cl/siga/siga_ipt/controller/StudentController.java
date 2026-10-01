@@ -26,7 +26,7 @@ public class StudentController {
 
     @PutMapping("/{id}")
     public ResponseEntity<StudentResponseDto> updateStudent(@PathVariable Long id, @Valid @RequestBody StudentUpdateDto dto){
-        return ResponseEntity.ok(studentService.updateStudent(id, dto));
+        return new ResponseEntity<>(studentService.updateStudent(id, dto), HttpStatus.OK);
     }
 
     /* Funciones por implementar
