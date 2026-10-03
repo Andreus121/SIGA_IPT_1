@@ -1,15 +1,15 @@
 package cl.siga.siga_ipt.repository;
 
-import jakarta.servlet.Registration;
+import cl.siga.siga_ipt.entity.RegistrationEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface RegistrationRepository extends JpaRepository<Registration, Long> {
+public interface RegistrationRepository extends JpaRepository<RegistrationEntity, Long> {
     Boolean existsByStudentRun(String studentRun);
-    List<Registration> findAllByStudentRun(String studentRun);
-    List<Registration> findAllByStudentRunAndPeriodCode(String studentRun, String periodCode);
-    List<Registration> findAllBySectionCodeAndPeriodCode(String sectionCode, String periodCode);
+    List<RegistrationEntity> findAllByStudentRun(String studentRun);
+    List<RegistrationEntity> findAllByStudentRunAndPeriodCode(String studentRun, String periodCode);
+    List<RegistrationEntity> findAllBySectionCodeAndPeriodCode(String sectionCode, String periodCode);
 }

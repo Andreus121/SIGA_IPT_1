@@ -11,5 +11,5 @@ public interface AcademicHistoryRepository extends JpaRepository<AcademicHistory
     Boolean existsByStudentRun(String studentRun);
     Boolean existsByTeacherCode(String teacherCode);
     List<AcademicHistoryEntity> findAllByStudentRun(String studentRun);
-    List<AcademicHistoryEntity> findAllByStudentRunAndTeacherCode(String teacherCode);
+    List<AcademicHistoryEntity> findAllByStudentRunAndTeacherCode(String studentRun, String teacherCode);
 }
