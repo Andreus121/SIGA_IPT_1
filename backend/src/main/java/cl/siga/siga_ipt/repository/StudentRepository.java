@@ -13,4 +13,5 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long> {
     Boolean existsByRun(String run);
     Boolean existsByEmail(String email);
     Boolean existsByCareerCode(String careerCode);
+    Boolean existsByStudyPlanCode(String planCode);
 }
