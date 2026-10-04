@@ -14,4 +14,5 @@ public interface StudyPlanRepository extends JpaRepository<StudyPlanEntity, Long
     Optional<StudyPlanEntity> findByCareerCodeAndStatus(String careerCode, StudyPlanStatus status);
     List<StudyPlanEntity> findAllByCareerCode(String careerCode);
     Boolean existsByCareerCode(String careerCode);
+    Boolean existsByCode(String code);
 }
