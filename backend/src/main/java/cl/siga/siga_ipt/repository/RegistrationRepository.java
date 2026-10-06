@@ -8,8 +8,5 @@ import java.util.List;
 
 @Repository
 public interface RegistrationRepository extends JpaRepository<RegistrationEntity, Long> {
-    Boolean existsByStudentRun(String studentRun);
-    List<RegistrationEntity> findAllByStudentRun(String studentRun);
-    List<RegistrationEntity> findAllByStudentRunAndPeriodCode(String studentRun, String periodCode);
-    List<RegistrationEntity> findAllBySectionCodeAndPeriodCode(String sectionCode, String periodCode);
+    boolean existsByStudentRun(String studentRun);
 }

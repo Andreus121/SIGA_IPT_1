@@ -3,6 +3,7 @@ package cl.siga.siga_ipt.dto;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -10,6 +11,9 @@ public class CourseCreateDto {
 
     @NotBlank(message = "El código de la asignatura es obligatorio")
     private String code;
+
+    @NotNull(message = "El ID del plan de estudios es obligatorio")
+    private String studyPlanCode;
 
     @NotBlank(message = "El nombre de la asignatura es obligatorio")
     private String name;
@@ -36,9 +40,6 @@ public class CourseCreateDto {
     @Max(value = 7, message = "El SCT debe ser menor o igual a 7")
     private Integer sct;
 
-    @NotNull(message = "El ID del plan de estudios es obligatorio")
-    private String studyPlanCode;
-
     // Se usa Set<> para que no tenga cosas duplicadas
-    private Set<String> prerequisiteCodes;
+    private Set<String> prerequisiteCodes = new HashSet<>();
 }

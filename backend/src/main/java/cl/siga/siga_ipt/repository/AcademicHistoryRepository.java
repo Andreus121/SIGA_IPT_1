@@ -8,8 +8,6 @@ import java.util.List;
 
 @Repository
 public interface AcademicHistoryRepository extends JpaRepository<AcademicHistoryEntity, Long> {
-    Boolean existsByStudentRun(String studentRun);
-    Boolean existsByTeacherCode(String teacherCode);
-    List<AcademicHistoryEntity> findAllByStudentRun(String studentRun);
-    List<AcademicHistoryEntity> findAllByStudentRunAndTeacherCode(String studentRun, String teacherCode);
+    boolean existsByStudentRun(String studentRun);
+    boolean existsByCourseCodeAndStudyPlanCode(String courseCode, String studyPlanCode);
 }

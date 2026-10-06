@@ -10,8 +10,8 @@ import java.util.Optional;
 public interface StudentRepository extends JpaRepository<StudentEntity, Long> {
     Optional<StudentEntity> findByRun(String run);
     Optional<StudentEntity> findByEmail(String email);
-    Boolean existsByRun(String run);
-    Boolean existsByEmail(String email);
-    Boolean existsByCareerCode(String careerCode);
-    Boolean existsByStudyPlanCode(String planCode);
+    boolean existsByRun(String run);
+    boolean existsByEmail(String email);
+    boolean existsByCareerCode(String careerCode);
+    boolean existsByStudyPlanCode(String planCode);
 }

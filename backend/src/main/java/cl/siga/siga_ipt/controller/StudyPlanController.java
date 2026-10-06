@@ -25,12 +25,12 @@ public class StudyPlanController {
 
     @GetMapping("/career/{careerCode}")
     public ResponseEntity<List<StudyPlanResponseDto>> getPlansByCareer(@PathVariable String careerCode) {
-        return ResponseEntity.ok(studyPlanService.getPlansByCareer(careerCode));
+        return new ResponseEntity<>(studyPlanService.getPlansByCareer(careerCode), HttpStatus.OK);
     }
 
     @PutMapping("/{planCode}/set-current")
     public ResponseEntity<StudyPlanResponseDto> setPlanAsCurrent(@PathVariable String planCode) {
-        return ResponseEntity.ok(studyPlanService.setPlanAsCurrent(planCode));
+        return new ResponseEntity<>(studyPlanService.setPlanAsCurrent(planCode), HttpStatus.OK);
     }
 
     @DeleteMapping("/{planCode}")

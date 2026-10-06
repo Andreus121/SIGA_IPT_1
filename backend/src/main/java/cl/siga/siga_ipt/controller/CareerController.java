@@ -27,19 +27,19 @@ public class CareerController {
 
     @GetMapping
     public ResponseEntity<List<CareerResponseDto>> getAllCareers() {
-        return ResponseEntity.ok(careerService.getAllCareers());
+        return new ResponseEntity<>(careerService.getAllCareers(), HttpStatus.OK);
     }
 
     @GetMapping("/{code}")
     public ResponseEntity<CareerResponseDto> getCareerByCode(@PathVariable String code) {
-        return ResponseEntity.ok(careerService.getCareerByCode(code));
+        return new ResponseEntity<>(careerService.getCareerByCode(code), HttpStatus.OK);
     }
 
     @PutMapping("/{code}")
     public ResponseEntity<CareerResponseDto> updateCareer(
             @PathVariable String code,
             @RequestBody CareerUpdateDto dto) {
-        return ResponseEntity.ok(careerService.updateCareer(code, dto));
+        return new ResponseEntity<>(careerService.updateCareer(code, dto), HttpStatus.OK);
     }
 
     @DeleteMapping("/{code}")

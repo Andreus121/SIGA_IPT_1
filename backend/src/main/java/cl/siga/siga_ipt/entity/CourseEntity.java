@@ -4,7 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "courses")
+@Table(name = "courses", uniqueConstraints = {
+        // Hacer que el código de la asignatura sea único por código de plan de estudio
+        @UniqueConstraint(name = "uk_course_code_plan", columnNames = {"code", "studyPlanCode"})
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,8 +30,13 @@ public class CourseEntity {
     @Column(nullable = false)
     private Integer semester;
 
+    @Column(nullable = false)
     private Integer theoryHours;
+
+    @Column(nullable = false)
     private Integer exerciseHours;
+
+    @Column(nullable = false)
     private Integer labHours;
 
     @Column(nullable = false)

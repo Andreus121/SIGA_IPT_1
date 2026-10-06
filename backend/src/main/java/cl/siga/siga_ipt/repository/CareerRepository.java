@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface CareerRepository extends JpaRepository<CareerEntity, Long> {
     Optional<CareerEntity> findByCode(String code);
-    Boolean existsByCode(String code);
+    boolean existsByCode(String code);
 }

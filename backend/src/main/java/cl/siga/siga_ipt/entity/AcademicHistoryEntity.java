@@ -20,6 +20,12 @@ public class AcademicHistoryEntity {
     private String studentRun;
 
     @Column(nullable = false)
+    private String courseCode;
+
+    @Column(nullable = false)
+    private String studyPlanCode;
+
+    @Column(nullable = false)
     private String sectionCode;
 
     @Column(nullable = false)
