@@ -1,5 +1,6 @@
 package cl.siga.siga_ipt.entity;
 
+import cl.siga.siga_ipt.enums.PeriodStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,8 +25,12 @@ public class SectionEntity {
     @Column(nullable = false)
     private String academicPeriodCode;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String teacherCode;
+    private PeriodStatus periodStatus;
+
+    @Column(nullable = false)
+    private Long teacherId;
 
     @Column(nullable = false)
     private Integer capacity;

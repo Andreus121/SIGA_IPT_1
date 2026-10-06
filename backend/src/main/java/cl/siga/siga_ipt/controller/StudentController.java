@@ -23,7 +23,7 @@ public class StudentController {
     // Post para registrar un nuevo estudiante en la tabla de estudiantes
     @PostMapping
     public ResponseEntity<StudentResponseDto> createStudent(@Valid @RequestBody StudentCreateDto dto) {
-        return new ResponseEntity<>(studentService.registerStudent(dto), HttpStatus.CREATED);
+        return new ResponseEntity<>(studentService.createStudent(dto), HttpStatus.CREATED);
     }
 
     // Put para actualizar un estudiante ya existente

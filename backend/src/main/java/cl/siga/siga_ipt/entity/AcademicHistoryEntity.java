@@ -29,7 +29,7 @@ public class AcademicHistoryEntity {
     private String sectionCode;
 
     @Column(nullable = false)
-    private String teacherCode;
+    private String teacherRun;
 
     @Column(nullable = false)
     private String periodCode;

@@ -7,6 +7,8 @@ import lombok.Data;
 @Data
 public class StudentUpdateDto {
 
+    private String run;
+
     private String fullName;
 
     @Email(message = "Formato de correo no válido")

@@ -1,0 +1,185 @@
+package cl.siga.siga_ipt.service;
+
+import cl.siga.siga_ipt.dto.TeacherCreateDto;
+import cl.siga.siga_ipt.dto.TeacherResponseDto;
+import cl.siga.siga_ipt.dto.TeacherUpdateDto;
+import cl.siga.siga_ipt.entity.TeacherEntity;
+import cl.siga.siga_ipt.entity.UserEntity;
+import cl.siga.siga_ipt.enums.PeriodStatus;
+import cl.siga.siga_ipt.enums.Role;
+import cl.siga.siga_ipt.enums.TeacherStatus;
+import cl.siga.siga_ipt.repository.AcademicHistoryRepository;
+import cl.siga.siga_ipt.repository.SectionRepository;
+import cl.siga.siga_ipt.repository.TeacherRepository;
+import cl.siga.siga_ipt.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class TeacherService {
+
+    private final TeacherRepository teacherRepository;
+    private final UserRepository userRepository;
+    private final SectionRepository sectionRepository;
+    private final AcademicHistoryRepository academicHistoryRepository;
+
+    // Crear un profesor
+    @Transactional
+    public TeacherResponseDto createTeacher(TeacherCreateDto dto) {
+        // Verificar RUN único
+        if (teacherRepository.existsByRun(dto.getRun())) {
+            throw new IllegalArgumentException("Ya existe un docente registrado con el RUN: " + dto.getRun());
+        }
+        // Verificar email único
+        if (teacherRepository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("Ya existe un docente registrado con el correo: " + dto.getEmail());
+        }
+
+        // Crear profesor
+        TeacherEntity teacher = TeacherEntity.builder()
+                .run(dto.getRun())
+                .fullName(dto.getFullName())
+                .email(dto.getEmail())
+                .professionalTitle(dto.getProfessionalTitle())
+                .academicDegree(dto.getAcademicDegree())
+                .status(TeacherStatus.ACTIVE) // Regla: Todo docente se registra inicialmente como ACTIVE
+                .build();
+
+        // Crear cuenta de usuario asociada para autenticación
+        UserEntity user = UserEntity.builder()
+                .email(dto.getEmail())
+                .password(dto.getPassword() != null ? dto.getPassword() : "DefaultPassword123!") // Usar encoder en prod
+                .role(Role.STUDENT)
+                .enabled(true)
+                .build();
+
+        userRepository.save(user);
+        // Guardar y retornar
+        teacherRepository.save(teacher);
+        return mapTeacherToDto(teacher);
+    }
+
+    // Obtener todos los profesores
+    @Transactional(readOnly = true)
+    public List<TeacherResponseDto> getAllTeachers(TeacherStatus status) {
+        List<TeacherEntity> teachers = (status != null)
+                ? teacherRepository.findByStatus(status)
+                : teacherRepository.findAll();
+
+        return teachers.stream()
+                .map(this::mapTeacherToDto)
+                .toList();
+    }
+
+    // Obtener un profesor por su ID
+    @Transactional(readOnly = true)
+    public TeacherResponseDto getTeacherById(Long id) {
+        TeacherEntity entity = teacherRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Docente no encontrado con el ID: " + id));
+        return mapTeacherToDto(entity);
+    }
+
+    // Actualizar datos de un profesor
+    @Transactional
+    public TeacherResponseDto updateTeacher(Long id, TeacherUpdateDto dto) {
+        // Encontrar al profesor a editar
+        TeacherEntity teacher = teacherRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Docente no encontrado con el ID: " + id));
+
+        // Si quiere cambiar el run
+        if(dto.getRun()!=null && !dto.getRun().isBlank()){
+            // Verificar que el run no es de otro profesor
+            if(teacherRepository.existsByRun(dto.getRun())){
+                throw new IllegalArgumentException("El run proporcionado es de otro profesor");
+            }
+            // Guardar run
+            teacher.setRun(dto.getRun());
+        }
+
+        // Si quiere cambiar el nombre del profesor
+        if(dto.getFullName()!=null && !dto.getFullName().isBlank()){
+            teacher.setFullName(dto.getFullName());
+        }
+
+        // Si quiere cambiar el email
+        if(dto.getEmail()!=null && !dto.getEmail().isBlank()){
+            // Verificar que no sea de otro profesor
+            if (teacherRepository.existsByEmailAndIdNot(dto.getEmail(), id)) {
+                throw new IllegalArgumentException("El correo proporcionado ya pertenece a otro docente: " + dto.getEmail());
+            }
+            // Guardar email
+            teacher.setEmail(dto.getEmail());
+        }
+
+        // Si quiere cambiar el título profesional
+        if(dto.getProfessionalTitle()!=null && !dto.getProfessionalTitle().isBlank()){
+            teacher.setProfessionalTitle(dto.getProfessionalTitle());
+        }
+
+        // Si quiere cambiar el grado académico
+        if(dto.getAcademicDegree()!= null && !dto.getAcademicDegree().isBlank()){
+            teacher.setAcademicDegree(dto.getAcademicDegree());
+        }
+
+        teacherRepository.save(teacher);
+        return mapTeacherToDto(teacher);
+    }
+
+    // Cambiar el estado de un profesor
+    @Transactional
+    public TeacherResponseDto changeTeacherStatus(Long id, TeacherStatus newStatus) {
+        // Verificar que existe el profesor a cambiar estado
+        TeacherEntity teacher = teacherRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Docente no encontrado con el ID: " + id));
+
+        // Si el nuevo estado es INACTIVO
+        if (newStatus == TeacherStatus.INACTIVE) {
+            // Regla de negocio, no cambiar a INACTIVE si tiene secciones asignadas en un período académico ABIERTO
+            if (sectionRepository.existsByTeacherIdAndPeriodStatus(id, PeriodStatus.OPEN)) {
+                throw new IllegalStateException("No se puede inactivar al docente porque tiene secciones asignadas en un período académico ABIERTO.");
+            }
+        }
+
+        // Si el nuevo estado es Activo solo se cambia y ya
+        teacherRepository.save(teacher);
+        return mapTeacherToDto(teacher);
+    }
+
+    // Borrar un profesor
+    @Transactional
+    public void deleteTeacher(Long id) {
+        // Verificar que si existe
+        if (!teacherRepository.existsById(id)) {
+            throw new IllegalArgumentException("Docente no encontrado con el ID: " + id);
+        }
+
+        // Regla: No eliminar físicamente si tiene secciones asociadas
+        if (sectionRepository.existsByTeacherId(id)) {
+            throw new IllegalStateException("No se puede eliminar el docente porque tiene secciones asociadas en el sistema.");
+        }
+
+        // Regla: No eliminar si tiene historial académico
+        if(academicHistoryRepository.existsByTeacherRun()){
+
+        }
+
+        // Si no tiene historial, se puede eliminar
+        teacherRepository.deleteById(id);
+    }
+
+    private TeacherResponseDto mapTeacherToDto(TeacherEntity teacher) {
+        return TeacherResponseDto.builder()
+                .id(teacher.getId())
+                .run(teacher.getRun())
+                .fullName(teacher.getFullName())
+                .email(teacher.getEmail())
+                .professionalTitle(teacher.getProfessionalTitle())
+                .academicDegree(teacher.getAcademicDegree())
+                .status(teacher.getStatus())
+                .build();
+    }
+}

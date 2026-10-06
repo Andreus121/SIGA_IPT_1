@@ -34,7 +34,7 @@ public class StudentService {
 
     // Registrar un estudiante nuevo en la tabla de estudiantes
     @Transactional
-    public StudentResponseDto registerStudent(StudentCreateDto dto) {
+    public StudentResponseDto createStudent(StudentCreateDto dto) {
 
         // 1. Validar unicidad de RUN y Email
         if (studentRepository.existsByRun(dto.getRun())) {
@@ -87,6 +87,11 @@ public class StudentService {
     public StudentResponseDto updateStudent(Long id, StudentUpdateDto dto) {
         StudentEntity student = studentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado."));
+
+        // Actualizar el run del estudiante
+        if (dto.getRun()!=null && !dto.getRun().isBlank()){
+            student.setRun(dto.getRun());
+        }
 
         // Actualización de Nombre Completo
         // Ver si está en blanco (no requiere cambio)
