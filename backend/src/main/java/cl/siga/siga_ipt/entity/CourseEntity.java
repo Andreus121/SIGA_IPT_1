@@ -6,7 +6,7 @@ import lombok.*;
 @Entity
 @Table(name = "courses", uniqueConstraints = {
         // Hacer que el código de la asignatura sea único por código de plan de estudio
-        @UniqueConstraint(name = "uk_course_code_plan", columnNames = {"code", "studyPlanCode"})
+        @UniqueConstraint(name = "uk_course_code_plan", columnNames = {"code", "study_plan_code"})
 })
 @Data
 @NoArgsConstructor
@@ -18,7 +18,7 @@ public class CourseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String code;
 
     @Column(nullable = false)

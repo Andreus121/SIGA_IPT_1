@@ -215,7 +215,7 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 
 ---
 
-### 4.2. Falta la eliminación física de Estudiante (`deleteStudent`)
+### 4.2. Falta la eliminación física de Estudiante (`deleteStudent`) **ARREGLADO**
 - **Épica:** Épica 1 (Gestión de Estudiantes).
 - **Requerimiento Oficial (PDF pág. 5):**
   > *"Un estudiante que posea inscripciones o historial académico no podrá ser eliminado físicamente del sistema."*
@@ -236,7 +236,7 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 
 ---
 
-### 4.3. Falta endpoint para consultar Plan de Estudio individual por código
+### 4.3. Falta endpoint para consultar Plan de Estudio individual por código **ARREGLADO**
 - **Épica:** Épica 2 (Gestión de Carreras y Planes de Estudio).
 - **Problema:**
   - `StudyPlanController` solo cuenta con `GET /api/study-plans/career/{careerCode}`.
@@ -246,7 +246,7 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 
 ## 5. Inconsistencias en Entidades y Modelo de Datos (Enfoque Sin FKs)
 
-### 5.1. `CourseEntity.java`: Restricción de unicidad global incorrecta y sintaxis de `@Table`
+### 5.1. `CourseEntity.java`: Restricción de unicidad global incorrecta y sintaxis de `@Table` **ARREGLADO**
 - **Archivo:** `backend/src/main/java/cl/siga/siga_ipt/entity/CourseEntity.java`
 - **Líneas:** 7-10 y 21
 - **Código actual:**
@@ -368,3 +368,21 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 ---
 
 
+
+## Prioridad de Correcciones
+
+**Prioridad 1 – Funcionalidad crítica**  
+- Eliminación física de estudiante (`deleteStudent`) **ARREGLADO**  
+- Endpoint GET de Plan de estudio individual por código (`/api/study-plans/{code}`) **ARREGLADO**  
+
+**Prioridad 2 – Correcciones de entidad y modelo**  
+- Unicidad del código de asignatura por plan (`CourseEntity`) – pendiente  
+- Unicidad del código de plan de estudio a nivel DB (`StudyPlanEntity`) – pendiente  
+- Campos obligatorios en `TeacherEntity` (`professionalTitle`, `academicDegree`) – pendiente  
+- Consistencia de identificadores entre entidades (periodo, docente) – pendiente  
+- Restricción única en `SectionEntity` (curso + período) y eliminación de duplicado de estado – pendiente  
+
+**Prioridad 3 – Seguridad y configuración**  
+- Configuración de Spring Security con Keycloak – pendiente  
+- GlobalExceptionHandler – pendiente  
+- Plugin JaCoCo y pruebas unitarias – pendiente

@@ -25,7 +25,7 @@ services:
       KC_DB_PASSWORD: ${DB_PASSWORD}
       KC_HOSTNAME_STRICT: false       # permite acceso con localhost
     ports:
-      - "8080:8080"   # Keycloak UI en http://localhost:8080
+      - "8090:8090"   # Keycloak UI en http://localhost:8080
     depends_on:
       - postgres
 
