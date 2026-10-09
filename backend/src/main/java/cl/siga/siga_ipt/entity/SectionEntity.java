@@ -1,11 +1,11 @@
 package cl.siga.siga_ipt.entity;
 
-import cl.siga.siga_ipt.enums.PeriodStatus;
+// PeriodStatus import removed (field no longer used)
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "sections")
+@Table(name = "sections", uniqueConstraints = {@UniqueConstraint(name = "uk_section_course_period", columnNames = {"course_code", "period_code"})})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,10 +24,6 @@ public class SectionEntity {
 
     @Column(name = "period_code", nullable = false)
     private String periodCode;   // references AcademicPeriodEntity.periodCode
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private PeriodStatus periodStatus;
 
     @Column(nullable = false)
     private Long teacherId;

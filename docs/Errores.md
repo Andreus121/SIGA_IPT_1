@@ -377,12 +377,12 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 
 **Prioridad 2 – Correcciones de entidad y modelo**  
 - Unicidad del código de asignatura por plan (`CourseEntity`) – **ARREGLADO** (unique constraint en entidad y validación en CourseService)
-- Unicidad del código de plan de estudio a nivel DB (`StudyPlanEntity`) – pendiente  
-- Campos obligatorios en `TeacherEntity` (`professionalTitle`, `academicDegree`) – pendiente  
-- Consistencia de identificadores entre entidades (periodo, docente) – pendiente  
+- Unicidad del código de plan de estudio a nivel DB (`StudyPlanEntity`) – **ARREGLADO** (unique constraint en entidad)
+- Campos obligatorios en `TeacherEntity` (`professionalTitle`, `academicDegree`) – **ARREGLADO** (@Column nullable = false)
+- Consistencia de identificadores entre entidades (periodo, docente) – **ARREGLADO** (periodCode y teacherRun usados coherentemente)
 - Restricción única en `SectionEntity` (curso + período) y eliminación de duplicado de estado – pendiente  
 
 **Prioridad 3 – Seguridad y configuración**  
-- Configuración de Spring Security con Keycloak – pendiente  
-- GlobalExceptionHandler – pendiente  
+- Configuración de Spring Security con Keycloak – **ARREGLADO** (SecurityConfig implementado)  
+- GlobalExceptionHandler – **ARREGLADO** (clase de manejo global de excepciones implementada)  
 - Plugin JaCoCo y pruebas unitarias – pendiente
