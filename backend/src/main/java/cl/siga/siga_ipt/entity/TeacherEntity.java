@@ -25,7 +25,9 @@ public class TeacherEntity {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
     private String professionalTitle;
+    @Column(nullable = false)
     private String academicDegree;
 
     @Enumerated(EnumType.STRING)

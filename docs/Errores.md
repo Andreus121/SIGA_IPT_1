@@ -274,7 +274,7 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 
 ---
 
-### 5.3. `TeacherEntity.java`: Atributos obligatorios permitiendo valores nulos
+### 5.3. `TeacherEntity.java`: Atributos obligatorios permitiendo valores nulos **ARREGLADO**
 - **Archivo:** `backend/src/main/java/cl/siga/siga_ipt/entity/TeacherEntity.java`
 - **Líneas:** 28-29
 - **Problema:**
