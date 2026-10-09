@@ -1,17 +1,21 @@
 package cl.siga.siga_ipt.service;
 
+/**
+ * Servicio para la gestión de docentes.
+ * Contiene la lógica de negocio y validaciones requeridas.
+ */
 import cl.siga.siga_ipt.dto.TeacherCreateDto;
 import cl.siga.siga_ipt.dto.TeacherResponseDto;
 import cl.siga.siga_ipt.dto.TeacherUpdateDto;
 import cl.siga.siga_ipt.entity.TeacherEntity;
-import cl.siga.siga_ipt.entity.UserEntity;
+
 import cl.siga.siga_ipt.enums.PeriodStatus;
-import cl.siga.siga_ipt.enums.Role;
+
 import cl.siga.siga_ipt.enums.TeacherStatus;
 import cl.siga.siga_ipt.repository.AcademicHistoryRepository;
 import cl.siga.siga_ipt.repository.SectionRepository;
 import cl.siga.siga_ipt.repository.TeacherRepository;
-import cl.siga.siga_ipt.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +27,7 @@ import java.util.List;
 public class TeacherService {
 
     private final TeacherRepository teacherRepository;
-    private final UserRepository userRepository;
+
     private final SectionRepository sectionRepository;
     private final AcademicHistoryRepository academicHistoryRepository;
 
@@ -49,15 +53,8 @@ public class TeacherService {
                 .status(TeacherStatus.ACTIVE) // Regla: Todo docente se registra inicialmente como ACTIVE
                 .build();
 
-        // Crear cuenta de usuario asociada para autenticación
-        UserEntity user = UserEntity.builder()
-                .email(dto.getEmail())
-                .password(dto.getPassword() != null ? dto.getPassword() : "DefaultPassword123!") // Usar encoder en prod
-                .role(Role.TEACHER)
-                .enabled(true)
-                .build();
 
-        userRepository.save(user);
+
         // Guardar y retornar
         teacherRepository.save(teacher);
         return mapTeacherToDto(teacher);

@@ -1,3 +1,4 @@
+// El campo password se elimina porque la autenticación se delega a Keycloak
 package cl.siga.siga_ipt.dto;
 
 import jakarta.validation.constraints.Email;
@@ -20,5 +21,5 @@ public class StudentCreateDto {
     @NotBlank(message = "El código de carrera es obligatorio")
     private String careerCode;
 
-    private String password; // Contraseña inicial para su cuenta de usuario
+
 }

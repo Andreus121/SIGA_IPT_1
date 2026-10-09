@@ -30,6 +30,8 @@ Documento de memoria técnica y contexto para continuidad de desarrollo en cualq
 - **Backend:** Spring Security + `spring-boot-starter-security-oauth2-resource-server` para validar tokens JWT emitidos por Keycloak.
 - **Roles:** `ADMIN` (Administrador Académico), `TEACHER` (Docente), `STUDENT` (Estudiante).
 
+> **Nota:** Se eliminó la entidad `UserEntity` y el enum `Role`; la autenticación y autorización se gestionan exclusivamente mediante Keycloak, extrayendo los roles del claim `realm_access.roles` del JWT.
+
 ### 2.3. Estándares de Código
 - **Idioma del código fuente:** Estrictamente en **inglés** (nombres de clases, métodos, variables, atributos y DTOs). Mensajes de validación o excepciones dirigidos a los usuarios pueden estar en español.
 - **Arquitectura:** Monolito por capas clásico:

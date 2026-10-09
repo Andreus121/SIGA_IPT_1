@@ -1,15 +1,17 @@
 package cl.siga.siga_ipt.service;
-
-
+/**
+ * Servicio para la gestión de estudiantes.
+ * Contiene la lógica de negocio y validaciones requeridas.
+ */
 import cl.siga.siga_ipt.dto.StudentCreateDto;
 import cl.siga.siga_ipt.dto.StudentResponseDto;
 import cl.siga.siga_ipt.dto.StudentUpdateDto;
 import cl.siga.siga_ipt.entity.CareerEntity;
 import cl.siga.siga_ipt.entity.StudentEntity;
 import cl.siga.siga_ipt.entity.StudyPlanEntity;
-import cl.siga.siga_ipt.entity.UserEntity;
+
 import cl.siga.siga_ipt.enums.CareerStatus;
-import cl.siga.siga_ipt.enums.Role;
+
 import cl.siga.siga_ipt.enums.StudentStatus;
 import cl.siga.siga_ipt.enums.StudyPlanStatus;
 import cl.siga.siga_ipt.repository.*;
@@ -26,7 +28,6 @@ import java.util.stream.Collectors;
 public class StudentService {
 
     private final StudentRepository studentRepository;
-    private final UserRepository userRepository;
     private final CareerRepository careerRepository;
     private final StudyPlanRepository studyPlanRepository;
     private final RegistrationRepository registrationRepository;
@@ -40,7 +41,7 @@ public class StudentService {
         if (studentRepository.existsByRun(dto.getRun())) {
             throw new IllegalArgumentException("El RUN ya se encuentra registrado.");
         }
-        if (studentRepository.existsByEmail(dto.getEmail()) || userRepository.existsByEmail(dto.getEmail())) {
+        if (studentRepository.existsByEmail(dto.getEmail())) {
             throw new IllegalArgumentException("El correo electrónico ya se encuentra registrado.");
         }
 
@@ -69,15 +70,7 @@ public class StudentService {
         // Guardar en la base de datos
         studentRepository.save(student);
 
-        // 5. Crear cuenta de usuario asociada para autenticación
-        UserEntity user = UserEntity.builder()
-                .email(dto.getEmail())
-                .password(dto.getPassword() != null ? dto.getPassword() : "DefaultPassword123!") // Usar encoder en prod
-                .role(Role.STUDENT)
-                .enabled(true)
-                .build();
 
-        userRepository.save(user);
 
         return mapStudentToResponseDto(student);
     }
@@ -99,16 +92,12 @@ public class StudentService {
         // Ver si está en blanco (no requiere cambio)
         if (dto.getEmail() != null && !dto.getEmail().equalsIgnoreCase(student.getEmail())) {
             // Verificar si ya existe ese correo
-            if (studentRepository.existsByEmail(dto.getEmail()) || userRepository.existsByEmail(dto.getEmail())) {
+            if (studentRepository.existsByEmail(dto.getEmail())) {
                 // Indicar que el correo está ocupado
                 throw new IllegalArgumentException("El nuevo correo electrónico ya está en uso.");
             }
 
             // Actualizar email en Student y en User
-            userRepository.findByEmail(student.getEmail()).ifPresent(user -> {
-                user.setEmail(dto.getEmail());
-                userRepository.save(user);
-            });
             student.setEmail(dto.getEmail());
         }
 

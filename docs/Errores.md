@@ -15,7 +15,7 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 4. [Componentes y Funcionalidades Faltantes (Épicas 1 a 4)](#4-componentes-y-funcionalidades-faltantes-épicas-1-a-4)
 5. [Inconsistencias en Entidades y Modelo de Datos (Enfoque Sin FKs)](#5-inconsistencias-en-entidades-y-modelo-de-datos-enfoque-sin-fks)
 6. [Configuración, Docker y DevOps](#6-configuración-docker-y-devops)
-7. [Checklist de Corrección Recomendado](#7-checklist-de-corrección-recomendado)
+
 
 ---
 
@@ -367,15 +367,4 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 
 ---
 
-## 7. Checklist de Corrección Recomendado
 
-- [ ] **1. Reparar error de compilación:** Corregir `deleteTeacher` en `TeacherService.java` pasando `teacher.getRun()` a `existsByTeacherRun()` y lanzando la excepción.
-- [ ] **2. Corregir lógica de actualización de prerrequisitos:** En `CourseService.java` cambiar los operadores `<` por `>=` en las líneas 96 y 106.
-- [ ] **3. Corregir cambio de estado en docentes:** En `TeacherService.java` asignar `teacher.setStatus(newStatus)`.
-- [ ] **4. Corregir validación de RUN al actualizar docente:** Usar `existsByRunAndIdNot(dto.getRun(), id)`.
-- [ ] **5. Crear `TeacherController.java`:** Exponer los endpoints REST de docentes para completar la Épica 4.
-- [ ] **6. Implementar eliminación de estudiante:** Agregar `deleteStudent` en `StudentService` y `StudentController` validando ausencia de inscripciones e historial.
-- [ ] **7. Ajustar unicidad en `CourseEntity.java`:** Retirar `unique = true` global del campo `code` y dejar solo la clave única compuesta con el plan de estudios.
-- [ ] **8. Alinear seguridad con Keycloak:** Eliminar manejo manual de contraseñas y configurar `SecurityConfig` para tokens JWT.
-- [ ] **9. Implementar `GlobalExceptionHandler`:** Manejar excepciones y devolver códigos HTTP semánticos (400, 404, 409).
-- [ ] **10. Corregir persistencia en Docker:** Agregar volumen `postgres_data` en `docker-compose.yml` y parametrizar `application.properties`.
