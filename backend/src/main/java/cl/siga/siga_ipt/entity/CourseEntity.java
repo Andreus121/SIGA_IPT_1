@@ -18,10 +18,10 @@ public class CourseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "code", nullable = false)
     private String code;
 
-    @Column(nullable = false)
+    @Column(name = "study_plan_code", nullable = false)
     private String studyPlanCode;
 
     @Column(nullable = false)

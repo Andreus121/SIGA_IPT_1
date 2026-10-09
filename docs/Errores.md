@@ -376,7 +376,7 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 - Endpoint GET de Plan de estudio individual por código (`/api/study-plans/{code}`) **ARREGLADO**  
 
 **Prioridad 2 – Correcciones de entidad y modelo**  
-- Unicidad del código de asignatura por plan (`CourseEntity`) – pendiente  
+- Unicidad del código de asignatura por plan (`CourseEntity`) – **ARREGLADO** (unique constraint en entidad y validación en CourseService)
 - Unicidad del código de plan de estudio a nivel DB (`StudyPlanEntity`) – pendiente  
 - Campos obligatorios en `TeacherEntity` (`professionalTitle`, `academicDegree`) – pendiente  
 - Consistencia de identificadores entre entidades (periodo, docente) – pendiente  
