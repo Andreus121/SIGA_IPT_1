@@ -88,11 +88,6 @@ public class StudentService {
         StudentEntity student = studentRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado."));
 
-        // Actualizar el run del estudiante
-        if (dto.getRun()!=null && !dto.getRun().isBlank()){
-            student.setRun(dto.getRun());
-        }
-
         // Actualización de Nombre Completo
         // Ver si está en blanco (no requiere cambio)
         if (dto.getFullName() != null && !dto.getFullName().isBlank()) {

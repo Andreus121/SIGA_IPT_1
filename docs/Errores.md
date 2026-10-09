@@ -102,7 +102,7 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 
 ---
 
-### 2.3. Validación incorrecta de unicidad de RUN en actualización de docente
+### 2.3. Validación incorrecta de unicidad de RUN en actualización de docente **ARREGLADO**
 - **Archivo:** `backend/src/main/java/cl/siga/siga_ipt/service/TeacherService.java`
 - **Líneas:** 94-101
 - **Código actual:**
@@ -122,7 +122,7 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 
 ---
 
-### 2.4. Asignación errónea de rol `Role.STUDENT` al registrar un docente
+### 2.4. Asignación errónea de rol `Role.STUDENT` al registrar un docente **ARREGLADO**
 - **Archivo:** `backend/src/main/java/cl/siga/siga_ipt/service/TeacherService.java`
 - **Línea:** 56
 - **Código actual:**
@@ -134,7 +134,7 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 
 ---
 
-### 2.5. Actualización de RUN de estudiante sin validación de unicidad ni riesgo de integridad referencial (Sin FK)
+### 2.5. Actualización de RUN de estudiante sin validación de unicidad ni riesgo de integridad referencial (Sin FK) **ARREGLADO**
 - **Archivo:** `backend/src/main/java/cl/siga/siga_ipt/service/StudentService.java`
 - **Líneas:** 92-94
 - **Código actual:**

@@ -53,7 +53,7 @@ public class TeacherService {
         UserEntity user = UserEntity.builder()
                 .email(dto.getEmail())
                 .password(dto.getPassword() != null ? dto.getPassword() : "DefaultPassword123!") // Usar encoder en prod
-                .role(Role.STUDENT)
+                .role(Role.TEACHER)
                 .enabled(true)
                 .build();
 
@@ -92,11 +92,10 @@ public class TeacherService {
 
         // Si quiere cambiar el run
         if(dto.getRun()!=null && !dto.getRun().isBlank()){
-            // Verificar que el run no es de otro profesor
-            if(teacherRepository.existsByRun(dto.getRun())){
-                throw new IllegalArgumentException("El run proporcionado es de otro profesor");
+            // Verificar que el run no pertenece a otro docente
+            if(teacherRepository.existsByRunAndIdNot(dto.getRun(), id)){
+                throw new IllegalArgumentException("El run proporcionado es de otro docente");
             }
-            // Guardar run
             teacher.setRun(dto.getRun());
         }
 
