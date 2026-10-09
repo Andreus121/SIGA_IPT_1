@@ -9,7 +9,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -20,21 +22,26 @@ public class CareerController {
 
     private final CareerService careerService;
 
+
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CareerResponseDto> createCareer(@Valid @RequestBody CareerCreateDto dto) {
         return new ResponseEntity<>(careerService.createCareer(dto), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<CareerResponseDto>> getAllCareers() {
         return new ResponseEntity<>(careerService.getAllCareers(), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','TEACHER','STUDENT')")
     @GetMapping("/{code}")
     public ResponseEntity<CareerResponseDto> getCareerByCode(@PathVariable String code) {
         return new ResponseEntity<>(careerService.getCareerByCode(code), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{code}")
     public ResponseEntity<CareerResponseDto> updateCareer(
             @PathVariable String code,
@@ -42,6 +49,7 @@ public class CareerController {
         return new ResponseEntity<>(careerService.updateCareer(code, dto), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{code}")
     public ResponseEntity<Void> deleteCareer(@PathVariable String code) {
         careerService.deleteCareer(code);

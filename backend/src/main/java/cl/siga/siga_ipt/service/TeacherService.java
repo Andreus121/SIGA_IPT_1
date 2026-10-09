@@ -50,7 +50,7 @@ public class TeacherService {
                 .email(dto.getEmail())
                 .professionalTitle(dto.getProfessionalTitle())
                 .academicDegree(dto.getAcademicDegree())
-                .status(TeacherStatus.ACTIVE) // Regla: Todo docente se registra inicialmente como ACTIVE
+                .status(TeacherStatus.ACTIVE) // Regla
                 .build();
 
 

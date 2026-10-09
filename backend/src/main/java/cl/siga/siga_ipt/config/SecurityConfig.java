@@ -6,6 +6,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 // Configuración de seguridad que delega la autenticación a Keycloak mediante JWT
 /**
  * Configuración de Spring Security.
@@ -16,6 +17,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
  */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean

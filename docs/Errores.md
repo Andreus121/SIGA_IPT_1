@@ -153,7 +153,7 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 
 ## 3. Incumplimientos de Arquitectura y Seguridad
 
-### 3.1. Gestión propia de usuarios y almacenamiento de contraseñas en base de datos
+### 3.1. Gestión propia de usuarios y almacenamiento de contraseñas en base de datos **ARREGLADO**
 - **Archivos:**
   - `backend/src/main/java/cl/siga/siga_ipt/entity/UserEntity.java`
   - `backend/src/main/java/cl/siga/siga_ipt/repository/UserRepository.java`
@@ -171,7 +171,7 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 
 ---
 
-### 3.2. Falta de configuración de Spring Security (`SecurityFilterChain`)
+### 3.2. Falta de configuración de Spring Security (`SecurityFilterChain`) **ARREGLADO**
 - **Problema:**
   - En `pom.xml` están agregadas las dependencias:
     - `spring-boot-starter-security`
@@ -183,7 +183,7 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 
 ---
 
-### 3.3. Falta de Manejo Global de Excepciones (`@RestControllerAdvice`)
+### 3.3. Falta de Manejo Global de Excepciones (`@RestControllerAdvice`) **ARREGLADO**
 - **Problema:**
   - Los servicios lanzan `IllegalArgumentException` e `IllegalStateException`.
   - Sin un `@RestControllerAdvice`, Spring retorna respuestas `500 Internal Server Error` con el stack trace por defecto de Tomcat.
@@ -199,7 +199,7 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 
 ## 4. Componentes y Funcionalidades Faltantes (Épicas 1 a 4)
 
-### 4.1. Falta el controlador REST de Docentes (`TeacherController.java`)
+### 4.1. Falta el controlador REST de Docentes (`TeacherController.java`)**ARREGLADO**
 - **Épica:** Épica 4 (Gestión de Docentes).
 - **Problema:**
   - Se crearon `TeacherEntity`, `TeacherRepository`, los DTOs y `TeacherService`, pero **no existe `TeacherController.java`**.

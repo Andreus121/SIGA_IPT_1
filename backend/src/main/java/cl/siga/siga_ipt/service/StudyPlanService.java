@@ -131,4 +131,11 @@ public class StudyPlanService {
                 .status(studyPlan.getStatus())
                 .build();
     }
+    @Transactional(readOnly = true)
+    public StudyPlanResponseDto getPlanByCode(String code) {
+        StudyPlanEntity plan = studyPlanRepository.findByCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Plan de estudios no encontrado con código: " + code));
+        return mapStudyPlanToResponseDto(plan);
+    }
 }
+

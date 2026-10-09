@@ -194,4 +194,17 @@ public class StudentService {
                 .build();
     }
 
-}
+    @Transactional
+    public void deleteStudent(Long id) {
+        StudentEntity student = studentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado con ID: " + id));
+
+        if (registrationRepository.existsByStudentRun(student.getRun())) {
+            throw new IllegalStateException("No se puede eliminar el estudiante porque tiene inscripciones en el sistema.");
+        }
+        if (academicHistoryRepository.existsByStudentRun(student.getRun())) {
+            throw new IllegalStateException("No se puede eliminar el estudiante porque tiene historial académico registrado.");
+        }
+        studentRepository.delete(student);
+    }
+}
