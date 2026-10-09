@@ -22,8 +22,8 @@ public class SectionEntity {
     @Column(nullable = false)
     private String courseCode;
 
-    @Column(nullable = false)
-    private String academicPeriodCode;
+    @Column(name = "period_code", nullable = false)
+    private String periodCode;   // references AcademicPeriodEntity.periodCode
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

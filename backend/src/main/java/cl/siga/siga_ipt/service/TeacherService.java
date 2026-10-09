@@ -80,6 +80,13 @@ public class TeacherService {
         return mapTeacherToDto(entity);
     }
 
+    @Transactional(readOnly = true)
+    public TeacherResponseDto getTeacherByRun(String run) {
+        TeacherEntity teacher = teacherRepository.findByRun(run)
+                .orElseThrow(() -> new IllegalArgumentException("Docente no encontrado con RUN: " + run));
+        return mapTeacherToDto(teacher);
+    }
+
     // Actualizar datos de un profesor
     @Transactional
     public TeacherResponseDto updateTeacher(Long id, TeacherUpdateDto dto) {

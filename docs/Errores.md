@@ -283,17 +283,17 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 ---
 
 ### 5.4. Inconsistencia en identificadores naturales entre tablas (Crítico para Microservicios)
-- **Problema:**
-  - En un sistema sin FKs que migrará a microservicios, las referencias entre tablas deben usar claves naturales uniformes:
-    - **Período Académico:**
-      - En `AcademicPeriodEntity`: se llama `academicPeriod`.
-      - En `SectionEntity`: se llama `academicPeriodCode`.
-      - En `AcademicHistoryEntity`, `EnrollmentEntity`, `RegistrationEntity`, `SectionScheduleEntity`: se llama `periodCode`.
-      - *Recomendación:* Estandarizar a `code` o `periodCode` en todas las entidades.
-    - **Identificador de Docente:**
-      - En `AcademicHistoryEntity`: se almacena `teacherRun` (String).
-      - En `SectionEntity`: se almacena `Long teacherId`.
-      - *Recomendación:* Usar `teacherRun` (o un UUID/código docente único) para mantener coherencia en las referencias distribuidas.
+- **Estado:** **ARREGLADO**
+- **Cambios realizados:**
+  - `AcademicPeriodEntity` ahora usa `periodCode` como clave de negocio y mantiene `academicPeriod` como campo deprecated.
+  - `SectionEntity` renombró `academicPeriodCode` → `periodCode` y actualizó la columna.
+  - Creado `AcademicPeriodRepository` con método `findByPeriodCode(String code)`.
+  - Creado `AcademicPeriodService` con CRUD usando `periodCode`.
+  - Creado `AcademicPeriodController` exponiendo endpoints GET (públicos) y POST (ADMIN).
+  - `TeacherRepository` agregó `Optional<TeacherEntity> findByRun(String run)`.
+  - `TeacherService` añadió método `getTeacherByRun(String run)` que devuelve `TeacherResponseDto`.
+  - Código actualizado para usar `run` como identificador natural en búsquedas de docente.
+
 
 ---
 

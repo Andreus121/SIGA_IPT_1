@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TeacherRepository extends JpaRepository<TeacherEntity, Long> {
@@ -14,4 +15,5 @@ public interface TeacherRepository extends JpaRepository<TeacherEntity, Long> {
     boolean existsByRunAndIdNot(String run, Long id);
     boolean existsByEmailAndIdNot(String email, Long id);
     List<TeacherEntity> findByStatus(TeacherStatus status);
+    Optional<TeacherEntity> findByRun(String run);
 }
