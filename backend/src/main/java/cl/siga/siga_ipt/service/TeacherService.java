@@ -145,6 +145,7 @@ public class TeacherService {
         }
 
         // Si el nuevo estado es Activo solo se cambia y ya
+        teacher.setStatus(newStatus);
         teacherRepository.save(teacher);
         return mapTeacherToDto(teacher);
     }

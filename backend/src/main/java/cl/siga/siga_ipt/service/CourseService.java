@@ -93,7 +93,7 @@ public class CourseService {
             for (PrerequisiteEntity prereq : currentPrereqs) {
                 CourseEntity prereqCourse = courseRepository.findByCodeAndStudyPlanCode(prereq.getPrerequisiteCourseCode(), studyPlanCode).orElse(null);
                 // Verificar que el curso prerrequisito existe y es de un semestre inferior
-                if (prereqCourse != null && prereqCourse.getSemester() < dto.getSemester()) {
+                if (prereqCourse == null || prereqCourse.getSemester() >= dto.getSemester()) {
                     throw new IllegalArgumentException("El semestre de la asignatura debe ser estrictamente posterior al de sus prerrequisitos.");
                 }
             }
@@ -103,7 +103,7 @@ public class CourseService {
             for (PrerequisiteEntity dep : dependentPrereqs) {
                 CourseEntity dependentCourse = courseRepository.findByCodeAndStudyPlanCode(dep.getCourseCode(), studyPlanCode).orElse(null);
                 // Verificar que estas asignaturas sean de un semestre superior
-                if (dependentCourse != null && dto.getSemester() < dependentCourse.getSemester()) {
+                if (dependentCourse != null && dto.getSemester() >= dependentCourse.getSemester()) {
                     // Indicar error porque el curso a modificar es el prerrequisito de otro superior
                     throw new IllegalArgumentException("No se puede mover la asignatura al semestre " + dto.getSemester() +
                             " porque es prerrequisito de '" + dependentCourse.getCode() + "' en el semestre " + dependentCourse.getSemester() + ".");

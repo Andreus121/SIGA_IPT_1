@@ -55,7 +55,7 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 
 ## 2. Errores Críticos de Lógica de Negocio
 
-### 2.1. Lógica invertida en la validación de prerrequisitos al actualizar asignatura
+### 2.1. Lógica invertida en la validación de prerrequisitos al actualizar asignatura **ARREGLADO**
 - **Archivo:** `backend/src/main/java/cl/siga/siga_ipt/service/CourseService.java`
 - **Líneas:** 96-98 y 106-110
 - **Código actual:**
@@ -80,7 +80,7 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 
 ---
 
-### 2.2. `changeTeacherStatus` no actualiza el estado del docente
+### 2.2. `changeTeacherStatus` no actualiza el estado del docente **ARREGLADO**
 - **Archivo:** `backend/src/main/java/cl/siga/siga_ipt/service/TeacherService.java`
 - **Líneas:** 134-150
 - **Código actual:**
