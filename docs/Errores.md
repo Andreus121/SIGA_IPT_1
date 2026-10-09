@@ -267,7 +267,7 @@ Este documento detalla todos los errores detectados en el backend hasta la **Ép
 
 ---
 
-### 5.2. `StudyPlanEntity.java`: Falta restricción de unicidad en BD
+### 5.2. `StudyPlanEntity.java`: Falta restricción de unicidad en BD **ARREGLADO**
 - **Archivo:** `backend/src/main/java/cl/siga/siga_ipt/entity/StudyPlanEntity.java`
 - **Problema:**
   - El campo `code` no tiene `unique = true` en la anotación `@Column`. Si bien el servicio lo valida, la base de datos no está protegida contra inserciones duplicadas concurrentes.
