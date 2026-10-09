@@ -152,23 +152,21 @@ public class TeacherService {
     // Borrar un profesor
     @Transactional
     public void deleteTeacher(Long id) {
-        // Verificar que si existe
-        if (!teacherRepository.existsById(id)) {
-            throw new IllegalArgumentException("Docente no encontrado con el ID: " + id);
-        }
+        // Encontrar profesor y lanzar error si no se encuentra
+        TeacherEntity teacher = teacherRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Docente no encontrado con el ID: " + id));
 
-        // Regla: No eliminar físicamente si tiene secciones asociadas
+        // Verificar si tiene secciones asociadas
         if (sectionRepository.existsByTeacherId(id)) {
             throw new IllegalStateException("No se puede eliminar el docente porque tiene secciones asociadas en el sistema.");
         }
 
-        // Regla: No eliminar si tiene historial académico
-        if(academicHistoryRepository.existsByTeacherRun()){
-
+        // Verificar si tiene historial académico
+        if (academicHistoryRepository.existsByTeacherRun(teacher.getRun())) {
+            throw new IllegalStateException("No se puede eliminar el docente porque registra historial académico en el sistema.");
         }
 
-        // Si no tiene historial, se puede eliminar
-        teacherRepository.deleteById(id);
+        teacherRepository.delete(teacher);
     }
 
     private TeacherResponseDto mapTeacherToDto(TeacherEntity teacher) {
