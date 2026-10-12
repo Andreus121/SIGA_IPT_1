@@ -213,3 +213,21 @@ backend/
    - Consultar `docs/Analisis.md` para reglas de negocio detalladas.
    - Consultar `docs/Evaluacion1_v1.pdf` para la rúbrica oficial de la evaluación.
    - Consultar `docs/Errores.md` para el listado de correcciones pendientes antes de pasar a la Épica 5.
+
+## Estado Actual y Próximos Pasos (para otro dispositivo)
+
+### Cambios ya aplicados
+- `SectionEntity.java`: restricción única compuesta (`course_code`, `period_code`), eliminado `periodStatus` y su import.
+- `docs/Errores.md`: marcados como **ARREGLADO** los ítems de unicidad del código de asignatura, unicidad del código de plan de estudio, campos obligatorios en `TeacherEntity`, consistencia de identificadores, restricción única en `SectionEntity`, `GlobalExceptionHandler` y configuración de Spring Security con Keycloak.
+- `SecurityConfig.java`: configuración de Spring Security con Keycloak (ya existente y confirmada).
+
+### Pendientes
+1. **Pruebas unitarias**: crear pruebas para la capa `service` con cobertura ≥ 90 % (JaCoCo). Añadir `jacoco-maven-plugin` al `pom.xml`.
+2. **Avanzar a la Épica 5** (Gestión de Oferta Académica y Secciones) una vez completadas las pruebas.
+
+### Pasos recomendados en el nuevo dispositivo
+1. Ejecutar `docker-compose up -d` para levantar la base de datos.
+2. Compilar el proyecto: `./mvnw.cmd clean compile` (desde la carpeta `backend`).
+3. Ejecutar pruebas y generar informe JaCoCo: `./mvnw.cmd test`.
+4. Implementar los tests faltantes bajo `src/test/java/...`.
+5. Cuando la cobertura sea ≥ 90 %, iniciar el desarrollo de la Épica 5 siguiendo las mismas guías de arquitectura y calidad.
