@@ -11,4 +11,9 @@ public interface RegistrationRepository extends JpaRepository<RegistrationEntity
     boolean existsByStudentRun(String studentRun);
     boolean existsBySectionCodeAndPeriodCode(String sectionCode, String periodCode);
     boolean existsBySectionCode(String sectionCode);
+    boolean existsByStudentRunAndCourseCodeAndPeriodCode(String studentRun, String courseCode, String periodCode);
+    long countByStudentRunAndPeriodCode(String studentRun, String periodCode);
+    long countBySectionCodeAndPeriodCode(String sectionCode, String periodCode);
+    java.util.List<RegistrationEntity> findByStudentRunAndPeriodCode(String studentRun, String periodCode);
+    java.util.List<RegistrationEntity> findBySectionCodeAndPeriodCode(String sectionCode, String periodCode);
 }
