@@ -7,6 +7,7 @@ import cl.siga.siga_ipt.entity.TeacherEntity;
 import cl.siga.siga_ipt.enums.PeriodStatus;
 import cl.siga.siga_ipt.enums.TeacherStatus;
 import cl.siga.siga_ipt.repository.AcademicHistoryRepository;
+import cl.siga.siga_ipt.repository.AcademicPeriodRepository;
 import cl.siga.siga_ipt.repository.SectionRepository;
 import cl.siga.siga_ipt.repository.TeacherRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +34,9 @@ class TeacherServiceTest {
 
     @Mock
     private SectionRepository sectionRepository;
+
+    @Mock
+    private AcademicPeriodRepository periodRepository;
 
     @Mock
     private AcademicHistoryRepository academicHistoryRepository;
@@ -158,7 +163,7 @@ class TeacherServiceTest {
         TeacherEntity teacher = TeacherEntity.builder().id(1L).status(TeacherStatus.ACTIVE).build();
 
         when(teacherRepository.findById(1L)).thenReturn(Optional.of(teacher));
-        when(sectionRepository.existsByTeacherIdAndPeriodStatus(1L, PeriodStatus.OPEN)).thenReturn(false);
+        when(sectionRepository.findAll()).thenReturn(Collections.emptyList());
         when(teacherRepository.save(any(TeacherEntity.class))).thenAnswer(i -> i.getArgument(0));
 
         TeacherResponseDto res = teacherService.changeTeacherStatus(1L, TeacherStatus.INACTIVE);
@@ -170,9 +175,18 @@ class TeacherServiceTest {
     @DisplayName("Should throw exception when inactivating teacher with sections in OPEN periods")
     void changeTeacherStatus_ToInactive_WithOpenPeriodSections_ThrowsException() {
         TeacherEntity teacher = TeacherEntity.builder().id(1L).status(TeacherStatus.ACTIVE).build();
+        cl.siga.siga_ipt.entity.SectionEntity section = cl.siga.siga_ipt.entity.SectionEntity.builder()
+                .teacherId(1L)
+                .periodCode("2027-1")
+                .build();
+        cl.siga.siga_ipt.entity.AcademicPeriodEntity period = cl.siga.siga_ipt.entity.AcademicPeriodEntity.builder()
+                .periodCode("2027-1")
+                .status(PeriodStatus.OPEN)
+                .build();
 
         when(teacherRepository.findById(1L)).thenReturn(Optional.of(teacher));
-        when(sectionRepository.existsByTeacherIdAndPeriodStatus(1L, PeriodStatus.OPEN)).thenReturn(true);
+        when(sectionRepository.findAll()).thenReturn(List.of(section));
+        when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(period));
 
         assertThatThrownBy(() -> teacherService.changeTeacherStatus(1L, TeacherStatus.INACTIVE))
                 .isInstanceOf(IllegalStateException.class)

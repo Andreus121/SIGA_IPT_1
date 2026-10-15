@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface RegistrationRepository extends JpaRepository<RegistrationEntity, Long> {
     boolean existsByStudentRun(String studentRun);
+    boolean existsBySectionCodeAndPeriodCode(String sectionCode, String periodCode);
+    boolean existsBySectionCode(String sectionCode);
 }

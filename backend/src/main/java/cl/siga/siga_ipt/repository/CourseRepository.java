@@ -12,5 +12,6 @@ public interface CourseRepository extends JpaRepository<CourseEntity, Long> {
     boolean existsByStudyPlanCode(String planCode);
     boolean existsByCodeAndStudyPlanCode(String code, String studyPlanCode);
     Optional<CourseEntity> findByCodeAndStudyPlanCode(String code, String studyPlanCode);
+    Optional<CourseEntity> findFirstByCode(String code);
     List<CourseEntity> findByStudyPlanCode(String studyPlanCode);
 }
