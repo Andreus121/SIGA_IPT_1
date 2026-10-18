@@ -222,6 +222,7 @@ public class RegistrationService {
                 .sectionCode(entity.getSectionCode())
                 .periodCode(entity.getPeriodCode())
                 .registrationDate(entity.getRegistrationDate())
+                .finalGrade(entity.getFinalGrade())
                 .status(entity.getStatus())
                 .build();
     }

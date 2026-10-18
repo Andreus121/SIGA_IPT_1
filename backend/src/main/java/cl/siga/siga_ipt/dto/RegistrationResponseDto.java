@@ -19,5 +19,6 @@ public class RegistrationResponseDto {
     private String sectionCode;
     private String periodCode;
     private LocalDateTime registrationDate;
+    private Double finalGrade;
     private RegistrationStatus status;
 }

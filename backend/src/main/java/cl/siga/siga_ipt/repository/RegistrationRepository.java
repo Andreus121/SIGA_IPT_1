@@ -16,4 +16,5 @@ public interface RegistrationRepository extends JpaRepository<RegistrationEntity
     long countBySectionCodeAndPeriodCode(String sectionCode, String periodCode);
     java.util.List<RegistrationEntity> findByStudentRunAndPeriodCode(String studentRun, String periodCode);
     java.util.List<RegistrationEntity> findBySectionCodeAndPeriodCode(String sectionCode, String periodCode);
+    java.util.List<RegistrationEntity> findByPeriodCode(String periodCode);
 }

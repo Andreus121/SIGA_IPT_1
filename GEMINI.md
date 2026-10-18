@@ -230,34 +230,27 @@ backend/
     - Restricción de eliminación si existen estudiantes inscritos.
   - `SectionController` con endpoints REST protegidos por Spring Security.
   - **Pruebas Unitarias de Services (COMPLETADO):**
-    - 118 pruebas unitarias implementadas con JUnit 5, Mockito y AssertJ sin errores.
-    - Cobertura del paquete `service` en JaCoCo: **91% de instrucciones** y **97% de líneas** cubiertas (cumple $\ge 90\%$).
+    - 130 pruebas unitarias implementadas con JUnit 5, Mockito y AssertJ sin errores.
+    - Cobertura del paquete `service` en JaCoCo: **92% de instrucciones** y **97% de líneas** cubiertas (supera el requisito de $\ge 90\%$).
 - **Épica 6 (Inscripción Académica) COMPLETADA:**
   - `EnrollmentEntity` y `EnrollmentRepository` para matrícula por período.
   - `RegistrationEntity` y `RegistrationRepository` para toma de asignaturas.
   - DTOs: `EnrollmentCreateDto`, `EnrollmentResponseDto`, `RegistrationCreateDto`, `RegistrationResponseDto`.
-  - `EnrollmentService` y `RegistrationService` con todas las validaciones de negocio:
-    - Período `OPEN`, estudiante `REGULAR` y matriculado (`ACTIVE`).
-    - Pertenencia al plan de estudio del estudiante.
-    - No aprobada previamente (`AcademicStatus.PASSED`).
-    - Prerrequisitos aprobados.
-    - Límite máximo de 6 asignaturas por período.
-    - Prioridad estricta de semestres inferiores si están disponibles y ofertadas.
-    - Control de cupos disponibles en sección.
-    - Control de topes de horario (mismo día y módulo).
-    - Anulación de ramos (`dropCourse`) permitida únicamente con período `OPEN`.
+  - `EnrollmentService` y `RegistrationService` con todas las validaciones de negocio.
   - `EnrollmentController` y `RegistrationController` con endpoints REST protegidos.
-  - Pruebas unitarias completas: `EnrollmentServiceTest` (8 tests) y `RegistrationServiceTest` (14 tests).
+  - Pruebas unitarias: `EnrollmentServiceTest` (8 tests) y `RegistrationServiceTest` (14 tests).
+- **Épica 7 (Registro de Calificaciones Finales y Cierre de Semestre) COMPLETADA:**
+  - `GradeEntryDto` y `SemesterClosingResponseDto`.
+  - `GradeService` con validaciones de notas ($1.0 \le \text{nota} \le 7.0$), estado de inscripción y período `OPEN`.
+  - `SemesterClosingService` con proceso transaccional de cierre:
+    - Validación de notas completas en inscripciones del período.
+    - Consolidación en `AcademicHistoryEntity` con estados `PASSED` / `FAILED`.
+    - Detección de doble reprobación para pase a estado `DROPPED`.
+    - Detección de aprobación curricular completa para pase a estado `GRADUATED`.
+    - Transición del período académico a estado `CLOSED`.
+  - `GradeController` y `SemesterClosingController` con endpoints REST protegidos con `@PreAuthorize`.
+  - Pruebas unitarias: `GradeServiceTest` (7 tests) y `SemesterClosingServiceTest` (5 tests).
 
 ### Próximo Paso Inmediato
-- **Avanzar a la Épica 7: Registro de Calificaciones Finales y Cierre de Semestre**:
-  - `GradeEntryDto` / `GradeUpdateDto`: registro y modificación de notas finales ($1.0 \le \text{nota} \le 7.0$) ingresadas por el docente de la sección.
-  - Validar período académico `OPEN` para registrar/modificar notas.
-  - $\ge 4.0 \rightarrow$ Aprobado (`PASSED`), $< 4.0 \rightarrow$ Reprobado (`FAILED`).
-  - Proceso de Cierre de Semestre (`SemesterClosingService` o en `AcademicPeriodService`):
-    - Requiere que todas las inscripciones del período tengan nota final asignada.
-    - Consolidación en el historial académico (`AcademicHistoryEntity`).
-    - Determinación de estados del estudiante:
-      - Si reprueba por 2da vez una misma asignatura $\rightarrow$ pasa a `DROPPED` (Eliminado).
-      - Si aprueba todas las asignaturas de su plan de estudios $\rightarrow$ pasa a `GRADUATED` (Egresado).
-    - Al finalizar el cierre, el período académico pasa a `CLOSED`.
+- Todas las 7 épicas del backend están completadas y probadas unitariamente con cobertura $\ge 90\%$.
+- Continuar con las pruebas de integración requeridas o proceder con la capa Frontend en React/Vite y despliegue Docker.
