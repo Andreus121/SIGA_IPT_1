@@ -230,14 +230,34 @@ backend/
     - Restricción de eliminación si existen estudiantes inscritos.
   - `SectionController` con endpoints REST protegidos por Spring Security.
   - **Pruebas Unitarias de Services (COMPLETADO):**
-    - 96 pruebas unitarias implementadas con JUnit 5, Mockito y AssertJ sin errores.
-    - Cobertura global del paquete `service` en JaCoCo: **91% de instrucciones** y **97% de líneas** cubiertas.
+    - 118 pruebas unitarias implementadas con JUnit 5, Mockito y AssertJ sin errores.
+    - Cobertura del paquete `service` en JaCoCo: **91% de instrucciones** y **97% de líneas** cubiertas (cumple $\ge 90\%$).
+- **Épica 6 (Inscripción Académica) COMPLETADA:**
+  - `EnrollmentEntity` y `EnrollmentRepository` para matrícula por período.
+  - `RegistrationEntity` y `RegistrationRepository` para toma de asignaturas.
+  - DTOs: `EnrollmentCreateDto`, `EnrollmentResponseDto`, `RegistrationCreateDto`, `RegistrationResponseDto`.
+  - `EnrollmentService` y `RegistrationService` con todas las validaciones de negocio:
+    - Período `OPEN`, estudiante `REGULAR` y matriculado (`ACTIVE`).
+    - Pertenencia al plan de estudio del estudiante.
+    - No aprobada previamente (`AcademicStatus.PASSED`).
+    - Prerrequisitos aprobados.
+    - Límite máximo de 6 asignaturas por período.
+    - Prioridad estricta de semestres inferiores si están disponibles y ofertadas.
+    - Control de cupos disponibles en sección.
+    - Control de topes de horario (mismo día y módulo).
+    - Anulación de ramos (`dropCourse`) permitida únicamente con período `OPEN`.
+  - `EnrollmentController` y `RegistrationController` con endpoints REST protegidos.
+  - Pruebas unitarias completas: `EnrollmentServiceTest` (8 tests) y `RegistrationServiceTest` (14 tests).
 
 ### Próximo Paso Inmediato
-- **Avanzar a la Épica 6: Inscripción Académica (`EnrollmentService` y `RegistrationService`)**:
-  - Validaciones para inscripción de asignaturas por estudiante en un período académico `OPEN`.
-  - Estudiante debe estar en estado `REGULAR` y matriculado.
-  - Solo asignaturas de su plan de estudios ofertadas en el período.
-  - Control de prerrequisitos aprobados (historial académico).
-  - Control de número de asignaturas permitidas (mínimo 3, máximo 6).
-  - Control de tope de horarios del estudiante y cupos disponibles en la sección.
+- **Avanzar a la Épica 7: Registro de Calificaciones Finales y Cierre de Semestre**:
+  - `GradeEntryDto` / `GradeUpdateDto`: registro y modificación de notas finales ($1.0 \le \text{nota} \le 7.0$) ingresadas por el docente de la sección.
+  - Validar período académico `OPEN` para registrar/modificar notas.
+  - $\ge 4.0 \rightarrow$ Aprobado (`PASSED`), $< 4.0 \rightarrow$ Reprobado (`FAILED`).
+  - Proceso de Cierre de Semestre (`SemesterClosingService` o en `AcademicPeriodService`):
+    - Requiere que todas las inscripciones del período tengan nota final asignada.
+    - Consolidación en el historial académico (`AcademicHistoryEntity`).
+    - Determinación de estados del estudiante:
+      - Si reprueba por 2da vez una misma asignatura $\rightarrow$ pasa a `DROPPED` (Eliminado).
+      - Si aprueba todas las asignaturas de su plan de estudios $\rightarrow$ pasa a `GRADUATED` (Egresado).
+    - Al finalizar el cierre, el período académico pasa a `CLOSED`.

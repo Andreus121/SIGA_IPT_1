@@ -27,9 +27,10 @@ public class EnrollmentService {
     private final StudentRepository studentRepository;
     private final AcademicPeriodRepository periodRepository;
 
+    // Simula la matricula de un alumno en un periodo académico
     @Transactional
     public EnrollmentResponseDto enrollStudent(EnrollmentCreateDto dto) {
-        // 1. Validar que el estudiante exista y esté REGULAR
+        // Validar que el estudiante exista y esté REGULAR
         StudentEntity student = studentRepository.findByRun(dto.getStudentRun())
                 .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado con RUN: " + dto.getStudentRun()));
 
@@ -37,7 +38,7 @@ public class EnrollmentService {
             throw new IllegalStateException("Solo los estudiantes en estado REGULAR pueden matricularse en el período.");
         }
 
-        // 2. Validar que el período exista y esté ABIERTO
+        // Validar que el período exista y esté ABIERTO
         AcademicPeriodEntity period = periodRepository.findByPeriodCode(dto.getPeriodCode())
                 .orElseThrow(() -> new IllegalArgumentException("El período académico '" + dto.getPeriodCode() + "' no existe."));
 
@@ -45,7 +46,7 @@ public class EnrollmentService {
             throw new IllegalStateException("Solo se pueden realizar matrículas en períodos académicos con estado ABIERTO.");
         }
 
-        // 3. Validar que no esté ya matriculado en el período
+        // Validar que no esté ya matriculado en el período
         if (enrollmentRepository.existsByStudentRunAndPeriodCode(dto.getStudentRun(), dto.getPeriodCode())) {
             throw new IllegalArgumentException("El estudiante ya se encuentra matriculado en el período académico " + dto.getPeriodCode());
         }
@@ -54,13 +55,14 @@ public class EnrollmentService {
                 .studentRun(dto.getStudentRun())
                 .periodCode(dto.getPeriodCode())
                 .enrollmentDate(LocalDate.now())
-                .status(EnrollmentStatus.ENROLLED)
+                .status(EnrollmentStatus.ACTIVE)
                 .build();
 
         EnrollmentEntity saved = enrollmentRepository.save(enrollment);
         return mapToDto(saved);
     }
 
+    // Obtiene las matrículas de un periodo
     @Transactional(readOnly = true)
     public List<EnrollmentResponseDto> getEnrollmentsByPeriod(String periodCode) {
         return enrollmentRepository.findByPeriodCode(periodCode).stream()
@@ -68,6 +70,7 @@ public class EnrollmentService {
                 .collect(Collectors.toList());
     }
 
+    // Obtiene las matrículas de un alumno por su run
     @Transactional(readOnly = true)
     public List<EnrollmentResponseDto> getEnrollmentsByStudent(String run) {
         return enrollmentRepository.findByStudentRun(run).stream()
@@ -75,6 +78,7 @@ public class EnrollmentService {
                 .collect(Collectors.toList());
     }
 
+    // Función auxiliar
     private EnrollmentResponseDto mapToDto(EnrollmentEntity entity) {
         return EnrollmentResponseDto.builder()
                 .id(entity.getId())
