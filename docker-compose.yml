@@ -1,33 +1,67 @@
+version: '3.8'
+
 services:
-  postgres:
+  db:
     image: postgres:16-alpine
     container_name: siga-postgres
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: SigaIPT_DB
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password1234
+    ports:
+      - "5090:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5090:5432"   # puerto externo 5090 → interno 5432
+    restart: unless-stopped
 
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.5
     container_name: siga-keycloak
-    command: start-dev                # modo de desarrollo (no producción)
+    command: start-dev
     environment:
-      KEYCLOAK_ADMIN: ${KEYCLOAK_USERNAME}          # usuario admin
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_PASSWORD}  # contraseña admin
-      KC_DB: postgres                 # usar la misma BD que la app
-      KC_DB_URL_HOST: postgres
-      KC_DB_URL_DATABASE: ${DB_NAME}
-      KC_DB_USERNAME: ${DB_USERNAME}
-      KC_DB_PASSWORD: ${DB_PASSWORD}
-      KC_HOSTNAME_STRICT: false       # permite acceso con localhost
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL_HOST: db
+      KC_DB_URL_DATABASE: SigaIPT_DB
+      KC_DB_USERNAME: admin
+      KC_DB_PASSWORD: password1234
+      KC_HOSTNAME_STRICT: false
     ports:
-      - "8090:8090"   # Keycloak UI en http://localhost:8080
+      - "8090:8080"
     depends_on:
-      - postgres
+      - db
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: siga-backend
+    depends_on:
+      - db
+      - keycloak
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/SigaIPT_DB?sslmode=disable
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: password1234
+      SPRING_PROFILES_ACTIVE: default
+    ports:
+      - "8080:8080"
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:latest
+    container_name: siga-nginx
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    restart: unless-stopped
 
 volumes:
   postgres_data:

@@ -251,6 +251,21 @@ backend/
   - `GradeController` y `SemesterClosingController` con endpoints REST protegidos con `@PreAuthorize`.
   - Pruebas unitarias: `GradeServiceTest` (7 tests) y `SemesterClosingServiceTest` (5 tests).
 
+- **Pruebas de Integración (COMPLETADO):**
+  - Configuración con base de datos H2 en memoria (`mode=PostgreSQL`) en perfil `test` y `@AutoConfigureMockMvc` con Spring Security (`@WithMockUser`).
+  - Total de 3 procesos y 18 casos de prueba (9 exitosos, 9 de rechazo) implementados y aprobados:
+    1. **Proceso 1: Oferta de Secciones y Horarios** ([`SectionOfferingIntegrationTest.java`](file:///c:/Users/jcand/Documents/SIGA_IPT_1/backend/src/test/java/cl/siga/siga_ipt/integration/SectionOfferingIntegrationTest.java)):
+       - 3 exitosos: Creación de sección con docente activo y horarios, modificación de capacidad, consulta de secciones por período.
+       - 3 rechazos: Período cerrado, docente inactivo, tope de horario docente.
+    2. **Proceso 2: Matrícula e Inscripción de Asignaturas** ([`EnrollmentRegistrationIntegrationTest.java`](file:///c:/Users/jcand/Documents/SIGA_IPT_1/backend/src/test/java/cl/siga/siga_ipt/integration/EnrollmentRegistrationIntegrationTest.java)):
+       - 3 exitosos: Matrícula de estudiante regular en período abierto, inscripción de asignatura con prerrequisitos cumplidos, anulación de ramo (`dropCourse`) en período abierto.
+       - 3 rechazos: Estudiante sin matrícula activa, prerrequisito no aprobado, tope de horario entre asignaturas del estudiante.
+    3. **Proceso 3: Calificaciones y Cierre de Semestre** ([`GradeClosingIntegrationTest.java`](file:///c:/Users/jcand/Documents/SIGA_IPT_1/backend/src/test/java/cl/siga/siga_ipt/integration/GradeClosingIntegrationTest.java)):
+       - 3 exitosos: Ingreso de calificación final válida (5.5), cierre de semestre con graduación de estudiante (`GRADUATED`), transición del período a `CLOSED`.
+       - 3 rechazos: Calificación fuera de rango (> 7.0), ingreso/modificación de notas en período cerrado, cierre de semestre con asignaturas sin calificación registrada.
+  - Total general de pruebas ejecutadas: **149 pruebas (130 unitarias + 18 de integración + 1 de contexto)** todas pasando sin fallos.
+  - Cobertura global de JaCoCo en `service`: **92% de instrucciones** y **97% de líneas** cubiertas.
+
 ### Próximo Paso Inmediato
-- Todas las 7 épicas del backend están completadas y probadas unitariamente con cobertura $\ge 90\%$.
-- Continuar con las pruebas de integración requeridas o proceder con la capa Frontend en React/Vite y despliegue Docker.
+- Todas las 7 épicas y la totalidad de pruebas unitarias e integración del backend están completas.
+- Proceder con la capa Frontend en React + Vite o con la configuración de Docker Compose / despliegue.
