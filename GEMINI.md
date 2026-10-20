@@ -266,6 +266,15 @@ backend/
   - Total general de pruebas ejecutadas: **149 pruebas (130 unitarias + 18 de integración + 1 de contexto)** todas pasando sin fallos.
   - Cobertura global de JaCoCo en `service`: **92% de instrucciones** y **97% de líneas** cubiertas.
 
+- **Despliegue y Contenedorización (EN CURSO):**
+  - Creado `nginx.conf` con upstream balanceado hacia el backend (`http://backend:8080`) en puerto 80.
+  - Actualizado `docker-compose.yml`:
+    - PostgreSQL persistente (puerto 5090).
+    - Keycloak 24 (puerto 8090).
+    - Backend Spring Boot configurado para 3 réplicas (`deploy.replicas: 3`) sin nombre de contenedor fijo para evitar conflictos de Compose v2.
+    - Nginx como reverse proxy / balanceador de carga.
+  - Creado [`backend/Dockerfile`](file:///c:/Users/jcand/Documents/SIGA_IPT_1/backend/Dockerfile) multi-stage (eclipse-temurin:21-jdk-alpine builder + jre-alpine runtime) con paths relativos al contexto del backend corregidos.
+
 ### Próximo Paso Inmediato
-- Todas las 7 épicas y la totalidad de pruebas unitarias e integración del backend están completas.
-- Proceder con la capa Frontend en React + Vite o con la configuración de Docker Compose / despliegue.
+- Probar el levantamiento del clúster con `docker compose up -d --build` para validar el empaquetado del backend y la orquestación.
+- Continuar con la capa Frontend en React + Vite.
