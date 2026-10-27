@@ -214,20 +214,67 @@ backend/
    - Consultar `docs/Evaluacion1_v1.pdf` para la rúbrica oficial de la evaluación.
    - Consultar `docs/Errores.md` para el listado de correcciones pendientes antes de pasar a la Épica 5.
 
-## Estado Actual y Próximos Pasos (para otro dispositivo)
+## Estado Actual y Próximos Pasos
 
-### Cambios ya aplicados
+### Cambios y Hitos Completados
 - `SectionEntity.java`: restricción única compuesta (`course_code`, `period_code`), eliminado `periodStatus` y su import.
-- `docs/Errores.md`: marcados como **ARREGLADO** los ítems de unicidad del código de asignatura, unicidad del código de plan de estudio, campos obligatorios en `TeacherEntity`, consistencia de identificadores, restricción única en `SectionEntity`, `GlobalExceptionHandler` y configuración de Spring Security con Keycloak.
-- `SecurityConfig.java`: configuración de Spring Security con Keycloak (ya existente y confirmada).
+- Arquitectura sin Foreign Keys, `GlobalExceptionHandler` y `SecurityConfig` (Keycloak OAuth2 Resource Server) totalmente operativos.
+- **Épica 5 (Gestión de Oferta Académica y Secciones) COMPLETADA:**
+  - `SectionScheduleEntity` y `SectionScheduleRepository` para gestión de bloques horarios.
+  - DTOs implementados: `SectionScheduleDto`, `SectionCreateDto`, `SectionUpdateDto` y `SectionResponseDto`.
+  - `SectionService` con validaciones de negocio:
+    - Período académico abierto (`PeriodStatus.OPEN`).
+    - Docente asignado activo (`TeacherStatus.ACTIVE`) y sin conflicto de horario en el período.
+    - Cupos ($1 \le \text{capacidad} \le 60$).
+    - Bloques de horario (módulos M1 a M6 en L-V) y correspondencia con horas TEL ($1 \text{ bloque} = 2 \text{ horas pedagógicas}$).
+    - Restricción de eliminación si existen estudiantes inscritos.
+  - `SectionController` con endpoints REST protegidos por Spring Security.
+  - **Pruebas Unitarias de Services (COMPLETADO):**
+    - 130 pruebas unitarias implementadas con JUnit 5, Mockito y AssertJ sin errores.
+    - Cobertura del paquete `service` en JaCoCo: **92% de instrucciones** y **97% de líneas** cubiertas (supera el requisito de $\ge 90\%$).
+- **Épica 6 (Inscripción Académica) COMPLETADA:**
+  - `EnrollmentEntity` y `EnrollmentRepository` para matrícula por período.
+  - `RegistrationEntity` y `RegistrationRepository` para toma de asignaturas.
+  - DTOs: `EnrollmentCreateDto`, `EnrollmentResponseDto`, `RegistrationCreateDto`, `RegistrationResponseDto`.
+  - `EnrollmentService` y `RegistrationService` con todas las validaciones de negocio.
+  - `EnrollmentController` y `RegistrationController` con endpoints REST protegidos.
+  - Pruebas unitarias: `EnrollmentServiceTest` (8 tests) y `RegistrationServiceTest` (14 tests).
+- **Épica 7 (Registro de Calificaciones Finales y Cierre de Semestre) COMPLETADA:**
+  - `GradeEntryDto` y `SemesterClosingResponseDto`.
+  - `GradeService` con validaciones de notas ($1.0 \le \text{nota} \le 7.0$), estado de inscripción y período `OPEN`.
+  - `SemesterClosingService` con proceso transaccional de cierre:
+    - Validación de notas completas en inscripciones del período.
+    - Consolidación en `AcademicHistoryEntity` con estados `PASSED` / `FAILED`.
+    - Detección de doble reprobación para pase a estado `DROPPED`.
+    - Detección de aprobación curricular completa para pase a estado `GRADUATED`.
+    - Transición del período académico a estado `CLOSED`.
+  - `GradeController` y `SemesterClosingController` con endpoints REST protegidos con `@PreAuthorize`.
+  - Pruebas unitarias: `GradeServiceTest` (7 tests) y `SemesterClosingServiceTest` (5 tests).
 
-### Pendientes
-1. **Pruebas unitarias**: crear pruebas para la capa `service` con cobertura ≥ 90 % (JaCoCo). Añadir `jacoco-maven-plugin` al `pom.xml`.
-2. **Avanzar a la Épica 5** (Gestión de Oferta Académica y Secciones) una vez completadas las pruebas.
+- **Pruebas de Integración (COMPLETADO):**
+  - Configuración con base de datos H2 en memoria (`mode=PostgreSQL`) en perfil `test` y `@AutoConfigureMockMvc` con Spring Security (`@WithMockUser`).
+  - Total de 3 procesos y 18 casos de prueba (9 exitosos, 9 de rechazo) implementados y aprobados:
+    1. **Proceso 1: Oferta de Secciones y Horarios** ([`SectionOfferingIntegrationTest.java`](file:///c:/Users/jcand/Documents/SIGA_IPT_1/backend/src/test/java/cl/siga/siga_ipt/integration/SectionOfferingIntegrationTest.java)):
+       - 3 exitosos: Creación de sección con docente activo y horarios, modificación de capacidad, consulta de secciones por período.
+       - 3 rechazos: Período cerrado, docente inactivo, tope de horario docente.
+    2. **Proceso 2: Matrícula e Inscripción de Asignaturas** ([`EnrollmentRegistrationIntegrationTest.java`](file:///c:/Users/jcand/Documents/SIGA_IPT_1/backend/src/test/java/cl/siga/siga_ipt/integration/EnrollmentRegistrationIntegrationTest.java)):
+       - 3 exitosos: Matrícula de estudiante regular en período abierto, inscripción de asignatura con prerrequisitos cumplidos, anulación de ramo (`dropCourse`) en período abierto.
+       - 3 rechazos: Estudiante sin matrícula activa, prerrequisito no aprobado, tope de horario entre asignaturas del estudiante.
+    3. **Proceso 3: Calificaciones y Cierre de Semestre** ([`GradeClosingIntegrationTest.java`](file:///c:/Users/jcand/Documents/SIGA_IPT_1/backend/src/test/java/cl/siga/siga_ipt/integration/GradeClosingIntegrationTest.java)):
+       - 3 exitosos: Ingreso de calificación final válida (5.5), cierre de semestre con graduación de estudiante (`GRADUATED`), transición del período a `CLOSED`.
+       - 3 rechazos: Calificación fuera de rango (> 7.0), ingreso/modificación de notas en período cerrado, cierre de semestre con asignaturas sin calificación registrada.
+  - Total general de pruebas ejecutadas: **149 pruebas (130 unitarias + 18 de integración + 1 de contexto)** todas pasando sin fallos.
+  - Cobertura global de JaCoCo en `service`: **92% de instrucciones** y **97% de líneas** cubiertas.
 
-### Pasos recomendados en el nuevo dispositivo
-1. Ejecutar `docker-compose up -d` para levantar la base de datos.
-2. Compilar el proyecto: `./mvnw.cmd clean compile` (desde la carpeta `backend`).
-3. Ejecutar pruebas y generar informe JaCoCo: `./mvnw.cmd test`.
-4. Implementar los tests faltantes bajo `src/test/java/...`.
-5. Cuando la cobertura sea ≥ 90 %, iniciar el desarrollo de la Épica 5 siguiendo las mismas guías de arquitectura y calidad.
+- **Despliegue y Contenedorización (EN CURSO):**
+  - Creado `nginx.conf` con upstream balanceado hacia el backend (`http://backend:8080`) en puerto 80.
+  - Actualizado `docker-compose.yml`:
+    - PostgreSQL persistente (puerto 5090).
+    - Keycloak 24 (puerto 8090).
+    - Backend Spring Boot configurado para 3 réplicas (`deploy.replicas: 3`) sin nombre de contenedor fijo para evitar conflictos de Compose v2.
+    - Nginx como reverse proxy / balanceador de carga.
+  - Creado [`backend/Dockerfile`](file:///c:/Users/jcand/Documents/SIGA_IPT_1/backend/Dockerfile) multi-stage (eclipse-temurin:21-jdk-alpine builder + jre-alpine runtime) con paths relativos al contexto del backend corregidos.
+
+### Próximo Paso Inmediato
+- Probar el levantamiento del clúster con `docker compose up -d --build` para validar el empaquetado del backend y la orquestación.
+- Continuar con la capa Frontend en React + Vite.

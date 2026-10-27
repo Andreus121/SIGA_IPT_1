@@ -13,6 +13,7 @@ import cl.siga.siga_ipt.enums.PeriodStatus;
 
 import cl.siga.siga_ipt.enums.TeacherStatus;
 import cl.siga.siga_ipt.repository.AcademicHistoryRepository;
+import cl.siga.siga_ipt.repository.AcademicPeriodRepository;
 import cl.siga.siga_ipt.repository.SectionRepository;
 import cl.siga.siga_ipt.repository.TeacherRepository;
 
@@ -27,8 +28,8 @@ import java.util.List;
 public class TeacherService {
 
     private final TeacherRepository teacherRepository;
-
     private final SectionRepository sectionRepository;
+    private final AcademicPeriodRepository periodRepository;
     private final AcademicHistoryRepository academicHistoryRepository;
 
     // Crear un profesor
@@ -142,7 +143,13 @@ public class TeacherService {
         // Si el nuevo estado es INACTIVO
         if (newStatus == TeacherStatus.INACTIVE) {
             // Regla de negocio, no cambiar a INACTIVE si tiene secciones asignadas en un período académico ABIERTO
-            if (sectionRepository.existsByTeacherIdAndPeriodStatus(id, PeriodStatus.OPEN)) {
+            boolean hasOpenPeriodSections = sectionRepository.findAll().stream()
+                    .filter(s -> s.getTeacherId().equals(id))
+                    .anyMatch(s -> periodRepository.findByPeriodCode(s.getPeriodCode())
+                            .map(p -> p.getStatus() == PeriodStatus.OPEN)
+                            .orElse(false));
+
+            if (hasOpenPeriodSections) {
                 throw new IllegalStateException("No se puede inactivar al docente porque tiene secciones asignadas en un período académico ABIERTO.");
             }
         }

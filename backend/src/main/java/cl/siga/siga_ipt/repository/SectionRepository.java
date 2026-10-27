@@ -7,6 +7,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SectionRepository extends JpaRepository<SectionEntity, Long> {
-    boolean existsByTeacherIdAndPeriodStatus(Long teacherId, PeriodStatus periodStatus);
     boolean existsByTeacherId(Long teacherId);
+    boolean existsByTeacherIdAndPeriodCode(Long teacherId, String periodCode);
+    boolean existsByCourseCodeAndPeriodCode(String courseCode, String periodCode);
+    boolean existsByCode(String code);
+    java.util.Optional<SectionEntity> findByCode(String code);
+    java.util.List<SectionEntity> findByPeriodCode(String periodCode);
+    java.util.List<SectionEntity> findByTeacherIdAndPeriodCode(Long teacherId, String periodCode);
 }

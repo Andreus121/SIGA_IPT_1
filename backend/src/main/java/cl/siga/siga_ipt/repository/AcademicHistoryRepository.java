@@ -9,4 +9,6 @@ public interface AcademicHistoryRepository extends JpaRepository<AcademicHistory
     boolean existsByStudentRun(String studentRun);
     boolean existsByTeacherRun(String teacherRun);
     boolean existsByCourseCodeAndStudyPlanCode(String courseCode, String studyPlanCode);
+    boolean existsByStudentRunAndCourseCodeAndStatus(String studentRun, String courseCode, cl.siga.siga_ipt.enums.AcademicStatus status);
+    List<AcademicHistoryEntity> findByStudentRun(String studentRun);
 }

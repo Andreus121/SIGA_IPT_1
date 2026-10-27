@@ -21,7 +21,7 @@ public class SectionScheduleEntity {
     @Column(nullable = false)
     private String periodCode;
 
-    @Column(nullable = false)
+    @Column(name = "schedule_day", nullable = false)
     private String day; // L, M, W, J, V
 
     @Column(nullable = false)
