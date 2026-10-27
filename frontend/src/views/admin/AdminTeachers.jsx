@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Spinner, Alert, Modal, Form, Badge } from 'react-bootstrap';
-import { getAllTeachers, createTeacher, updateTeacherStatus } from '../../services/adminService';
+import { getAllTeachers, createTeacher, updateTeacherStatus } from '../../services/AdminService';
 
 const AdminTeachers = () => {
   const [teachers, setTeachers] = useState([]);
