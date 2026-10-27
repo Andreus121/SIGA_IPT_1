@@ -2,16 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Container, Spinner } from 'react-bootstrap';
 import keycloak from './config/keycloak';
+
+// Componentes de Autenticación y Redirección
 import RoleRedirect from './components/RoleRedirect';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// Vistas del Estudiante
+import StudentLayout from './views/student/StudentLayout';
 import StudentDashboard from './views/student/StudentDashboard';
-import TeacherDashboard from './views/teacher/TeacherDashboard';
+import StudentInfo from './views/student/StudentInfo';
+import StudentEnrollment from './views/student/StudentEnrollment';
+import StudentRegistration from './views/student/StudentRegistration';
+import StudentSchedule from './views/student/StudentSchedule';
+import StudentGrades from './views/student/StudentGrades';
+
+// Vistas de Admin y Docente
 import AdminDashboard from './views/admin/AdminDashboard';
+import TeacherDashboard from './views/teacher/TeacherDashboard';
 
 const App = () => {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    // inicializa Keycloak y maneja la autenticación
+    // 'login-required' fuerza el login si no hay sesión activa
     keycloak.init({ onLoad: 'login-required', checkLoginIframe: false })
       .then((authenticated) => {
         if (authenticated) {
@@ -23,7 +36,6 @@ const App = () => {
       });
   }, []);
 
-  // mostrar un spinner de carga mientras Keycloak se inicializa
   if (!isInitialized) {
     return (
       <Container className="d-flex justify-content-center align-items-center vh-100">
@@ -37,9 +49,27 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<RoleRedirect />} />
+
+        {/* Rutas del Estudiante (Anidadas bajo StudentLayout) */}
+        <Route 
+          path="/student" 
+          element={
+            <ProtectedRoute>
+              <StudentLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<StudentDashboard />} />
+          <Route path="info" element={<StudentInfo />} />
+          <Route path="enrollment" element={<StudentEnrollment />} />
+          <Route path="registration" element={<StudentRegistration />} />
+          <Route path="schedule" element={<StudentSchedule />} />
+          <Route path="grades" element={<StudentGrades />} />
+        </Route>
+
+        {/* Rutas para Admin y Docente */}
         <Route path="/admin/*" element={<AdminDashboard />} />
         <Route path="/teacher/*" element={<TeacherDashboard />} />
-        <Route path="/student/*" element={<StudentDashboard />} />
       </Routes>
     </Router>
   );
