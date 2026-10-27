@@ -66,10 +66,23 @@ const App = () => {
           <Route path="schedule" element={<StudentSchedule />} />
           <Route path="grades" element={<StudentGrades />} />
         </Route>
+        
+        {/* Rutas para Docente */}
+        <Route 
+          path="/teacher" 
+          element={
+            <ProtectedRoute>
+              <TeacherLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<TeacherDashboard />} />
+          <Route path="sections" element={<TeacherSectionsView />} />
+          <Route path="grades/:sectionCode" element={<TeacherGradesEntryView />} />
+        </Route>
 
-        {/* Rutas para Admin y Docente */}
+        {/* Rutas para Admin*/}
         <Route path="/admin/*" element={<AdminDashboard />} />
-        <Route path="/teacher/*" element={<TeacherDashboard />} />
       </Routes>
     </Router>
   );

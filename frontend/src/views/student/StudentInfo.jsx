@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Badge, Spinner, Alert, Row, Col } from 'react-bootstrap';
 import keycloak from '../../config/keycloak';
-import { getStudentByEmail, getCoursesByStudyPlan } from '../../services/studentService';
+import { getStudentByEmail, getCoursesByStudyPlan } from '../../services/StudentService';
 
 const StudentCurriculumView = () => {
   const [courses, setCourses] = useState([]);

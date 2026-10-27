@@ -5,7 +5,7 @@ import {
   getStudentByEmail,
   getAcademicPeriods,
   getRegistrationsByStudent
-} from '../../services/studentService';
+} from '../../services/StudentService';
 
 const StudentGradesView = () => {
   const [student, setStudent] = useState(null);

@@ -6,7 +6,7 @@ import {
   getAcademicPeriods,
   getRegistrationsByStudent,
   getSectionsByPeriod
-} from '../../services/studentService';
+} from '../../services/StudentService';
 
 const StudentScheduleView = () => {
   const [student, setStudent] = useState(null);

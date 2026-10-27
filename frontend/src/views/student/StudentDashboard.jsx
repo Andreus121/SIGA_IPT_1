@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Badge, Spinner, Alert, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import keycloak from '../../config/keycloak';
-import { getStudentByEmail } from '../../services/studentService';
+import { getStudentByEmail } from '../../services/StudentService';
 
 const StudentDashboard = () => {
   const [studentData, setStudentData] = useState(null);

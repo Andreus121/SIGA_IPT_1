@@ -8,7 +8,7 @@ import {
   getRegistrationsByStudent,
   createRegistration,
   deleteRegistration
-} from '../../services/studentService';
+} from '../../services/StudentService';
 
 const StudentRegistrationView = () => {
   const [student, setStudent] = useState(null);

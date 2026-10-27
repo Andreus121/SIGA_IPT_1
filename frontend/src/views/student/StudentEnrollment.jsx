@@ -6,7 +6,7 @@ import {
   getEnrollmentsByStudent,
   getAcademicPeriods,
   createEnrollment
-} from '../../services/studentService';
+} from '../../services/StudentService';
 
 const StudentEnrollmentView = () => {
   const [student, setStudent] = useState(null);
