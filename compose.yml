@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: siga-postgres
+    env_file: 
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_NAME:-siga_ipt}
+      POSTGRES_USER: ${DB_USERNAME:-siga_ipt_username}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-siga_ipt_pass}
+    ports:
+      - "${DB_PORT:-5432}:5432"  
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.5
+    container_name: siga-keycloak
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_USERNAME:-keycloak_username}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_PASSWORD:-keycloak_pass}
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres
+      KC_DB_URL_DATABASE: ${DB_NAME:-siga_ipt}
+      KC_DB_USERNAME: ${DB_USERNAME:-siga_ipt_username}
+      KC_DB_PASSWORD: ${DB_PASSWORD:-siga_ipt_pass}
+      KC_HOSTNAME_STRICT: false       # permite acceso con localhost
+    ports:
+      - "${KEYCLOAK_PORT:-8090}:8090" # Keycloak UI en http://localhost:8090
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  backend:
+    image: eclipse-temurin:21-jdk-alpine
+    working_dir: /app
+    command: ./mvnw spring-boot:run
+    build: ./backend
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - keycloak
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/SigaIPT_DB?sslmode=disable
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: password1234
+      SPRING_PROFILES_ACTIVE: default
+    # Las 3 réplicas se controlan con: docker compose up -d --scale backend=3
+    scale: 3
+    restart: unless-stopped  
+
+  nginx:
+    image: nginx:latest
+    container_name: siga-nginx
+    depends_on:
+      - backend
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
