@@ -16,9 +16,17 @@ import StudentRegistration from './views/student/StudentRegistration';
 import StudentSchedule from './views/student/StudentSchedule';
 import StudentGrades from './views/student/StudentGrades';
 
-// Vistas de Admin y Docente
-import AdminDashboard from './views/admin/AdminDashboard';
+// Vistas de Docente
 import TeacherDashboard from './views/teacher/TeacherDashboard';
+import TeacherLayout from './views/teacher/TeacherLayout';
+import TeacherSections from './views/teacher/TeacherSections';
+import TeacherGradesEntry from './views/teacher/TeacherGradesEntry';
+
+// Vistas de Administrador
+import AdminDashboard from './views/admin/AdminDashboard';
+import AdminLayout from './views/admin/AdminLayout';
+import AdminStudents from './views/admin/AdminStudents';
+import AdminTeachers from './views/admin/AdminTeachers';
 
 const App = () => {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -77,12 +85,16 @@ const App = () => {
           }
         >
           <Route index element={<TeacherDashboard />} />
-          <Route path="sections" element={<TeacherSectionsView />} />
-          <Route path="grades/:sectionCode" element={<TeacherGradesEntryView />} />
+          <Route path="sections" element={<TeacherSections />} />
+          <Route path="grades/:sectionCode" element={<TeacherGradesEntry />} />
         </Route>
 
         {/* Rutas para Admin*/}
-        <Route path="/admin/*" element={<AdminDashboard />} />
+        <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="students" element={<AdminStudents />} />
+          <Route path="teachers" element={<AdminTeachers />} />
+        </Route>
       </Routes>
     </Router>
   );
