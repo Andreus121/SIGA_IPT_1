@@ -1,7 +1,6 @@
 package cl.siga.siga_ipt.repository;
 
 import cl.siga.siga_ipt.entity.EnrollmentEntity;
-import cl.siga.siga_ipt.enums.EnrollmentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
