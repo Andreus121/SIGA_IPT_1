@@ -27,6 +27,11 @@ import AdminDashboard from './views/admin/AdminDashboard';
 import AdminLayout from './views/admin/AdminLayout';
 import AdminStudents from './views/admin/AdminStudents';
 import AdminTeachers from './views/admin/AdminTeachers';
+import AdminCareers from './views/admin/AdminCareers';
+import AdminStudyPlans from './views/admin/AdminStudyPlan';
+import AdminPeriods from './views/admin/AdminPeriods';
+import AdminSections from './views/admin/AdminSections';
+import AdminCourses from './views/admin/AdminCourses';
 
 const App = () => {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -101,6 +106,11 @@ const App = () => {
           <Route index element={<AdminDashboard />} />
           <Route path="students" element={<AdminStudents />} />
           <Route path="teachers" element={<AdminTeachers />} />
+          <Route path="careers" element={<AdminCareers />} />
+          <Route path="study-plans" element={<AdminStudyPlans />} />
+          <Route path="periods" element={<AdminPeriods />} />
+          <Route path="sections" element={<AdminSections />} />
+          <Route path="courses" element={<AdminCourses />} />
         </Route>
       </Routes>
     </Router>
