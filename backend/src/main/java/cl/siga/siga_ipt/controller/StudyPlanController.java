@@ -25,6 +25,14 @@ public class StudyPlanController {
         return new ResponseEntity<>(studyPlanService.createStudyPlan(dto), HttpStatus.CREATED);
     }
 
+    // obtener todos los planes de estudio
+    @GetMapping
+    @PreAuthorize ("hasAnyRole('ADMIN')")
+    public ResponseEntity<List<StudyPlanResponseDto>> getAllStudyPlans() {
+        return new ResponseEntity<>(studyPlanService.getAllStudyPlans(), HttpStatus.OK);
+    }
+
+
     @GetMapping("/career/{careerCode}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<StudyPlanResponseDto>> getPlansByCareer(@PathVariable String careerCode) {
@@ -48,4 +56,4 @@ public class StudyPlanController {
     public ResponseEntity<StudyPlanResponseDto> getPlanByCode(@PathVariable String code) {
         return new ResponseEntity<>(studyPlanService.getPlanByCode(code), HttpStatus.OK);
     }
-}
+}

@@ -1,5 +1,7 @@
 package cl.siga.siga_ipt.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -9,6 +11,7 @@ public class StudyPlanCreateDto {
     @NotBlank(message = "El código del plan de estudios es obligatorio")
     private String code;
 
+    @JsonProperty("careerCode")
     @NotBlank(message = "El código de la carrera es obligatorio")
     private String careerCode;
 

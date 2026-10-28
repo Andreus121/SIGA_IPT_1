@@ -114,6 +114,15 @@ public class StudyPlanService {
         studyPlanRepository.delete(plan);
     }
 
+    // obtener todos los planes de estudio
+    @Transactional(readOnly = true)
+    public List<StudyPlanResponseDto> getAllStudyPlans() {
+        return studyPlanRepository.findAll().stream()
+                .map(this::mapStudyPlanToResponseDto)
+                .toList();
+    }
+
+    // obtener los planes de estudio de una carrera
     @Transactional(readOnly = true)
     public List<StudyPlanResponseDto> getPlansByCareer(String careerCode) {
         return studyPlanRepository.findAllByCareerCode(careerCode).stream()
@@ -131,6 +140,7 @@ public class StudyPlanService {
                 .status(studyPlan.getStatus())
                 .build();
     }
+    
     @Transactional(readOnly = true)
     public StudyPlanResponseDto getPlanByCode(String code) {
         StudyPlanEntity plan = studyPlanRepository.findByCode(code)

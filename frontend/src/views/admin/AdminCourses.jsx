@@ -8,7 +8,14 @@ const AdminCourses = () => {
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
-    code: '', name: '', studyPlanCode: '', semester: 1, sct: 0, theoryHours: 0, exerciseHours: 0, labHours: 0
+    code: '', 
+    studyPlanCode: '', 
+    name: '', 
+    semester: 1, 
+    sct: 0, 
+    theoryHours: 0, 
+    exerciseHours: 0, 
+    labHours: 0
   });
 
   const fetchCourses = async () => {
@@ -79,37 +86,45 @@ const AdminCourses = () => {
         <Form onSubmit={handleSubmit}>
           <Modal.Header closeButton><Modal.Title>Registrar Asignatura</Modal.Title></Modal.Header>
           <Modal.Body className="row">
+            {/* Código de la Asignatura */}
             <Form.Group className="col-md-6 mb-3">
               <Form.Label>Código Asignatura</Form.Label>
               <Form.Control type="text" onChange={e => setFormData({...formData, code: e.target.value})} required />
             </Form.Group>
+            {/* Nombre de la Asignatura */}
             <Form.Group className="col-md-6 mb-3">
               <Form.Label>Nombre</Form.Label>
               <Form.Control type="text" onChange={e => setFormData({...formData, name: e.target.value})} required />
             </Form.Group>
+            {/* Plan de Estudio Asociado */}
             <Form.Group className="col-md-6 mb-3">
               <Form.Label>Plan de Estudio Asociado</Form.Label>
               <Form.Control type="text" onChange={e => setFormData({...formData, studyPlanCode: e.target.value})} required />
             </Form.Group>
+            {/* Semestre de la Malla */}
             <Form.Group className="col-md-6 mb-3">
               <Form.Label>Semestre de la Malla</Form.Label>
               <Form.Control type="number" onChange={e => setFormData({...formData, semester: e.target.value})} required />
             </Form.Group>
+            {/* Créditos SCT*/}
             <Form.Group className="col-md-3 mb-3">
               <Form.Label>Créditos SCT</Form.Label>
-              <Form.Control type="number" onChange={e => setFormData({...formData, sct: e.target.value})} required />
+              <Form.Control type="number" onChange={e => setFormData({...formData, sct: NUMBER(e.target.value)})} required />
             </Form.Group>
+            {/* Horas de teoría */}
             <Form.Group className="col-md-3 mb-3">
               <Form.Label>Hrs Teoría</Form.Label>
-              <Form.Control type="number" onChange={e => setFormData({...formData, theoryHours: e.target.value})} required />
+              <Form.Control type="number" onChange={e => setFormData({...formData, theoryHours: NUMBER(e.target.value)})} required />
             </Form.Group>
+            {/* Horas de ejercicios */}
             <Form.Group className="col-md-3 mb-3">
               <Form.Label>Hrs Ejercicios</Form.Label>
-              <Form.Control type="number" onChange={e => setFormData({...formData, exerciseHours: e.target.value})} required />
+              <Form.Control type="number" onChange={e => setFormData({...formData, exerciseHours: NUMBER(e.target.value)})} required />
             </Form.Group>
+            {/* Horas de laboratorio */}
             <Form.Group className="col-md-3 mb-3">
               <Form.Label>Hrs Lab</Form.Label>
-              <Form.Control type="number" onChange={e => setFormData({...formData, labHours: e.target.value})} required />
+              <Form.Control type="number" onChange={e => setFormData({...formData, labHours: NUMBER(e.target.value)})} required />
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>

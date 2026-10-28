@@ -7,7 +7,11 @@ const AdminCareers = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState({ code: '', name: '', degree: '', totalSemesters: '' });
+  const [formData, setFormData] = useState({ 
+    code: '', 
+    name: '', 
+    description: ''
+  });
 
   const fetchCareers = async () => {
     setLoading(true);
@@ -53,8 +57,7 @@ const AdminCareers = () => {
             <tr>
               <th>Código</th>
               <th>Nombre</th>
-              <th>Grado</th>
-              <th>Semestres Totales</th>
+              <th>Descripción</th>
             </tr>
           </thead>
           <tbody>
@@ -62,8 +65,7 @@ const AdminCareers = () => {
               <tr key={c.id}>
                 <td className="fw-bold">{c.code}</td>
                 <td>{c.name}</td>
-                <td>{c.degree}</td>
-                <td>{c.totalSemesters}</td>
+                <td>{c.description}</td>
               </tr>
             ))}
           </tbody>
@@ -72,23 +74,24 @@ const AdminCareers = () => {
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Form onSubmit={handleSubmit}>
-          <Modal.Header closeButton><Modal.Title>Registrar Carrera</Modal.Title></Modal.Header>
+          <Modal.Header closeButton><Modal.Title>
+            Registrar Carrera
+          </Modal.Title></Modal.Header>
           <Modal.Body>
+            {/* Código de la Carrera */}
             <Form.Group className="mb-3">
               <Form.Label>Código (Ej: INF)</Form.Label>
               <Form.Control type="text" value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} required />
             </Form.Group>
+            {/* Nombre de la Carrera */}
             <Form.Group className="mb-3">
               <Form.Label>Nombre</Form.Label>
               <Form.Control type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required />
             </Form.Group>
+            {/*Descripción de la Carrera */}
             <Form.Group className="mb-3">
-              <Form.Label>Grado Académico</Form.Label>
-              <Form.Control type="text" value={formData.degree} onChange={e => setFormData({...formData, degree: e.target.value})} required />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Semestres Totales</Form.Label>
-              <Form.Control type="number" value={formData.totalSemesters} onChange={e => setFormData({...formData, totalSemesters: e.target.value})} required />
+              <Form.Label>Descripción</Form.Label>
+              <Form.Control type="text" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} required />
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>

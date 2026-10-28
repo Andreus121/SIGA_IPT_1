@@ -61,8 +61,8 @@ const getStudyPlans = async () => {
 };
 
 // crear un nuevo plan de estudio
-const createStudyPlan = async (data) => {
-  const response = await axiosClient.post('/api/study-plans', data);
+const createStudyPlan = async (code, careerCode, name, setCurrent) => {
+  const response = await axiosClient.post('/api/study-plans', {code, careerCode, name, setCurrent });
   return response.data;
 };
 

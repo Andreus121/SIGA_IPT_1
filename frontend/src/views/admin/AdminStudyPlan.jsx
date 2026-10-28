@@ -1,19 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Spinner, Modal, Form, Badge } from 'react-bootstrap';
-import { getStudyPlans, createStudyPlan, setCurrentStudyPlan } from '../../services/AdminService';
+import { getStudyPlans, createStudyPlan, setCurrentStudyPlan, getCareers } from '../../services/AdminService';
 
 const AdminStudyPlans = () => {
   const [plans, setPlans] = useState([]);
+  const [careers, setCareers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState({ planCode: '', careerCode: '', resolutionYear: '' });
+  const [formData, setFormData] = useState({ 
+    code: '', 
+    careerCode: '', 
+    name: '',
+    setCurrent: false
+  });
 
-  const fetchPlans = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await getStudyPlans();
-      setPlans(data);
+      // obtener planes de estudio y carreras
+      const plansData = await getStudyPlans();
+      setPlans(plansData);
+      const careersData = await getCareers();
+      setCareers(careersData);
     } catch (err) {
       console.error(err);
     } finally {
@@ -21,15 +30,19 @@ const AdminStudyPlans = () => {
     }
   };
 
-  useEffect(() => { fetchPlans(); }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
+
+    console.log("Payload exacto que sale a Axios:", JSON.stringify(formData));
     try {
-      await createStudyPlan(formData);
+      await createStudyPlan(formData.code, formData.careerCode, formData.name, formData.setCurrent);
+      // esconder el modal tras guardar con éxito
       setShowModal(false);
-      fetchPlans();
+      // recargar la lista de planes de estudio
+      fetchData(); 
     } catch (err) {
       alert('Error al crear plan');
     } finally {
@@ -37,11 +50,11 @@ const AdminStudyPlans = () => {
     }
   };
 
-  const handleSetCurrent = async (planCode) => {
-    if(!window.confirm(`¿Establecer ${planCode} como plan vigente?`)) return;
+  const handleSetCurrent = async (planCode, planName) => {
+    if(!window.confirm(`¿Establecer ${planCode} - ${planName} como plan vigente?`)) return;
     try {
       await setCurrentStudyPlan(planCode);
-      fetchPlans();
+      fetchData();
     } catch (err) {
       alert('Error al actualizar vigencia');
     }
@@ -61,18 +74,18 @@ const AdminStudyPlans = () => {
           <thead className="table-dark">
             <tr>
               <th>Código Plan</th>
-              <th>Carrera</th>
-              <th>Año Resolución</th>
+              <th>Nombre plan</th>
+              <th>Código carrera</th>
               <th>Estado</th>
-              <th>Acción</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {plans.map(p => (
               <tr key={p.id}>
                 <td className="fw-bold">{p.planCode}</td>
+                <td>{p.name}</td>
                 <td>{p.careerCode}</td>
-                <td>{p.resolutionYear}</td>
                 <td>
                   <Badge bg={p.isCurrent ? 'success' : 'secondary'}>
                     {p.isCurrent ? 'VIGENTE' : 'HISTÓRICO'}
@@ -95,17 +108,41 @@ const AdminStudyPlans = () => {
         <Form onSubmit={handleSubmit}>
           <Modal.Header closeButton><Modal.Title>Registrar Plan de Estudio</Modal.Title></Modal.Header>
           <Modal.Body>
+            {/* código del Plan */}
             <Form.Group className="mb-3">
-              <Form.Label>Código del Plan (Ej: INF-2026)</Form.Label>
-              <Form.Control type="text" onChange={e => setFormData({...formData, planCode: e.target.value})} required />
+              <Form.Label>Código del Plan</Form.Label>
+              <Form.Control 
+              type="text" 
+              value={formData.code}
+              onChange={e => setFormData({...formData, code: e.target.value})} 
+                required 
+              />
             </Form.Group>
+            {/* código de carrera */}
             <Form.Group className="mb-3">
               <Form.Label>Código de Carrera Asociada</Form.Label>
-              <Form.Control type="text" onChange={e => setFormData({...formData, careerCode: e.target.value})} required />
+              <Form.Select 
+                value={formData.careerCode}
+                onChange={e => setFormData({...formData, careerCode: e.target.value})} 
+                required
+              >
+                <option value="">Seleccione una carrera...</option>
+                {careers.map(c => (
+                  <option key={c.id} value={c.code}>
+                    {c.code} - {c.name}
+                  </option>
+                ))}
+              </Form.Select>
             </Form.Group>
+            {/* nombre del plan de estudio */}
             <Form.Group className="mb-3">
-              <Form.Label>Año de Resolución</Form.Label>
-              <Form.Control type="number" onChange={e => setFormData({...formData, resolutionYear: e.target.value})} required />
+              <Form.Label>Nombre del Plan</Form.Label>
+              <Form.Control 
+              type="text" 
+              value={formData.name}
+              onChange={e => setFormData({...formData, name: e.target.value})} 
+                required 
+              />
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
