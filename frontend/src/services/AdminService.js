@@ -72,6 +72,8 @@ const deleteCareer = async (code) => {
   return response.data;
 }
 
+// ================ PLANES DE ESTUDIO ==================
+
 // obtener todos los planes de estudio
 const getStudyPlans = async () => {
   const response = await axiosClient.get('/api/study-plans');
@@ -89,6 +91,12 @@ const setCurrentStudyPlan = async (planCode) => {
   const response = await axiosClient.put(`/api/study-plans/${planCode}/set-current`);
   return response.data;
 };
+
+// borrar un plan de estudio
+const deleteStudyPlan = async (planCode) => {
+  const response = await axiosClient.delete(`/api/study-plans/${planCode}`);
+  return response.data;
+}
 
 // obtener todas las asignaturas
 const getCourses = async () => {
@@ -155,17 +163,22 @@ export {
   getAllStudents,
   createStudent,
   updateStudent,
+
   getAllTeachers,
   createTeacher,
   updateTeacher,
   updateTeacherStatus,
+
   getCareers,
   createCareer,
   updateCareer,
   deleteCareer,
+
   getStudyPlans,
   createStudyPlan,
   setCurrentStudyPlan,
+  deleteStudyPlan,
+  
   getCourses,
   createCourse,
   getPeriods,
