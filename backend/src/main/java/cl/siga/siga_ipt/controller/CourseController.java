@@ -24,6 +24,11 @@ public class CourseController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CourseResponseDto> createCourse(@Valid @RequestBody CourseCreateDto dto) {
+        // Linea de depuracion para ver en consola todo el DTO que llega desde el frontend
+        System.out.println("=== DTO CURSO RECIBIDO ===");
+        System.out.println("DTO completo: " + dto);
+        System.out.println("Prerrequisitos recibidos: " + dto.getPrerequisitesCodes());
+        System.out.println("==========================");
         return new ResponseEntity<>(courseService.createCourse(dto), HttpStatus.CREATED);
     }
 
@@ -33,6 +38,11 @@ public class CourseController {
             @PathVariable String code,
             @Valid @RequestBody CourseUpdateDto dto) {
         return new ResponseEntity<>(courseService.updateCourse(studyPlanCode, code, dto), HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<CourseResponseDto>> getAllCourses() {
+        return new ResponseEntity<>(courseService.getAllCourses(), HttpStatus.OK);
     }
 
     @GetMapping("/{studyPlanCode}/{code}")

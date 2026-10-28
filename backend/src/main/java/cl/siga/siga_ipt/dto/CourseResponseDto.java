@@ -17,5 +17,5 @@ public class CourseResponseDto {
     private Integer labHours;
     private Integer sct;
     private String studyPlanCode;
-    private Set<String> prerequisites;
+    private Set<String> prerequisitesCodes;
 }

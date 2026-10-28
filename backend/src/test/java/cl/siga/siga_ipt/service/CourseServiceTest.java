@@ -54,7 +54,7 @@ class CourseServiceTest {
         dto.setExerciseHours(2);
         dto.setLabHours(2); // sum = 6 < 8
         dto.setSct(5);
-        dto.setPrerequisiteCodes(Collections.emptySet());
+        dto.setPrerequisitesCodes(Collections.emptySet());
         return dto;
     }
 
@@ -84,7 +84,7 @@ class CourseServiceTest {
         CourseCreateDto dto = buildValidCreateDto();
         dto.setCode("INF-201");
         dto.setSemester(2);
-        dto.setPrerequisiteCodes(Set.of("INF-101"));
+        dto.setPrerequisitesCodes(Set.of("INF-101"));
 
         CourseEntity prereq = CourseEntity.builder()
                 .code("INF-101")
@@ -107,7 +107,7 @@ class CourseServiceTest {
 
         CourseResponseDto response = courseService.createCourse(dto);
 
-        assertThat(response.getPrerequisites()).contains("INF-101");
+        assertThat(response.getPrerequisitesCodes()).contains("INF-101");
         verify(prerequisiteRepository).save(any(PrerequisiteEntity.class));
     }
 
@@ -197,7 +197,7 @@ class CourseServiceTest {
     void createCourse_MoreThan3Prerequisites_ThrowsException() {
         CourseCreateDto dto = buildValidCreateDto();
         dto.setSemester(4);
-        dto.setPrerequisiteCodes(Set.of("P1", "P2", "P3", "P4"));
+        dto.setPrerequisitesCodes(Set.of("P1", "P2", "P3", "P4"));
 
         when(studyPlanRepository.existsByCode("PLAN-2024")).thenReturn(true);
         when(courseRepository.existsByCodeAndStudyPlanCode("INF-101", "PLAN-2024")).thenReturn(false);
@@ -212,7 +212,7 @@ class CourseServiceTest {
     void createCourse_PrerequisiteNotFromEarlierSemester_ThrowsException() {
         CourseCreateDto dto = buildValidCreateDto();
         dto.setSemester(2);
-        dto.setPrerequisiteCodes(Set.of("PREREQ-2"));
+        dto.setPrerequisitesCodes(Set.of("PREREQ-2"));
 
         CourseEntity prereqCourse = CourseEntity.builder()
                 .code("PREREQ-2")
@@ -427,7 +427,7 @@ class CourseServiceTest {
 
         CourseResponseDto res = courseService.updateCourse("PLAN-2024", "INF-201", updateDto);
 
-        assertThat(res.getPrerequisites()).contains("INF-101");
+        assertThat(res.getPrerequisitesCodes()).contains("INF-101");
         verify(prerequisiteRepository).deleteByCourseCodeAndStudyPlanCode("INF-201", "PLAN-2024");
         verify(prerequisiteRepository).save(any(PrerequisiteEntity.class));
     }

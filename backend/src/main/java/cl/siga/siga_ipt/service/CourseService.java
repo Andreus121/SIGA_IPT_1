@@ -49,7 +49,7 @@ public class CourseService {
         validateSCT(dto.getSct());
 
         // 6. Validar prerrequisitos
-        validatePrerequisites(dto.getPrerequisiteCodes(), dto.getStudyPlanCode(), dto.getSemester());
+        validatePrerequisites(dto.getPrerequisitesCodes(), dto.getStudyPlanCode(), dto.getSemester());
 
         // Guardar la entidad Asignatura
         CourseEntity course = CourseEntity.builder()
@@ -66,7 +66,7 @@ public class CourseService {
         courseRepository.save(course);
 
         // Guardar los prerrequisitos en la base de datos
-        savePrerequisites(dto.getCode(), dto.getStudyPlanCode(), dto.getPrerequisiteCodes());
+        savePrerequisites(dto.getCode(), dto.getStudyPlanCode(), dto.getPrerequisitesCodes());
 
         return mapCourseToResponseDto(course);
     }
@@ -146,6 +146,14 @@ public class CourseService {
         CourseEntity course = courseRepository.findByCodeAndStudyPlanCode(code, studyPlanCode)
                 .orElseThrow(() -> new IllegalArgumentException("La asignatura especificada no existe."));
         return mapCourseToResponseDto(course);
+    }
+
+    // obtener todas las asignaturas
+    @Transactional(readOnly = true)
+    public List<CourseResponseDto> getAllCourses() {
+        return courseRepository.findAll().stream()
+                .map(this::mapCourseToResponseDto)
+                .collect(Collectors.toList());
     }
 
     // Obtener las asignaturas de un plan de estudio
@@ -264,7 +272,7 @@ public class CourseService {
                 .labHours(course.getLabHours())
                 .sct(course.getSct())
                 .studyPlanCode(course.getStudyPlanCode())
-                .prerequisites(prerequisitesCodes)
+                .prerequisitesCodes(prerequisitesCodes)
                 .build();
     }
 }

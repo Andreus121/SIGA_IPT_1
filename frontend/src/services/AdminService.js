@@ -98,6 +98,8 @@ const deleteStudyPlan = async (planCode) => {
   return response.data;
 }
 
+// ================ ASIGNATURAS ==================
+
 // obtener todas las asignaturas
 const getCourses = async () => {
   const response = await axiosClient.get('/api/courses');
@@ -107,6 +109,12 @@ const getCourses = async () => {
 // crear una nueva asignatura
 const createCourse = async (data) => {
   const response = await axiosClient.post('/api/courses', data);
+  return response.data;
+};
+
+// eliminar una asignatura existente
+const deleteCourse = async (planCode, courseCode) => {
+  const response = await axiosClient.delete(`/api/courses/${planCode}/${courseCode}`);
   return response.data;
 };
 
@@ -178,9 +186,11 @@ export {
   createStudyPlan,
   setCurrentStudyPlan,
   deleteStudyPlan,
-  
+
   getCourses,
   createCourse,
+  deleteCourse,
+
   getPeriods,
   createPeriod,
   closeSemester,

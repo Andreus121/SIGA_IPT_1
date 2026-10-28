@@ -6,13 +6,16 @@ import lombok.Data;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @Data
 public class CourseCreateDto {
 
     @NotBlank(message = "El código de la asignatura es obligatorio")
     private String code;
 
-    @NotNull(message = "El ID del plan de estudios es obligatorio")
+    @JsonProperty("studyPlanCode")
+    @NotNull(message = "El código del plan de estudios es obligatorio")
     private String studyPlanCode;
 
     @NotBlank(message = "El nombre de la asignatura es obligatorio")
@@ -23,14 +26,17 @@ public class CourseCreateDto {
     @Max(value = 4, message = "El semestre debe ser como máximo 4")
     private Integer semester;
 
+    @JsonProperty("theoryHours")
     @NotNull(message = "Las horas de teoría son obligatorias")
     @Min(value = 0, message = "Las horas de teoría no pueden ser negativas")
     private Integer theoryHours;
 
+    @JsonProperty("exerciseHours")
     @NotNull(message = "Las horas de ejercicios son obligatorias")
     @Min(value = 0, message = "Las horas de ejercicios no pueden ser negativas")
     private Integer exerciseHours;
 
+    @JsonProperty("labHours")
     @NotNull(message = "Las horas de laboratorio son obligatorias")
     @Min(value = 0, message = "Las horas de laboratorio no pueden ser negativas")
     private Integer labHours;
@@ -41,5 +47,6 @@ public class CourseCreateDto {
     private Integer sct;
 
     // Se usa Set<> para que no tenga cosas duplicadas
-    private Set<String> prerequisiteCodes = new HashSet<>();
+    @JsonProperty ("prerequisitesCodes")
+    private Set<String> prerequisitesCodes = new HashSet<>();
 }
