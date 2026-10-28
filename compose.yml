@@ -16,7 +16,6 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:24.0.5
     container_name: siga-keycloak
-    command: start-dev
     environment:
       KEYCLOAK_ADMIN: ${KEYCLOAK_USERNAME:-keycloak_username}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_PASSWORD:-keycloak_pass}
@@ -30,6 +29,7 @@ services:
       - "${KEYCLOAK_PORT:-8090}:8080" # Keycloak UI en http://localhost:8090
     volumes:
       - ./keycloak/siga-realm.json:/opt/keycloak/data/import/siga-realm.json:ro
+    command: start-dev --import-realm
     depends_on:
       - postgres
     restart: unless-stopped
