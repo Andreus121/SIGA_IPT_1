@@ -114,6 +114,25 @@ const createSection = async (data) => {
   return response.data;
 };
 
+// obtener todas las inscripciones (toma de ramos) de un período académico
+const getEnrollmentsByPeriod = async (periodCode) => {
+  const response = await axiosClient.get(`/api/enrollments/period/${periodCode}`);
+  return response.data;
+};
+
+// obtener todas las inscripciones (toma de ramos) de una sección específica
+const getRegistrationsBySection = async (sectionCode, periodCode) => {
+  const response = await axiosClient.get(`/api/registrations/section/${sectionCode}`, {
+    params: { periodCode }
+  });
+  return response.data;
+};
+
+// anular administrativamente la inscripción de un alumno
+const forceDeleteRegistration = async (registrationId) => {
+  await axiosClient.delete(`/api/registrations/${registrationId}`);
+};
+
 export {
   getAllStudents,
   createStudent,
@@ -133,5 +152,8 @@ export {
   createPeriod,
   closeSemester,
   getSections,
-  createSection
+  createSection,
+  getEnrollmentsByPeriod,
+  getRegistrationsBySection,
+  forceDeleteRegistration
 };
