@@ -189,7 +189,7 @@ const AdminCareers = () => {
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>Cancelar</Button>
+            <Button variant="secondary" onClick={() => setCreateShowModal(false)}>Cancelar</Button>
             <Button variant="primary" type="submit" disabled={saving}>Guardar</Button>
           </Modal.Footer>
         </Form>
