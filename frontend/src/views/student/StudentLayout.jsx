@@ -21,7 +21,9 @@ const StudentLayout = () => {
   }, []);
 
   const handleLogout = () => {
-    keycloak.logout();
+    keycloak.logout({
+      redirectUri: window.location.origin
+    });
   };
 
   // Validación de seguridad para acceso exclusivo a estudiantes

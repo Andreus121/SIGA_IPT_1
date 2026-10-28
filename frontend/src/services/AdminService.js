@@ -1,39 +1,137 @@
 import axiosClient from '../api/axiosClient';
 
-// === ESTUDIANTES ===
-export const getAllStudents = async () => {
+// obtener todos los estudiantes
+const getAllStudents = async () => {
   const response = await axiosClient.get('/api/students');
   return response.data;
 };
 
-export const createStudent = async (studentData) => {
+// crear un nuevo estudiante
+const createStudent = async (studentData) => {
   const response = await axiosClient.post('/api/students', studentData);
   return response.data;
 };
 
-export const updateStudent = async (id, studentData) => {
+// actualizar un estudiante existente
+const updateStudent = async (id, studentData) => {
   const response = await axiosClient.put(`/api/students/${id}`, studentData);
   return response.data;
 };
 
-// === DOCENTES ===
-export const getAllTeachers = async () => {
+// obtener todos los docentes
+const getAllTeachers = async () => {
   const response = await axiosClient.get('/api/teachers');
   return response.data;
 };
 
-export const createTeacher = async (teacherData) => {
+// crear un nuevo docente
+const createTeacher = async (teacherData) => {
   const response = await axiosClient.post('/api/teachers', teacherData);
   return response.data;
 };
 
-export const updateTeacher = async (id, teacherData) => {
+// actualizar un docente existente
+const updateTeacher = async (id, teacherData) => {
   const response = await axiosClient.put(`/api/teachers/${id}`, teacherData);
   return response.data;
 };
 
-// Cambiar estado del docente (ej: ACTIVE a INACTIVE)
-export const updateTeacherStatus = async (id, status) => {
+// cambiar estado del docente (ej: ACTIVE a INACTIVE)
+const updateTeacherStatus = async (id, status) => {
   const response = await axiosClient.patch(`/api/teachers/${id}/status`, { status });
   return response.data;
+};
+
+// obtener todas las carreras
+const getCareers = async () => {
+  const response = await axiosClient.get('/api/careers');
+  return response.data;
+};
+
+// crear una nueva carrera
+const createCareer = async (data) => {
+  const response = await axiosClient.post('/api/careers', data);
+  return response.data;
+};
+
+// obtener todos los planes de estudio
+const getStudyPlans = async () => {
+  const response = await axiosClient.get('/api/study-plans');
+  return response.data;
+};
+
+// crear un nuevo plan de estudio
+const createStudyPlan = async (data) => {
+  const response = await axiosClient.post('/api/study-plans', data);
+  return response.data;
+};
+
+// establecer un plan de estudio como actual
+const setCurrentStudyPlan = async (planCode) => {
+  const response = await axiosClient.put(`/api/study-plans/${planCode}/set-current`);
+  return response.data;
+};
+
+// obtener todas las asignaturas
+const getCourses = async () => {
+  const response = await axiosClient.get('/api/courses');
+  return response.data;
+};
+
+// crear una nueva asignatura
+const createCourse = async (data) => {
+  const response = await axiosClient.post('/api/courses', data);
+  return response.data;
+};
+
+// obtener todos los períodos académicos
+const getPeriods = async () => {
+  const response = await axiosClient.get('/api/periods');
+  return response.data;
+};
+
+// crear un nuevo período académico
+const createPeriod = async (data) => {
+  const response = await axiosClient.post('/api/periods', data);
+  return response.data;
+};
+
+// cerrar un período académico
+const closeSemester = async (periodCode) => {
+  const response = await axiosClient.post(`/api/semester-closing/${periodCode}`);
+  return response.data;
+};
+
+// obtener todas las secciones de un periodo académico
+const getSections = async (periodCode) => {
+  const response = await axiosClient.get(`/api/sections/period/${periodCode}`);
+  return response.data;
+};
+
+// crear una nueva sección
+const createSection = async (data) => {
+  const response = await axiosClient.post('/api/sections', data);
+  return response.data;
+};
+
+export {
+  getAllStudents,
+  createStudent,
+  updateStudent,
+  getAllTeachers,
+  createTeacher,
+  updateTeacher,
+  updateTeacherStatus,
+  getCareers,
+  createCareer,
+  getStudyPlans,
+  createStudyPlan,
+  setCurrentStudyPlan,
+  getCourses,
+  createCourse,
+  getPeriods,
+  createPeriod,
+  closeSemester,
+  getSections,
+  createSection
 };

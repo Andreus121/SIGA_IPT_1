@@ -17,7 +17,9 @@ const TeacherLayout = () => {
   }, []);
 
   const handleLogout = () => {
-    keycloak.logout();
+    keycloak.logout({
+      redirectUri: window.location.origin
+    });
   };
 
   if (role !== 'TEACHER') {

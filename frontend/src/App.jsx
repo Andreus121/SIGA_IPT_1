@@ -58,7 +58,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<RoleRedirect />} />
 
-        {/* Rutas del Estudiante (Anidadas bajo StudentLayout) */}
+        {/* Rutas del Estudiante */}
         <Route 
           path="/student" 
           element={
@@ -89,8 +89,15 @@ const App = () => {
           <Route path="grades/:sectionCode" element={<TeacherGradesEntry />} />
         </Route>
 
-        {/* Rutas para Admin*/}
-        <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
+        {/* Rutas para Admin */}
+        <Route 
+          path="/admin" 
+          element={
+            <ProtectedRoute>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<AdminDashboard />} />
           <Route path="students" element={<AdminStudents />} />
           <Route path="teachers" element={<AdminTeachers />} />
