@@ -1,5 +1,7 @@
 import axiosClient from '../api/axiosClient';
 
+// ================ ESTUDIANTES ==================
+
 // obtener todos los estudiantes
 const getAllStudents = async () => {
   const response = await axiosClient.get('/api/students');
@@ -17,6 +19,8 @@ const updateStudent = async (id, studentData) => {
   const response = await axiosClient.put(`/api/students/${id}`, studentData);
   return response.data;
 };
+
+// ================ DOCENTES ==================
 
 // obtener todos los docentes
 const getAllTeachers = async () => {
@@ -42,6 +46,8 @@ const updateTeacherStatus = async (id, status) => {
   return response.data;
 };
 
+// ================ CARRERAS ==================
+
 // obtener todas las carreras
 const getCareers = async () => {
   const response = await axiosClient.get('/api/careers');
@@ -53,6 +59,18 @@ const createCareer = async (data) => {
   const response = await axiosClient.post('/api/careers', data);
   return response.data;
 };
+
+// actualizar una carrera existente
+const updateCareer = async (code, data) => {
+  const response = await axiosClient.put(`/api/careers/${code}`, data);
+  return response.data;
+}
+
+// eliminar una carrera existente
+const deleteCareer = async (code) => {
+  const response = await axiosClient.delete(`/api/careers/${code}`);
+  return response.data;
+}
 
 // obtener todos los planes de estudio
 const getStudyPlans = async () => {
@@ -143,6 +161,8 @@ export {
   updateTeacherStatus,
   getCareers,
   createCareer,
+  updateCareer,
+  deleteCareer,
   getStudyPlans,
   createStudyPlan,
   setCurrentStudyPlan,
