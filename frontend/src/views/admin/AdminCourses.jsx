@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Spinner, Modal, Form } from 'react-bootstrap';
-import { getCourses, createCourse, getStudyPlans, getCareers, deleteCourse } from '../../services/AdminService';
+import { getCourses, createCourse, getStudyPlans, getCareers, deleteCourse, updateCourse } from '../../services/AdminService';
 
 const AdminCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -35,7 +35,9 @@ const AdminCourses = () => {
   // mostrar u ocultar modal de crear asignatura
   const [showEditModal, setShowEditModal] = useState(false);
   // code de la asignatura que se está editando
-  const [editingCode, setEditingCode] = useState(null);
+  const [editingCourseCode, setEditingCourseCode] = useState(null);
+  // code del plan de estudio de la asignatura que se está editando
+  const [studyPlanCode, setStudyPlanCode] = useState(null);
   // estado inicial de formulario de actualizar asignatura
   const initialEditFormData = {
     name: '',
@@ -127,7 +129,8 @@ const AdminCourses = () => {
   
   // abrir el modal de editar asignatura y llenar el formulario con los datos de la asignatura seleccionada
   const handleOpenEditModal = (course) => {
-    setEditingCode(course.code); // O career.id según requiera tu API
+    setStudyPlanCode(course.study_plan_code);
+    setEditingCourseCode(course.code); // O career.id según requiera tu API
     setFormEditData({
       name: course.name || '',
       semester: course.semester || '',
@@ -148,11 +151,11 @@ const AdminCourses = () => {
     e.preventDefault();
     setSaving(true);
     try {
-      await updateCareer(editingCode, formEditData);
+      await updateCourse(studyPlanCode, editingCourseCode, formEditData);
       setShowEditModal(false);
       fetchData();
     } catch (err) {
-      alert('Error al actualizar la carrera');
+      alert('Error al actualizar la asignatura');
     } finally {
       setSaving(false);
     }
@@ -409,7 +412,7 @@ const AdminCourses = () => {
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
         <Form onSubmit={handleEditSubmit}>
           <Modal.Header closeButton>
-            <Modal.Title>Editar Asignatura ({editingCode})</Modal.Title>
+            <Modal.Title>Editar Asignatura ({editingCourseCode})</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Form.Group className="mb-3">
@@ -424,10 +427,11 @@ const AdminCourses = () => {
             <Form.Group className="mb-3">
               <Form.Label>Semestre</Form.Label>
               <Form.Control 
-                as="textarea"
-                rows={3}
-                value={formEditData.semester} 
-                onChange={e => setFormEditData({...formEditData, semester: e.target.value})} 
+                type="number" 
+                min="1"
+                max="4"
+                value={formEditData.semester}
+                onChange={e => setFormEditData({...formEditData, semester: Number(e.target.value)})} 
                 required 
               />
             </Form.Group>
@@ -446,8 +450,8 @@ const AdminCourses = () => {
               <Form.Control 
                 type="number" 
                 min="0"
-                value={formEditData.labExerciseHours}
-                onChange={e => setFormEditData({...formEditData, labExerciseHours: Number(e.target.value)})} 
+                value={formEditData.exerciseHours}
+                onChange={e => setFormEditData({...formEditData, exerciseHours: Number(e.target.value)})} 
                 required 
               />
             </Form.Group>
@@ -460,6 +464,17 @@ const AdminCourses = () => {
                 onChange={e => setFormEditData({...formEditData, labHours: Number(e.target.value)})} 
                 required 
               />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Sct</Form.Label>
+              <Form.Control 
+                type="number"
+                min="0"
+                value={formEditData.sct}
+                onChange={e => setFormEditData({...formEditData, sct: Number(e.target.value)})} 
+                required 
+              />
+            </Form.Group> 
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowEditModal(false)}>Cancelar</Button>

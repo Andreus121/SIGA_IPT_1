@@ -151,7 +151,7 @@ const AdminCareers = () => {
       </Card>
 
       {/* ================= MODAL 1: REGISTRAR CARRERA ================= */}
-      <Modal show={showCreateModal} onHide={() => setCreateShowModal(false)}>
+      <Modal show={showCreateModal} onHide={() => setShowCreateModal(false)}>
         <Form onSubmit={handleCreateSubmit}>
           <Modal.Header closeButton><Modal.Title>
             Registrar Carrera
@@ -189,7 +189,7 @@ const AdminCareers = () => {
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setCreateShowModal(false)}>Cancelar</Button>
+            <Button variant="secondary" onClick={() => setShowCreateModal(false)}>Cancelar</Button>
             <Button variant="primary" type="submit" disabled={saving}>Guardar</Button>
           </Modal.Footer>
         </Form>

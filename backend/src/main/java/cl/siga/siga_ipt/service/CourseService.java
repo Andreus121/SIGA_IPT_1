@@ -130,10 +130,10 @@ public class CourseService {
         }
 
         // Actualización de Prerrequisitos
-        if (dto.getPrerequisiteCodes() != null) {
-            validatePrerequisites(dto.getPrerequisiteCodes(), studyPlanCode, course.getSemester());
+        if (dto.getPrerequisitesCodes() != null) {
+            validatePrerequisites(dto.getPrerequisitesCodes(), studyPlanCode, course.getSemester());
             prerequisiteRepository.deleteByCourseCodeAndStudyPlanCode(code, studyPlanCode);
-            savePrerequisites(code, studyPlanCode, dto.getPrerequisiteCodes());
+            savePrerequisites(code, studyPlanCode, dto.getPrerequisitesCodes());
         }
 
         courseRepository.save(course);

@@ -412,7 +412,7 @@ class CourseServiceTest {
                 .build();
 
         CourseUpdateDto updateDto = new CourseUpdateDto();
-        updateDto.setPrerequisiteCodes(Set.of("INF-101"));
+        updateDto.setPrerequisitesCodes(Set.of("INF-101"));
 
         when(courseRepository.findByCodeAndStudyPlanCode("INF-201", "PLAN-2024")).thenReturn(Optional.of(course));
         when(courseRepository.findByCodeAndStudyPlanCode("INF-101", "PLAN-2024")).thenReturn(Optional.of(prereq));

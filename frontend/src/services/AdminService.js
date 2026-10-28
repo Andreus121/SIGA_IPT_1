@@ -112,6 +112,12 @@ const createCourse = async (data) => {
   return response.data;
 };
 
+// actualizar una asignatura existente
+const updateCourse = async (planCode, courseCode, data) => {
+  const response = await axiosClient.put(`/api/courses/${planCode}/${courseCode}`, data);
+  return response.data;
+};
+
 // eliminar una asignatura existente
 const deleteCourse = async (planCode, courseCode) => {
   const response = await axiosClient.delete(`/api/courses/${planCode}/${courseCode}`);
@@ -189,6 +195,7 @@ export {
 
   getCourses,
   createCourse,
+  updateCourse,
   deleteCourse,
 
   getPeriods,
