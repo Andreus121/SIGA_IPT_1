@@ -7,10 +7,15 @@ const AdminTeachers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState({
-    run: '', fullName: '', email: '', professionalTitle: '', academicDegree: ''
+
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [formCreateData, setFormCreateData] = useState({
+    run: '', 
+    full_name: '', 
+    email: '', 
+    professional_title: '', 
+    academic_degree: ''
   });
 
   const fetchTeachers = async () => {
@@ -29,17 +34,19 @@ const AdminTeachers = () => {
     fetchTeachers();
   }, []);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleCreateSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
-      await createTeacher(formData);
-      setShowModal(false);
-      setFormData({ run: '', fullName: '', email: '', professionalTitle: '', academicDegree: '' });
+      await createTeacher(formCreateData);
+      setShowCreateModal(false);
+      setFormCreateData({ 
+        run: '', 
+        full_name: '', 
+        email: '', 
+        professional_title: '', 
+        academic_degree: '' 
+      });
       fetchTeachers();
     } catch (err) {
       alert(err.response?.data?.message || 'Error al crear docente');
@@ -64,7 +71,7 @@ const AdminTeachers = () => {
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h3>Gestión de Docentes</h3>
-        <Button variant="success" onClick={() => setShowModal(true)}>+ Nuevo Docente</Button>
+        <Button variant="primary" onClick={() => setShowCreateModal(true)}>+ Nuevo Docente</Button>
       </div>
 
       {error && <Alert variant="danger">{error}</Alert>}
@@ -86,9 +93,9 @@ const AdminTeachers = () => {
               {teachers.map(tc => (
                 <tr key={tc.id}>
                   <td className="fw-bold">{tc.run}</td>
-                  <td>{tc.fullName}</td>
+                  <td>{tc.full_name}</td>
                   <td>{tc.email}</td>
-                  <td>{tc.academicDegree} / {tc.professionalTitle}</td>
+                  <td>{tc.academic_degree} / {tc.professional_title}</td>
                   <td>
                     <Badge bg={tc.status === 'ACTIVE' ? 'success' : 'secondary'}>{tc.status}</Badge>
                   </td>
@@ -109,36 +116,65 @@ const AdminTeachers = () => {
       </Card>
 
       {/* Modal Crear Docente */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Form onSubmit={handleSubmit}>
+      <Modal show={showCreateModal} onHide={() => setShowCreateModal(false)}>
+        <Form onSubmit={handleCreateSubmit}>
           <Modal.Header closeButton>
             <Modal.Title>Registrar Nuevo Docente</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Form.Group className="mb-3">
               <Form.Label>RUN</Form.Label>
-              <Form.Control type="text" name="run" value={formData.run} onChange={handleChange} required />
+              <Form.Control 
+                type="text" 
+                name="run" 
+                value={formCreateData.run} 
+                onChange={e => setFormCreateData({...formCreateData, run: e.target.value})} 
+                required 
+                placeholder="Ej: 12345678-9" 
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Nombre Completo</Form.Label>
-              <Form.Control type="text" name="fullName" value={formData.fullName} onChange={handleChange} required />
+              <Form.Control 
+                type="text" 
+                name="full_name" 
+                value={formCreateData.full_name} 
+                onChange={e => setFormCreateData({...formCreateData, full_name: e.target.value})} 
+                required 
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Correo Electrónico</Form.Label>
-              <Form.Control type="email" name="email" value={formData.email} onChange={handleChange} required />
+              <Form.Control 
+                type="email" 
+                name="email" 
+                value={formCreateData.email} 
+                onChange={e => setFormCreateData({...formCreateData, email: e.target.value})} 
+                required 
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Título Profesional</Form.Label>
-              <Form.Control type="text" name="professionalTitle" value={formData.professionalTitle} onChange={handleChange} />
+              <Form.Control 
+                type="text" 
+                name="professional_title" 
+                value={formCreateData.professional_title} 
+                onChange={e => setFormCreateData({...formCreateData, professional_title: e.target.value})} 
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Grado Académico</Form.Label>
-              <Form.Control type="text" name="academicDegree" value={formData.academicDegree} onChange={handleChange} />
+              <Form.Control 
+                type="text" 
+                name="academic_degree" 
+                value={formCreateData.academic_degree} 
+                onChange={e => setFormCreateData({...formCreateData, academic_degree: e.target.value})} 
+              />
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>Cancelar</Button>
-            <Button variant="success" type="submit" disabled={saving}>
+            <Button variant="secondary" onClick={() => setShowCreateModal(false)}>Cancelar</Button>
+            <Button variant="primary" type="submit" disabled={saving}>
               {saving ? 'Guardando...' : 'Guardar Docente'}
             </Button>
           </Modal.Footer>
