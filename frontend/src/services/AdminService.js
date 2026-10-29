@@ -20,6 +20,11 @@ const updateStudent = async (id, studentData) => {
   return response.data;
 };
 
+const deleteStudent = async (id) => {
+  const response = await axiosClient.delete(`/api/students/${id}`);
+  return response.data;
+}
+
 // ================ DOCENTES ==================
 
 // obtener todos los docentes
@@ -177,6 +182,7 @@ export {
   getAllStudents,
   createStudent,
   updateStudent,
+  deleteStudent,
 
   getAllTeachers,
   createTeacher,

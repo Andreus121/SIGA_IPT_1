@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Spinner, Alert, Modal, Form, Badge } from 'react-bootstrap';
-import { getAllStudents, createStudent, getCareers } from '../../services/AdminService';
+import { getAllStudents, createStudent, getCareers, updateStudent, deleteStudent } from '../../services/AdminService';
 
 const AdminStudents = () => {
   const [students, setStudents] = useState([]);
@@ -10,14 +10,25 @@ const AdminStudents = () => {
   // Carreras ya existentes para el formulario
   const [careers, setCareers] = useState([]);
 
+  const [saving, setSaving] = useState(false);
+  
   // Estados para el Modal de crear alumno
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [formCreateData, setFormCreateData] = useState({
     run: '', 
     full_name: '', 
     email: '', 
     career_code: ''
+  });
+
+  // estados para el Modal de editar alumno
+  const [editingStudent, setEditingStudent] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [formEditData, setFormEditData] = useState({
+    full_name: '', 
+    email: '', 
+    career_code: '',
+    status: ''
   });
 
   const fetchStudents = async () => {
@@ -72,6 +83,46 @@ const AdminStudents = () => {
     }
   };
 
+  const handleOpenEditModal = (student) => {
+    setEditingStudent(student);
+    setFormEditData({ 
+      full_name: student.full_name || '', 
+      email: student.email || '', 
+      career_code: student.career_code || '',
+      status: student.status || 'REGULAR'
+    });
+    fetchCareers();
+    setShowEditModal(true);
+  }
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await updateStudent(editingStudent.id, formEditData);
+      setShowEditModal(false);
+      fetchStudents();
+      alert(`Estudiante ${formEditData.full_name} actualizado con éxito.`);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error al editar estudiante');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (student) => {
+    if (!window.confirm(`¿Está seguro de eliminar al estudiante ${student.full_name}?`)) {
+      return;
+    }
+    try {
+      await deleteStudent(student.id);
+      fetchStudents();
+      alert(`Estudiante ${student.full_name} eliminado con éxito.`);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error al eliminar estudiante');
+    }
+  };
+
   if (loading && students.length === 0) return <div className="text-center my-5"><Spinner animation="border" /></div>;
 
   return (
@@ -93,6 +144,7 @@ const AdminStudents = () => {
                 <th>Correo</th>
                 <th>Carrera (Plan)</th>
                 <th>Estado</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -103,7 +155,15 @@ const AdminStudents = () => {
                   <td>{st.email}</td>
                   <td>{st.career_code} ({st.study_plan_code})</td>
                   <td>
-                    <Badge bg={st.status === 'REGULAR' ? 'success' : 'warning'}>{st.status}</Badge>
+                    <Badge bg={st.status === 'REGULAR' ? 'success' : 'secondary'}>
+                      {st.status==='REGULAR' ? 'Activo' : 
+                      st.status==='TEMPORARY_WITHDRAWAL' ? 'Retiro Temporal' 
+                      : 'Retirado'}
+                    </Badge>
+                  </td>
+                  <td>
+                    <Button variant="outline-primary" size="sm" onClick={() => handleOpenEditModal(st)}>Editar</Button>
+                    <Button variant="outline-danger" size="sm" className="ms-2" onClick={() => handleDelete(st)}>Eliminar</Button>
                   </td>
                 </tr>
               ))}
@@ -168,6 +228,68 @@ const AdminStudents = () => {
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowCreateModal(false)}>Cancelar</Button>
+            <Button variant="primary" type="submit" disabled={saving}>
+              {saving ? 'Guardando...' : 'Guardar Estudiante'}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+      {/* Modal Editar Estudiante */}
+      <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
+        <Form onSubmit={handleEditSubmit}>
+          <Modal.Header closeButton>
+            <Modal.Title>Editar Estudiante</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form.Group className="mb-3">
+              <Form.Label>Nombre Completo</Form.Label>
+              <Form.Control 
+                type="text" 
+                name="full_name" 
+                value={formEditData.full_name}
+                onChange={e => setFormEditData({...formEditData, full_name: e.target.value})} 
+                required 
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Correo Electrónico (Keycloak)</Form.Label>
+              <Form.Control 
+                type="email" 
+                name="email" 
+                value={formEditData.email}
+                onChange={e => setFormEditData({...formEditData, email: e.target.value})} 
+                required 
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Código de Carrera</Form.Label>
+              <Form.Select 
+                value={formEditData.career_code}
+                onChange={e => setFormEditData({...formEditData, career_code: e.target.value})} 
+                required
+                >
+                {careers.map(c => (
+                  <option key={c.id} value={c.code}>
+                    {c.code} - {c.name}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Estado</Form.Label>
+              <Form.Select 
+                value={formEditData.status}
+                onChange={e => setFormEditData({...formEditData, status: e.target.value})} 
+                required
+                >
+                <option value="REGULAR">Activo</option>
+                <option value="TEMPORARY_WITHDRAWAL">Retiro Temporal</option>
+                <option value="POSTPONEMENT">Retirado</option>
+              </Form.Select>
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowEditModal(false)}>Cancelar</Button>
             <Button variant="primary" type="submit" disabled={saving}>
               {saving ? 'Guardando...' : 'Guardar Estudiante'}
             </Button>
