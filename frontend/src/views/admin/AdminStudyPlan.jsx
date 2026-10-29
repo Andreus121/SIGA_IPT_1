@@ -159,7 +159,7 @@ const AdminStudyPlans = () => {
             </Form.Group>
             {/* código de carrera */}
             <Form.Group className="mb-3">
-              <Form.Label>Código de Carrera Asociada</Form.Label>
+              <Form.Label>Carrera</Form.Label>
               <Form.Select 
                 value={formData.careerCode}
                 onChange={e => setFormData({...formData, careerCode: e.target.value})} 

@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Spinner, Alert, Modal, Form, Badge } from 'react-bootstrap';
-import { getAllStudents, createStudent } from '../../services/AdminService';
+import { getAllStudents, createStudent, getCareers } from '../../services/AdminService';
 
 const AdminStudents = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Estados para el Modal
-  const [showModal, setShowModal] = useState(false);
+  // Carreras ya existentes para el formulario
+  const [careers, setCareers] = useState([]);
+
+  // Estados para el Modal de crear alumno
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState({
-    run: '', fullName: '', email: '', careerCode: '', studyPlanCode: ''
+  const [formCreateData, setFormCreateData] = useState({
+    run: '', 
+    full_name: '', 
+    email: '', 
+    career_code: ''
   });
 
   const fetchStudents = async () => {
@@ -19,6 +25,7 @@ const AdminStudents = () => {
     try {
       const data = await getAllStudents();
       setStudents(data);
+      console.log("Estudiantes obtenidos:", data);
     } catch (err) {
       setError('Error al obtener la lista de estudiantes.');
     } finally {
@@ -26,21 +33,37 @@ const AdminStudents = () => {
     }
   };
 
+  const fetchCareers = async () => {
+    try {
+      const response = await getCareers();
+      setCareers(response);
+    } catch (err) {
+      console.error('Error al obtener las carreras:', err);
+    }
+  };
+
   useEffect(() => {
     fetchStudents();
   }, []);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleOpenCreateModal = () => {
+    setFormCreateData({ run: '', full_name: '', email: '', career_code: ''});
+    fetchCareers();
+    setShowCreateModal(true);
+  }
 
-  const handleSubmit = async (e) => {
+  const handleCreateSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
-      await createStudent(formData);
-      setShowModal(false);
-      setFormData({ run: '', fullName: '', email: '', careerCode: '', studyPlanCode: '' });
+      await createStudent(formCreateData);
+      setShowCreateModal(false);
+      setFormCreateData({ 
+        run: '', 
+        full_name: '', 
+        email: '', 
+        career_code: ''
+      });
       fetchStudents();
     } catch (err) {
       alert(err.response?.data?.message || 'Error al crear estudiante');
@@ -55,7 +78,7 @@ const AdminStudents = () => {
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h3>Gestión de Estudiantes</h3>
-        <Button variant="primary" onClick={() => setShowModal(true)}>+ Nuevo Estudiante</Button>
+        <Button variant="primary" onClick={() => handleOpenCreateModal()}>+ Nuevo Estudiante</Button>
       </div>
 
       {error && <Alert variant="danger">{error}</Alert>}
@@ -76,9 +99,9 @@ const AdminStudents = () => {
               {students.map(st => (
                 <tr key={st.id}>
                   <td className="fw-bold">{st.run}</td>
-                  <td>{st.fullName}</td>
+                  <td>{st.full_name}</td>
                   <td>{st.email}</td>
-                  <td>{st.careerCode} ({st.studyPlanCode})</td>
+                  <td>{st.career_code} ({st.study_plan_code})</td>
                   <td>
                     <Badge bg={st.status === 'REGULAR' ? 'success' : 'warning'}>{st.status}</Badge>
                   </td>
@@ -90,35 +113,61 @@ const AdminStudents = () => {
       </Card>
 
       {/* Modal Crear Estudiante */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Form onSubmit={handleSubmit}>
+      <Modal show={showCreateModal} onHide={() => setShowCreateModal(false)}>
+        <Form onSubmit={handleCreateSubmit}>
           <Modal.Header closeButton>
             <Modal.Title>Registrar Nuevo Estudiante</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Form.Group className="mb-3">
               <Form.Label>RUN</Form.Label>
-              <Form.Control type="text" name="run" value={formData.run} onChange={handleChange} required placeholder="Ej: 12345678-9" />
+              <Form.Control 
+                type="text" 
+                name="run" 
+                value={formCreateData.run} 
+                onChange={e => setFormCreateData({...formCreateData, run: e.target.value})} 
+                required 
+                placeholder="Ej: 12345678-9" 
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Nombre Completo</Form.Label>
-              <Form.Control type="text" name="fullName" value={formData.fullName} onChange={handleChange} required />
+              <Form.Control 
+                type="text" 
+                name="full_name" 
+                value={formCreateData.full_name}
+                onChange={e => setFormCreateData({...formCreateData, full_name: e.target.value})} 
+                required 
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Correo Electrónico (Keycloak)</Form.Label>
-              <Form.Control type="email" name="email" value={formData.email} onChange={handleChange} required />
+              <Form.Control 
+                type="email" 
+                name="email" 
+                value={formCreateData.email}
+                onChange={e => setFormCreateData({...formCreateData, email: e.target.value})} 
+                required 
+              />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Código de Carrera</Form.Label>
-              <Form.Control type="text" name="careerCode" value={formData.careerCode} onChange={handleChange} required />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Código Plan de Estudios</Form.Label>
-              <Form.Control type="text" name="studyPlanCode" value={formData.studyPlanCode} onChange={handleChange} required />
+              <Form.Select 
+                value={formCreateData.career_code}
+                onChange={e => setFormCreateData({...formCreateData, career_code: e.target.value})} 
+                required
+                >
+                <option value="">Seleccione una carrera...</option>
+                {careers.map(c => (
+                  <option key={c.id} value={c.code}>
+                    {c.code} - {c.name}
+                  </option>
+                ))}
+              </Form.Select>
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>Cancelar</Button>
+            <Button variant="secondary" onClick={() => setShowCreateModal(false)}>Cancelar</Button>
             <Button variant="primary" type="submit" disabled={saving}>
               {saving ? 'Guardando...' : 'Guardar Estudiante'}
             </Button>
