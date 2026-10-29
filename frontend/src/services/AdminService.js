@@ -47,7 +47,13 @@ const updateTeacher = async (id, teacherData) => {
 
 // cambiar estado del docente (ej: ACTIVE a INACTIVE)
 const updateTeacherStatus = async (id, status) => {
-  const response = await axiosClient.patch(`/api/teachers/${id}/status`, { status });
+  const response = await axiosClient.patch(`/api/teachers/${id}/status?status=${status}`);
+  return response.data;
+};
+
+// eliminar un docente existente
+const deleteTeacher = async (id) => {
+  const response = await axiosClient.delete(`/api/teachers/${id}`);
   return response.data;
 };
 
@@ -188,6 +194,7 @@ export {
   createTeacher,
   updateTeacher,
   updateTeacherStatus,
+  deleteTeacher,
 
   getCareers,
   createCareer,

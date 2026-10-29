@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Spinner, Alert, Modal, Form, Badge } from 'react-bootstrap';
-import { getAllTeachers, createTeacher, updateTeacherStatus } from '../../services/AdminService';
+import { getAllTeachers, createTeacher, updateTeacherStatus, updateTeacher, deleteTeacher } from '../../services/AdminService';
 
 const AdminTeachers = () => {
   const [teachers, setTeachers] = useState([]);
@@ -9,9 +9,20 @@ const AdminTeachers = () => {
   
   const [saving, setSaving] = useState(false);
 
+  // cosas para crear un profesor
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [formCreateData, setFormCreateData] = useState({
     run: '', 
+    full_name: '', 
+    email: '', 
+    professional_title: '', 
+    academic_degree: ''
+  });
+
+  //cosas para editar un profesor
+  const [teacher, setTeacher] = useState(-1);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [formEditData, setFormEditData] = useState({
     full_name: '', 
     email: '', 
     professional_title: '', 
@@ -23,6 +34,7 @@ const AdminTeachers = () => {
     try {
       const data = await getAllTeachers();
       setTeachers(data);
+      console.log('Fetched teachers:', data); // Log the fetched data
     } catch (err) {
       setError('Error al obtener la lista de docentes.');
     } finally {
@@ -45,11 +57,36 @@ const AdminTeachers = () => {
         full_name: '', 
         email: '', 
         professional_title: '', 
-        academic_degree: '' 
-      });
+        academic_degree: ''
+    });
       fetchTeachers();
     } catch (err) {
       alert(err.response?.data?.message || 'Error al crear docente');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleOpenEditModal = (teacher) => {
+    setTeacher(teacher.id);
+    setFormEditData({ 
+      full_name: teacher.full_name || '', 
+      email: teacher.email || '', 
+      professional_title: teacher.professional_title || '', 
+    academic_degree: teacher.academic_degree || ''
+    });
+    setShowEditModal(true);
+  }
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await updateTeacher(String(teacher), formEditData);
+      setShowEditModal(false);
+      fetchTeachers();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error al actualizar el docente');
     } finally {
       setSaving(false);
     }
@@ -64,6 +101,19 @@ const AdminTeachers = () => {
       alert('Error al cambiar el estado del docente.');
     }
   };
+
+  const handleDelete = async (teacher) => {
+    if (!window.confirm(`¿Está seguro de eliminar al docente ${teacher.full_name}?`)) {
+      return;
+    }
+    try {
+      await deleteTeacher(teacher.id);
+      fetchTeachers();
+      alert(`Docente ${teacher.full_name} eliminado con éxito.`);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error al eliminar docente');
+    }
+  }; 
 
   if (loading && teachers.length === 0) return <div className="text-center my-5"><Spinner animation="border" /></div>;
 
@@ -97,15 +147,35 @@ const AdminTeachers = () => {
                   <td>{tc.email}</td>
                   <td>{tc.academic_degree} / {tc.professional_title}</td>
                   <td>
-                    <Badge bg={tc.status === 'ACTIVE' ? 'success' : 'secondary'}>{tc.status}</Badge>
+                    <Badge bg={tc.status === 'ACTIVE' ? 'success' : 'secondary'}>
+                      {tc.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
+                      </Badge>
                   </td>
-                  <td>
+                  <td className="d-flex gap-2">
+                    <Button
+                      variant="outline-primary" 
+                      size="sm"
+                      onClick={() => {
+                        handleOpenEditModal(tc);
+                      }}
+                    >
+                      Editar
+                    </Button>
                     <Button 
                       variant={tc.status === 'ACTIVE' ? 'outline-danger' : 'outline-success'} 
                       size="sm"
-                      onClick={() => toggleStatus(tc.id, tc.status)}
+                      onClick={() => toggleStatus(tc, tc.status)}
                     >
                       {tc.status === 'ACTIVE' ? 'Desactivar' : 'Activar'}
+                    </Button>
+                    <Button
+                      variant="outline-danger" 
+                      size="sm"
+                      onClick={() => {
+                        handleDelete(tc);
+                      }}
+                    >
+                      Eliminar
                     </Button>
                   </td>
                 </tr>
@@ -174,6 +244,61 @@ const AdminTeachers = () => {
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowCreateModal(false)}>Cancelar</Button>
+            <Button variant="primary" type="submit" disabled={saving}>
+              {saving ? 'Guardando...' : 'Guardar Docente'}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+
+      {/* Modal Actualizar Docente */}
+      <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
+        <Form onSubmit={handleEditSubmit}>
+          <Modal.Header closeButton>
+            <Modal.Title>Actualizar Docente</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form.Group className="mb-3">
+              <Form.Label>Nombre Completo</Form.Label>
+              <Form.Control 
+                type="text" 
+                name="full_name" 
+                value={formEditData.full_name} 
+                onChange={e => setFormEditData({...formEditData, full_name: e.target.value})} 
+                required 
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Correo Electrónico</Form.Label>
+              <Form.Control 
+                type="email" 
+                name="email" 
+                value={formEditData.email} 
+                onChange={e => setFormEditData({...formEditData, email: e.target.value})} 
+                required 
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Título Profesional</Form.Label>
+              <Form.Control 
+                type="text" 
+                name="professional_title" 
+                value={formEditData.professional_title} 
+                onChange={e => setFormEditData({...formEditData, professional_title: e.target.value})} 
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Grado Académico</Form.Label>
+              <Form.Control 
+                type="text" 
+                name="academic_degree" 
+                value={formEditData.academic_degree} 
+                onChange={e => setFormEditData({...formEditData, academic_degree: e.target.value})} 
+              />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowEditModal(false)}>Cancelar</Button>
             <Button variant="primary" type="submit" disabled={saving}>
               {saving ? 'Guardando...' : 'Guardar Docente'}
             </Button>
