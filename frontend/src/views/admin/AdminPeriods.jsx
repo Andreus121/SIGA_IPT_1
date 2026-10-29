@@ -35,6 +35,12 @@ const AdminPeriods = () => {
       period_code: String(year) + '-' + String(semester),
       status: 'OPEN'
     });
+    // si un período ya es activo, no permitir crear otro
+    if(periods.some(p => p.status === 'OPEN')) {
+      alert('Ya existe un período activo. Cierre el período actual antes de abrir uno nuevo.');
+      setSaving(false);
+      return;
+    }
     try {
       await createPeriod(formData);
       setShowModal(false);
