@@ -7,7 +7,12 @@ const AdminPeriods = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState({ periodCode: '', year: new Date().getFullYear(), semester: 1, startDate: '', endDate: '' });
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [semester, setSemester] = useState(1);
+  const [formData, setFormData] = useState({ 
+    period_code: new Date().getFullYear(), 
+    status: 'OPEN'
+  });
 
   const fetchPeriods = async () => {
     setLoading(true);
@@ -26,6 +31,10 @@ const AdminPeriods = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
+    setFormData({
+      period_code: String(year) + '-' + String(semester),
+      status: 'OPEN'
+    });
     try {
       await createPeriod(formData);
       setShowModal(false);
@@ -60,28 +69,29 @@ const AdminPeriods = () => {
         <Table responsive hover className="mb-0 align-middle text-center">
           <thead className="table-dark">
             <tr>
-              <th>Período</th>
-              <th>Año / Sem.</th>
-              <th>Fechas</th>
+              <th>Período (Año-Semestre)</th>
               <th>Estado</th>
-              <th>Acción de Cierre</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {periods.map(p => (
               <tr key={p.id}>
-                <td className="fw-bold">{p.periodCode}</td>
-                <td>{p.year} / {p.semester}</td>
-                <td>{p.startDate} a {p.endDate}</td>
+                <td className="fw-bold">{p.period_code}</td>
                 <td>
-                  <Badge bg={p.status === 'OPEN' ? 'success' : 'danger'}>{p.status}</Badge>
+                  <Badge bg={p.status === 'OPEN' ? 'success' : 'secondary'}>
+                    {p.status === 'OPEN' ? 'Abierto' : 'Cerrado'}
+                  </Badge>
                 </td>
                 <td>
-                  {p.status === 'OPEN' && (
-                    <Button variant="danger" size="sm" onClick={() => handleCloseSemester(p.periodCode)}>
-                      Cerrar Semestre
-                    </Button>
-                  )}
+                  <Button 
+                  variant="danger" 
+                  size="sm" 
+                  onClick={() => handleCloseSemester(p.period_code)}
+                  disabled={p.status === 'CLOSED'}
+                  >
+                    Cerrar Semestre
+                  </Button>
                 </td>
               </tr>
             ))}
@@ -94,24 +104,24 @@ const AdminPeriods = () => {
           <Modal.Header closeButton><Modal.Title>Apertura de Período</Modal.Title></Modal.Header>
           <Modal.Body>
             <Form.Group className="mb-3">
-              <Form.Label>Código (Ej: 2026-02)</Form.Label>
-              <Form.Control type="text" onChange={e => setFormData({...formData, periodCode: e.target.value})} required />
-            </Form.Group>
-            <Form.Group className="mb-3">
               <Form.Label>Año</Form.Label>
-              <Form.Control type="number" value={formData.year} onChange={e => setFormData({...formData, year: e.target.value})} required />
+              <Form.Control 
+                type="text" 
+                value={year} 
+                onChange={e => setYear(e.target.value)} 
+                required 
+              />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Semestre (1 o 2)</Form.Label>
-              <Form.Control type="number" value={formData.semester} onChange={e => setFormData({...formData, semester: e.target.value})} required />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Fecha Inicio</Form.Label>
-              <Form.Control type="date" onChange={e => setFormData({...formData, startDate: e.target.value})} required />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Fecha Fin</Form.Label>
-              <Form.Control type="date" onChange={e => setFormData({...formData, endDate: e.target.value})} required />
+              <Form.Label>Semestre</Form.Label>
+              <Form.Select 
+                value={semester} 
+                onChange={e => setSemester(e.target.value)} 
+                required 
+              >
+                <option value={1}>1</option>
+                <option value={2}>2</option>
+              </Form.Select>
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>

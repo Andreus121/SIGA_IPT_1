@@ -135,6 +135,8 @@ const deleteCourse = async (planCode, courseCode) => {
   return response.data;
 };
 
+// ================ ASIGNATURAS ==================
+
 // obtener todos los períodos académicos
 const getPeriods = async () => {
   const response = await axiosClient.get('/api/periods');
