@@ -33,6 +33,12 @@ const getAllTeachers = async () => {
   return response.data;
 };
 
+// obtener un docente específico por su ID
+const getTeacherById = async (id) => {
+  const response = await axiosClient.get(`/api/teachers/${id}`);
+  return response.data;
+};
+
 // crear un nuevo docente
 const createTeacher = async (teacherData) => {
   const response = await axiosClient.post('/api/teachers', teacherData);
@@ -187,37 +193,48 @@ const forceDeleteRegistration = async (registrationId) => {
 };
 
 export {
+  // Estudiantes
   getAllStudents,
   createStudent,
   updateStudent,
   deleteStudent,
 
+  // Docentes
   getAllTeachers,
+  getTeacherById,
   createTeacher,
   updateTeacher,
   updateTeacherStatus,
   deleteTeacher,
 
+  // Carreras
   getCareers,
   createCareer,
   updateCareer,
   deleteCareer,
 
+  // Planes de Estudio
   getStudyPlans,
   createStudyPlan,
   setCurrentStudyPlan,
   deleteStudyPlan,
 
+  // Asignaturas
   getCourses,
   createCourse,
   updateCourse,
   deleteCourse,
 
+  // Períodos Académicos
   getPeriods,
   createPeriod,
   closeSemester,
+
+  // Secciones
   getSections,
   createSection,
+
+  // Inscripciones
   getEnrollmentsByPeriod,
   getRegistrationsBySection,
   forceDeleteRegistration
