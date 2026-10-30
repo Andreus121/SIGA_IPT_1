@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Badge, Spinner, Alert, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import keycloak from '../../config/keycloak';
-import { getStudentByEmail } from '../../services/StudentService';
+import { getStudentByEmail, getCareerByCode } from '../../services/StudentService';
 
 const StudentDashboard = () => {
   const [studentData, setStudentData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [careerData, setCareerData] = useState(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -16,6 +17,12 @@ const StudentDashboard = () => {
         if (userEmail) {
           const data = await getStudentByEmail(userEmail);
           setStudentData(data);
+          if (data.career_code) {
+            const career = await getCareerByCode(data.career_code);
+            console.log("Datos de la carrera obtenidos:", career);
+            setCareerData(career);
+          }
+
         } else {
           setError('No se pudo determinar el correo electrónico de la sesión.');
         }
@@ -61,10 +68,10 @@ const StudentDashboard = () => {
                   <strong>Correo Institucional:</strong> <p className="text-muted mb-0">{studentData?.email}</p>
                 </Col>
                 <Col sm={6} className="mb-3">
-                  <strong>Carrera:</strong> <p className="text-muted mb-0">{studentData?.careerCode}</p>
+                  <strong>Carrera:</strong> <p className="text-muted mb-0">{careerData?.name || studentData?.career_code}</p>
                 </Col>
                 <Col sm={6} className="mb-3">
-                  <strong>Plan de Estudios:</strong> <p className="text-muted mb-0">{studentData?.studyPlanCode}</p>
+                  <strong>Plan de Estudios:</strong> <p className="text-muted mb-0">{studentData?.study_plan_code}</p>
                 </Col>
                 <Col sm={6}>
                   <strong>Estado Académico:</strong>{' '}

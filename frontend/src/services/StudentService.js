@@ -55,6 +55,12 @@ const deleteRegistration = async(registrationId) => {
   await axiosClient.delete(`/api/registrations/${registrationId}`);
 };
 
+// Obtener información de la carrera por código
+const getCareerByCode = async (careerCode) => {
+  const response = await axiosClient.get(`/api/careers/${careerCode}`);
+  return response.data;
+};
+
 export {
   getStudentByEmail,
   getCoursesByStudyPlan,
@@ -64,5 +70,6 @@ export {
   getSectionsByPeriod,
   getRegistrationsByStudent,
   createRegistration,
-  deleteRegistration
+  deleteRegistration,
+  getCareerByCode
 };
