@@ -41,6 +41,12 @@ const AdminPeriods = () => {
       setSaving(false);
       return;
     }
+    // si el semestre es 0, no permitir crear
+    if(semester === 0) {
+      alert('Seleccione un semestre válido.');
+      setSaving(false);
+      return;
+    }
     try {
       await createPeriod(formData);
       setShowModal(false);
@@ -125,6 +131,7 @@ const AdminPeriods = () => {
                 onChange={e => setSemester(e.target.value)} 
                 required 
               >
+                <option value={0}>Seleccione un semestre</option>
                 <option value={1}>1</option>
                 <option value={2}>2</option>
               </Form.Select>

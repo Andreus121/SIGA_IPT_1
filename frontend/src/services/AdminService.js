@@ -25,6 +25,8 @@ const deleteStudent = async (id) => {
   return response.data;
 }
 
+
+
 // ================ DOCENTES ==================
 
 // obtener todos los docentes
@@ -63,6 +65,8 @@ const deleteTeacher = async (id) => {
   return response.data;
 };
 
+
+
 // ================ CARRERAS ==================
 
 // obtener todas las carreras
@@ -88,6 +92,8 @@ const deleteCareer = async (code) => {
   const response = await axiosClient.delete(`/api/careers/${code}`);
   return response.data;
 }
+
+
 
 // ================ PLANES DE ESTUDIO ==================
 
@@ -115,6 +121,8 @@ const deleteStudyPlan = async (planCode) => {
   return response.data;
 }
 
+
+
 // ================ ASIGNATURAS ==================
 
 // obtener todas las asignaturas
@@ -141,7 +149,9 @@ const deleteCourse = async (planCode, courseCode) => {
   return response.data;
 };
 
-// ================ ASIGNATURAS ==================
+
+
+// ================ PERÍODOS ACADÉMICOS ==================
 
 // obtener todos los períodos académicos
 const getPeriods = async () => {
@@ -161,17 +171,37 @@ const closeSemester = async (periodCode) => {
   return response.data;
 };
 
-// obtener todas las secciones de un periodo académico
-const getSections = async (periodCode) => {
-  const response = await axiosClient.get(`/api/sections/period/${periodCode}`);
-  return response.data;
-};
+
+
+// ================ SECCIONES ==================
 
 // crear una nueva sección
 const createSection = async (data) => {
   const response = await axiosClient.post('/api/sections', data);
   return response.data;
 };
+
+// obtener todas las secciones de un periodo académico
+const getSections = async (periodCode) => {
+  const response = await axiosClient.get(`/api/sections/period/${periodCode}`);
+  return response.data;
+};
+
+// actualizar una seccion existente
+const updateSection = async (sectionId, data) => {
+  const response = await axiosClient.put(`/api/sections/${sectionId}`, data);
+  return response.data;
+};
+
+// eliminar una sección existente
+const deleteSection = async (sectionId) => {
+  const response = await axiosClient.delete(`/api/sections/${sectionId}`);
+  return response.data;
+};
+
+
+
+// ================ INSCRIPCIONES ==================
 
 // obtener todas las inscripciones (toma de ramos) de un período académico
 const getEnrollmentsByPeriod = async (periodCode) => {
@@ -233,6 +263,8 @@ export {
   // Secciones
   getSections,
   createSection,
+  updateSection,
+  deleteSection,
 
   // Inscripciones
   getEnrollmentsByPeriod,

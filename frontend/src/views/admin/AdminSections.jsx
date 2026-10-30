@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Spinner, Modal, Form, Badge } from 'react-bootstrap';
-import { getPeriods, getSections, createSection, getCourses, getAllTeachers, getTeacherById } from '../../services/AdminService';
+import { getPeriods, getSections, createSection, updateSection, deleteSection, getCourses, getAllTeachers, getTeacherById } from '../../services/AdminService';
 
 //constantes
 const DAYS = ['L', 'M', 'W', 'J', 'V'];
@@ -21,6 +21,13 @@ const AdminSections = () => {
     course_code: '', 
     period_code: '', 
     teacher_id: '', 
+    capacity: 40,
+    schedules: []
+  });
+  // editar una seccion (campos definidos por SectionUpdateDto)
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [formEditData, setFormEditData] = useState({
+    teacher_id: '',
     capacity: 40,
     schedules: []
   });
@@ -147,11 +154,78 @@ const AdminSections = () => {
     try {
       await createSection(payload);
       setShowCreateModal(false);
-      alert('Sección creada exitosamente');
       setSelectedPeriod(''); // Resetear el período seleccionado para forzar la recarga
+      alert('Sección creada exitosamente');
       setSelectedPeriod(payload.period_code); // Reestablecer el período seleccionado
     } catch (err) {
       const msg = err.response?.data?.message || 'Error al crear la sección';
+      alert(`Error: ${msg}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleOpenEdit = (section) => {
+    setFormEditData({
+      id: section.id,
+      teacher_id: section.teacher_id || '',
+      capacity: section.capacity || 40,
+      schedules: (section.schedules || []).map(schedule => ({
+        day: schedule.day || schedule.dia,
+        module_number: schedule.module_number ?? schedule.module ?? schedule.modulo
+      }))
+    });
+    setShowEditModal(true);
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+
+    const { id, teacher_id, capacity, schedules } = formEditData;
+    const payload = {
+      teacher_id: teacher_id ? Number(teacher_id) : null,
+      capacity: Number(capacity),
+      schedules
+    };
+
+    try {
+      await updateSection(id, payload);
+      setSections(prevSections => prevSections.map(section => (
+        section.id === id ? { ...section, ...payload } : section
+      )));
+      setShowEditModal(false);
+      alert('Sección editada exitosamente');
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Error al editar la sección';
+      alert(`Error: ${msg}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleEditScheduleBlock = (day, moduleNumber) => {
+    const schedules = [...formEditData.schedules];
+    const index = schedules.findIndex(
+      schedule => schedule.day === day && schedule.module_number === moduleNumber
+    );
+
+    if (index >= 0) schedules.splice(index, 1);
+    else schedules.push({ day, module_number: moduleNumber });
+
+    setFormEditData({ ...formEditData, schedules });
+  };
+
+  const handleDelete = async (sectionId) => {
+    if (!window.confirm('¿Está seguro de eliminar esta sección?')) return;
+
+    setSaving(true);
+    try {
+      await deleteSection(sectionId);
+      setSections(prevSections => prevSections.filter(section => section.id !== sectionId));
+      alert('Sección eliminada exitosamente');
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Error al eliminar la sección';
       alert(`Error: ${msg}`);
     } finally {
       setSaving(false);
@@ -178,6 +252,19 @@ const AdminSections = () => {
       .catch(err => console.error(`Error al obtener docente ID ${teacherId}:`, err));
 
     return `Cargando docente (${teacherId})...`;
+  };
+
+  // Los horarios llegan como objetos desde la API y no pueden renderizarse
+  // directamente como hijos de React.
+  const formatSchedule = (schedule) => {
+    if (!schedule) return '';
+    if (typeof schedule === 'string') return schedule;
+    if (typeof schedule === 'object') {
+      const day = schedule.day || schedule.dia || '';
+      const moduleNumber = schedule.module_number ?? schedule.module ?? schedule.modulo ?? '';
+      return day && moduleNumber ? `${day}-${moduleNumber}` : JSON.stringify(schedule);
+    }
+    return String(schedule);
   };
   
   if (loading && !selectedPeriod) return <Spinner animation="border" className="d-block mx-auto mt-5" />;
@@ -233,7 +320,7 @@ const AdminSections = () => {
                     {s.schedules && s.schedules.length > 0 ? (
                       <ul className="list-unstyled mb-0">
                         {s.schedules.map((schedule, index) => (
-                          <li key={index}>{schedule}</li>
+                          <li key={index}>{formatSchedule(schedule)}</li>
                         ))}
                       </ul>
                     ) : (
@@ -241,8 +328,22 @@ const AdminSections = () => {
                     )}
                   </td>
                   <td>
-                    <Button variant="outline-primary" size="sm" className="me-2">Editar</Button>
-                    <Button variant="outline-danger" size="sm">Eliminar</Button>
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      className="me-2"
+                      onClick={() => handleOpenEdit(s)}
+                    >
+                      Editar
+                    </Button>
+                    <Button
+                      variant="outline-danger"
+                      size="sm"
+                      onClick={() => handleDelete(s.id)}
+                      disabled={saving}
+                    >
+                      Eliminar
+                    </Button>
                   </td>
                 </tr>
               ))
@@ -349,6 +450,73 @@ const AdminSections = () => {
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowCreateModal(false)}>Cancelar</Button>
+            <Button variant="primary" type="submit" disabled={saving}>Guardar</Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+
+      <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
+        <Form onSubmit={handleEditSubmit}>
+          <Modal.Header closeButton><Modal.Title>Editar Sección</Modal.Title></Modal.Header>
+          <Modal.Body>
+            <Form.Group className="mb-3">
+              <Form.Label>Docente de la Sección</Form.Label>
+              <Form.Select
+                value={formEditData.teacher_id}
+                onChange={e => setFormEditData({ ...formEditData, teacher_id: e.target.value })}
+              >
+                <option value="">Seleccione un docente</option>
+                {teachers.map(teacher => (
+                  <option key={teacher.id} value={teacher.id}>{teacher.full_name}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Capacidad Máxima</Form.Label>
+              <Form.Control
+                type="number"
+                min="1"
+                max="60"
+                value={formEditData.capacity}
+                onChange={e => setFormEditData({ ...formEditData, capacity: e.target.value })}
+                required
+              />
+            </Form.Group>
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <Form.Label className="fw-bold mb-0">Selección de Horarios</Form.Label>
+              <Badge bg="info">{formEditData.schedules.length} Bloque(s) seleccionado(s)</Badge>
+            </div>
+            <Table bordered size="sm" className="text-center align-middle">
+              <thead className="table-light">
+                <tr><th>Módulo</th>{DAYS.map(day => <th key={day}>{day}</th>)}</tr>
+              </thead>
+              <tbody>
+                {MODULES.map(moduleNumber => (
+                  <tr key={moduleNumber}>
+                    <td className="fw-bold text-secondary">Módulo {moduleNumber}</td>
+                    {DAYS.map(day => {
+                      const selected = formEditData.schedules.some(
+                        schedule => schedule.day === day && schedule.module_number === moduleNumber
+                      );
+                      return (
+                        <td key={`${day}-${moduleNumber}`}>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant={selected ? 'primary' : 'outline-light'}
+                            className={selected ? '' : 'text-dark border-0 w-100'}
+                            onClick={() => toggleEditScheduleBlock(day, moduleNumber)}
+                          >{selected ? `✓ ${day}-${moduleNumber}` : '-'}</Button>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowEditModal(false)}>Cancelar</Button>
             <Button variant="primary" type="submit" disabled={saving}>Guardar</Button>
           </Modal.Footer>
         </Form>
