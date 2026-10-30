@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Form, Spinner, Badge } from 'react-bootstrap';
-import { getPeriods, getEnrollmentsByPeriod } from '../../services/AdminService';
+import { getPeriods, getEnrollmentsByPeriod, deleteEnrollment } from '../../services/AdminService';
 
 const AdminEnrollments = () => {
   const [periods, setPeriods] = useState([]);
@@ -28,9 +28,7 @@ const AdminEnrollments = () => {
     init();
   }, []);
 
-  // Cargar inscripciones cuando cambia el período seleccionado
-  useEffect(() => {
-    const fetchEnrollments = async () => {
+  const fetchEnrollments = async () => {
       if (!selectedPeriod) return;
       setLoading(true);
       try {
@@ -42,8 +40,22 @@ const AdminEnrollments = () => {
         setLoading(false);
       }
     };
+
+  // Cargar inscripciones cuando cambia el período seleccionado
+  useEffect(() => {
     fetchEnrollments();
-  }, [selectedPeriod]);
+  }, [selectedPeriod, fetchEnrollments]);
+
+  const handleDeletSubmit = async (id) => {
+    try {
+      console.log("Eliminando matrícula con ID:", id);
+      await deleteEnrollment(id);
+      console.log("Matrícula eliminada con éxito");
+      fetchEnrollments(); // Refrescar la lista después de eliminar
+    } catch (err) {
+      console.error("Error al eliminar matrícula", err);
+    }
+  };
 
   if (loading && !selectedPeriod) {
     return <Spinner animation="border" className="d-block mx-auto mt-5" variant="primary" />;
@@ -75,7 +87,7 @@ const AdminEnrollments = () => {
                 <th>ID Matrícula</th>
                 <th>RUN Alumno</th>
                 <th>Fecha de Matrícula</th>
-                <th>Estado</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -87,12 +99,16 @@ const AdminEnrollments = () => {
                 enrollments.map((enr) => (
                   <tr key={enr.id}>
                     <td>{enr.id}</td>
-                    <td className="fw-bold">{enr.studentRun}</td>
-                    <td>{new Date(enr.enrollmentDate).toLocaleString()}</td>
+                    <td className="fw-bold">{enr.student_run}</td>
+                    <td>{new Date(enr.enrollment_date).toLocaleString()}</td>
                     <td>
-                      <Badge bg={enr.status === 'ACTIVE' ? 'success' : 'danger'}>
-                        {enr.status}
-                      </Badge>
+                      <button
+                        type="button"
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleDeletSubmit(enr.id)}
+                      >
+                        ELIMINAR
+                      </button>
                     </td>
                   </tr>
                 ))

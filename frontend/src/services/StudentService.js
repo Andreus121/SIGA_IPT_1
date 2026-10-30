@@ -61,6 +61,12 @@ const getCareerByCode = async (careerCode) => {
   return response.data;
 };
 
+// Función para inscribir a un estudiante en un período académico
+const enrollStudent = async (student_run, period_code) => {
+  const response = await axiosClient.post('/api/enrollments', { student_run, period_code });
+  return response.data;
+};
+
 export {
   getStudentByEmail,
   getCoursesByStudyPlan,
@@ -71,5 +77,6 @@ export {
   getRegistrationsByStudent,
   createRegistration,
   deleteRegistration,
-  getCareerByCode
+  getCareerByCode,
+  enrollStudent
 };

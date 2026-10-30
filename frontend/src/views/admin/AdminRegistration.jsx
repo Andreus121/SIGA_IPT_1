@@ -1,6 +1,7 @@
+/**
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Form, Spinner, Button, Row, Col, Badge, Alert } from 'react-bootstrap';
-import { getPeriods, getSections, getRegistrationsBySection, forceDeleteRegistration } from '../../services/AdminService';
+import { getPeriods, getSections, getRegistrationsBySection,   } from '../../services/AdminService';
 
 const AdminRegistrations = () => {
   const [periods, setPeriods] = useState([]);
@@ -77,7 +78,7 @@ const AdminRegistrations = () => {
     setActionLoading(true);
     setMessage(null);
     try {
-      await forceDeleteRegistration(registrationId);
+      await  (registrationId);
       setMessage({ type: 'success', text: 'Inscripción anulada correctamente.' });
       await fetchRegistrations();
     } catch (err) {
@@ -181,3 +182,4 @@ const AdminRegistrations = () => {
 };
 
 export default AdminRegistrations;
+  

@@ -5,17 +5,17 @@ import {
   getStudentByEmail,
   getEnrollmentsByStudent,
   getAcademicPeriods,
-  createEnrollment
+  enrollStudent
 } from '../../services/StudentService';
 
 const StudentEnrollmentView = () => {
   const [student, setStudent] = useState(null);
   const [enrollments, setEnrollments] = useState([]);
-  const [openPeriods, setOpenPeriods] = useState([]);
-  const [selectedPeriod, setSelectedPeriod] = useState('');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState(null);
+  const [activePeriods, setActivePeriods] = useState([]);
+  const [selectedPeriod, setSelectedPeriod] = useState('');
 
   const fetchData = async () => {
     try {
@@ -28,11 +28,9 @@ const StudentEnrollmentView = () => {
         setEnrollments(history);
 
         const periods = await getAcademicPeriods();
-        const activePeriods = periods.filter((p) => p.status === 'OPEN');
-        setOpenPeriods(activePeriods);
-        if (activePeriods.length > 0) {
-          setSelectedPeriod(activePeriods[0].periodCode);
-        }
+        const openPeriods = periods.filter((period) => period.status === 'OPEN');
+        setActivePeriods(openPeriods);
+        setSelectedPeriod(openPeriods.length > 0 ? openPeriods[0].period_code : '');
       }
     } catch (err) {
       setMessage({ type: 'danger', text: 'Error al cargar los datos de matrícula.' });
@@ -45,18 +43,15 @@ const StudentEnrollmentView = () => {
     fetchData();
   }, []);
 
-  const handleEnrollmentSubmit = async (e) => {
+  const handleEnrollment = async (e) => {
     e.preventDefault();
-    if (!selectedPeriod) return;
+    if (!selectedPeriod || !student) return;
 
     setActionLoading(true);
     setMessage(null);
 
     try {
-      await createEnrollment({
-        studentRun: student.run,
-        periodCode: selectedPeriod
-      });
+      await enrollStudent(student.run, selectedPeriod);
       setMessage({ type: 'success', text: `Matrícula procesada con éxito para el período ${selectedPeriod}.` });
       await fetchData();
     } catch (err) {
@@ -85,10 +80,10 @@ const StudentEnrollmentView = () => {
       <Card className="shadow-sm border-0 mb-4">
         <Card.Header className="bg-primary text-white fw-bold">Nueva Matrícula</Card.Header>
         <Card.Body>
-          {openPeriods.length === 0 ? (
-            <p className="text-muted mb-0">No hay períodos académicos abiertos disponibles para matricularse.</p>
+          {activePeriods.length === 0 ? (
+            <p className="text-muted mb-0">No hay periodos academicos abiertos.</p>
           ) : (
-            <Form onSubmit={handleEnrollmentSubmit} className="row align-items-end">
+            <Form onSubmit={handleEnrollment} className="row align-items-end">
               <Form.Group className="col-md-6 mb-3 mb-md-0">
                 <Form.Label>Seleccionar Período Académico Abierto</Form.Label>
                 <Form.Select
@@ -96,11 +91,9 @@ const StudentEnrollmentView = () => {
                   onChange={(e) => setSelectedPeriod(e.target.value)}
                   disabled={actionLoading}
                 >
-                  {openPeriods.map((period) => (
-                    <option key={period.periodCode} value={period.periodCode}>
-                      {period.periodCode} ({period.status})
-                    </option>
-                  ))}
+                  <option value={activePeriods[0].period_code}>
+                    {activePeriods[0].period_code}
+                  </option>
                 </Form.Select>
               </Form.Group>
               <div className="col-md-6">
@@ -122,7 +115,6 @@ const StudentEnrollmentView = () => {
                 <th>ID</th>
                 <th>Período</th>
                 <th>Fecha de Matrícula</th>
-                <th>Estado</th>
               </tr>
             </thead>
             <tbody>
@@ -134,13 +126,8 @@ const StudentEnrollmentView = () => {
                 enrollments.map((enr) => (
                   <tr key={enr.id}>
                     <td>{enr.id}</td>
-                    <td className="fw-bold">{enr.periodCode}</td>
-                    <td>{enr.enrollmentDate}</td>
-                    <td>
-                      <Badge bg={enr.status === 'ACTIVE' ? 'success' : 'danger'}>
-                        {enr.status}
-                      </Badge>
-                    </td>
+                    <td className="fw-bold">{enr.period_code}</td>
+                    <td>{enr.enrollment_date}</td>
                   </tr>
                 ))
               )}

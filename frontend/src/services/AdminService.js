@@ -201,25 +201,18 @@ const deleteSection = async (sectionId) => {
 
 
 
-// ================ INSCRIPCIONES ==================
+// ================ matriculas ==================
 
-// obtener todas las inscripciones (toma de ramos) de un período académico
+// obtener todas las matriculas de un periodo
 const getEnrollmentsByPeriod = async (periodCode) => {
   const response = await axiosClient.get(`/api/enrollments/period/${periodCode}`);
   return response.data;
 };
 
-// obtener todas las inscripciones (toma de ramos) de una sección específica
-const getRegistrationsBySection = async (sectionCode, periodCode) => {
-  const response = await axiosClient.get(`/api/registrations/section/${sectionCode}`, {
-    params: { periodCode }
-  });
+// Eliminar una matrícula por ID (solo admin)
+const deleteEnrollment = async (enrollmentId) => {
+  const response = await axiosClient.delete(`/api/enrollments/${enrollmentId}`);
   return response.data;
-};
-
-// anular administrativamente la inscripción de un alumno
-const forceDeleteRegistration = async (registrationId) => {
-  await axiosClient.delete(`/api/registrations/${registrationId}`);
 };
 
 export {
@@ -266,8 +259,7 @@ export {
   updateSection,
   deleteSection,
 
-  // Inscripciones
+  // matriculas
   getEnrollmentsByPeriod,
-  getRegistrationsBySection,
-  forceDeleteRegistration
+  deleteEnrollment
 };

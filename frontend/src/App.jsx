@@ -33,7 +33,7 @@ import AdminPeriods from './views/admin/AdminPeriods';
 import AdminSections from './views/admin/AdminSections';
 import AdminCourses from './views/admin/AdminCourses';
 import AdminEnrollments from './views/admin/AdminEnrollments';
-import AdminRegistrations from './views/admin/AdminRegistration';
+// import AdminRegistrations from './views/admin/AdminRegistration';
 
 const App = () => {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -114,7 +114,7 @@ const App = () => {
           <Route path="sections" element={<AdminSections />} />
           <Route path="courses" element={<AdminCourses />} />
           <Route path="enrollments" element={<AdminEnrollments />} />
-          <Route path="registrations" element={<AdminRegistrations />} />
+          {/* <Route path="registrations" element={<AdminRegistrations />} /> */}
         </Route>
       </Routes>
     </Router>

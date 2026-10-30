@@ -22,7 +22,6 @@ public class AcademicPeriodService {
         // Business logic: build entity here, not in controller
         AcademicPeriodEntity entity = AcademicPeriodEntity.builder()
                 .periodCode(dto.getPeriodCode())
-                .academicPeriod(dto.getPeriodCode()) // keep backward compatibility
                 .status(dto.getStatus())
                 .build();
         AcademicPeriodEntity saved = periodRepository.save(entity);

@@ -78,6 +78,16 @@ public class EnrollmentService {
                 .collect(Collectors.toList());
     }
 
+    // Elimina una matrícula por su ID
+    @Transactional
+    public void deleteEnrollment(Long id) {
+        if (!enrollmentRepository.existsById(id)) {
+            throw new IllegalArgumentException("Matrícula no encontrada con ID: " + id);
+        }
+
+        enrollmentRepository.deleteById(id);
+    }
+    
     // Función auxiliar
     private EnrollmentResponseDto mapToDto(EnrollmentEntity entity) {
         return EnrollmentResponseDto.builder()

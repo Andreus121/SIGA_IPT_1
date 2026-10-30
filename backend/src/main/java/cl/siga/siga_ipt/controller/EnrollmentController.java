@@ -39,4 +39,12 @@ public class EnrollmentController {
     public ResponseEntity<List<EnrollmentResponseDto>> getEnrollmentsByStudent(@PathVariable String run) {
         return new ResponseEntity<>(enrollmentService.getEnrollmentsByStudent(run), HttpStatus.OK);
     }
+
+    // Solo el admin puede eliminar una matrícula por ID
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteEnrollment(@PathVariable Long id) {
+        enrollmentService.deleteEnrollment(id);
+        return ResponseEntity.noContent().build();
+    }
 }
