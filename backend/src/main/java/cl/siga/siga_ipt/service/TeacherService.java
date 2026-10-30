@@ -4,19 +4,17 @@ package cl.siga.siga_ipt.service;
  * Servicio para la gestión de docentes.
  * Contiene la lógica de negocio y validaciones requeridas.
  */
+
 import cl.siga.siga_ipt.dto.TeacherCreateDto;
 import cl.siga.siga_ipt.dto.TeacherResponseDto;
 import cl.siga.siga_ipt.dto.TeacherUpdateDto;
 import cl.siga.siga_ipt.entity.TeacherEntity;
-
 import cl.siga.siga_ipt.enums.PeriodStatus;
-
 import cl.siga.siga_ipt.enums.TeacherStatus;
 import cl.siga.siga_ipt.repository.AcademicHistoryRepository;
 import cl.siga.siga_ipt.repository.AcademicPeriodRepository;
 import cl.siga.siga_ipt.repository.SectionRepository;
 import cl.siga.siga_ipt.repository.TeacherRepository;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +29,8 @@ public class TeacherService {
     private final SectionRepository sectionRepository;
     private final AcademicPeriodRepository periodRepository;
     private final AcademicHistoryRepository academicHistoryRepository;
+    // Servicio para crear el usuario en Keycloak al momento de registrar al docente
+    private final KeycloakAdminService keycloakAdminService;
 
     // Crear un profesor
     @Transactional
@@ -44,20 +44,22 @@ public class TeacherService {
             throw new IllegalArgumentException("Ya existe un docente registrado con el correo: " + dto.getEmail());
         }
 
-        // Crear profesor
+        // Crear profesor en la base de datos
         TeacherEntity teacher = TeacherEntity.builder()
                 .run(dto.getRun())
                 .fullName(dto.getFullName())
                 .email(dto.getEmail())
                 .professionalTitle(dto.getProfessionalTitle())
                 .academicDegree(dto.getAcademicDegree())
-                .status(TeacherStatus.ACTIVE) // Regla
+                .status(TeacherStatus.ACTIVE) // Regla: siempre empieza ACTIVE
                 .build();
 
-
-
-        // Guardar y retornar
+        // Guardar en la base de datos
         teacherRepository.save(teacher);
+
+        // Crear el usuario en Keycloak con rol TEACHER para que pueda iniciar sesión
+        keycloakAdminService.createUser(dto.getEmail(), dto.getFullName(), dto.getPassword(), "TEACHER");
+
         return mapTeacherToDto(teacher);
     }
 
@@ -96,21 +98,21 @@ public class TeacherService {
                 .orElseThrow(() -> new IllegalArgumentException("Docente no encontrado con el ID: " + id));
 
         // Si quiere cambiar el run
-        if(dto.getRun()!=null && !dto.getRun().isBlank()){
+        if (dto.getRun() != null && !dto.getRun().isBlank()) {
             // Verificar que el run no pertenece a otro docente
-            if(teacherRepository.existsByRunAndIdNot(dto.getRun(), id)){
+            if (teacherRepository.existsByRunAndIdNot(dto.getRun(), id)) {
                 throw new IllegalArgumentException("El run proporcionado es de otro docente");
             }
             teacher.setRun(dto.getRun());
         }
 
         // Si quiere cambiar el nombre del profesor
-        if(dto.getFullName()!=null && !dto.getFullName().isBlank()){
+        if (dto.getFullName() != null && !dto.getFullName().isBlank()) {
             teacher.setFullName(dto.getFullName());
         }
 
         // Si quiere cambiar el email
-        if(dto.getEmail()!=null && !dto.getEmail().isBlank()){
+        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
             // Verificar que no sea de otro profesor
             if (teacherRepository.existsByEmailAndIdNot(dto.getEmail(), id)) {
                 throw new IllegalArgumentException("El correo proporcionado ya pertenece a otro docente: " + dto.getEmail());
@@ -120,12 +122,12 @@ public class TeacherService {
         }
 
         // Si quiere cambiar el título profesional
-        if(dto.getProfessionalTitle()!=null && !dto.getProfessionalTitle().isBlank()){
+        if (dto.getProfessionalTitle() != null && !dto.getProfessionalTitle().isBlank()) {
             teacher.setProfessionalTitle(dto.getProfessionalTitle());
         }
 
         // Si quiere cambiar el grado académico
-        if(dto.getAcademicDegree()!= null && !dto.getAcademicDegree().isBlank()){
+        if (dto.getAcademicDegree() != null && !dto.getAcademicDegree().isBlank()) {
             teacher.setAcademicDegree(dto.getAcademicDegree());
         }
 
@@ -142,7 +144,7 @@ public class TeacherService {
 
         // Si el nuevo estado es INACTIVO
         if (newStatus == TeacherStatus.INACTIVE) {
-            // Regla de negocio, no cambiar a INACTIVE si tiene secciones asignadas en un período académico ABIERTO
+            // Regla de negocio: no cambiar a INACTIVE si tiene secciones asignadas en un período académico ABIERTO
             boolean hasOpenPeriodSections = sectionRepository.findAll().stream()
                     .filter(s -> s.getTeacherId().equals(id))
                     .anyMatch(s -> periodRepository.findByPeriodCode(s.getPeriodCode())

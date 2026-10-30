@@ -16,7 +16,8 @@ const AdminTeachers = () => {
     full_name: '', 
     email: '', 
     professional_title: '', 
-    academic_degree: ''
+    academic_degree: '',
+    password: ''
   });
 
   //cosas para editar un profesor
@@ -57,7 +58,8 @@ const AdminTeachers = () => {
         full_name: '', 
         email: '', 
         professional_title: '', 
-        academic_degree: ''
+        academic_degree: '',
+        password: ''
     });
       fetchTeachers();
     } catch (err) {
@@ -222,6 +224,24 @@ const AdminTeachers = () => {
                 onChange={e => setFormCreateData({...formCreateData, email: e.target.value})} 
                 required 
               />
+            </Form.Group>
+            <Form.Text className="text-muted">
+              Este correo será el usuario de inicio de sesión en el sistema.
+            </Form.Text>
+            <Form.Group className="mb-3">
+              <Form.Label>Contraseña inicial</Form.Label>
+              <Form.Control 
+                type="password" 
+                name="password" 
+                value={formCreateData.password}
+                onChange={e => setFormCreateData({...formCreateData, password: e.target.value})} 
+                required
+                minLength={6}
+                placeholder="Mínimo 6 caracteres"
+              />
+              <Form.Text className="text-muted">
+                El docente usará esta contraseña para iniciar sesión.
+              </Form.Text>
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Título Profesional</Form.Label>

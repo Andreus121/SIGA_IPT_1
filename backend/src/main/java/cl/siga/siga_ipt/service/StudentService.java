@@ -1,17 +1,17 @@
 package cl.siga.siga_ipt.service;
+
 /**
  * Servicio para la gestión de estudiantes.
  * Contiene la lógica de negocio y validaciones requeridas.
  */
+
 import cl.siga.siga_ipt.dto.StudentCreateDto;
 import cl.siga.siga_ipt.dto.StudentResponseDto;
 import cl.siga.siga_ipt.dto.StudentUpdateDto;
 import cl.siga.siga_ipt.entity.CareerEntity;
 import cl.siga.siga_ipt.entity.StudentEntity;
 import cl.siga.siga_ipt.entity.StudyPlanEntity;
-
 import cl.siga.siga_ipt.enums.CareerStatus;
-
 import cl.siga.siga_ipt.enums.StudentStatus;
 import cl.siga.siga_ipt.enums.StudyPlanStatus;
 import cl.siga.siga_ipt.repository.*;
@@ -32,6 +32,8 @@ public class StudentService {
     private final StudyPlanRepository studyPlanRepository;
     private final RegistrationRepository registrationRepository;
     private final AcademicHistoryRepository academicHistoryRepository;
+    // Servicio para crear el usuario en Keycloak al momento de registrar al estudiante
+    private final KeycloakAdminService keycloakAdminService;
 
     // Registrar un estudiante nuevo en la tabla de estudiantes
     @Transactional
@@ -57,7 +59,7 @@ public class StudentService {
         StudyPlanEntity studyPlan = studyPlanRepository.findByCareerCodeAndStatus(career.getCode(), StudyPlanStatus.CURRENT)
                 .orElseThrow(() -> new IllegalStateException("La carrera no tiene un plan de estudios vigente asignado."));
 
-        // Crear el estudiante con sus datos
+        // 4. Crear el estudiante con sus datos
         StudentEntity student = StudentEntity.builder()
                 .run(dto.getRun())
                 .fullName(dto.getFullName())
@@ -67,10 +69,11 @@ public class StudentService {
                 .status(StudentStatus.REGULAR)
                 .build();
 
-        // Guardar en la base de datos
+        // 5. Guardar en la base de datos
         studentRepository.save(student);
 
-
+        // 6. Crear el usuario en Keycloak con rol STUDENT para que pueda iniciar sesión
+        keycloakAdminService.createUser(dto.getEmail(), dto.getFullName(), dto.getPassword(), "STUDENT");
 
         return mapStudentToResponseDto(student);
     }
@@ -97,7 +100,7 @@ public class StudentService {
                 throw new IllegalArgumentException("El nuevo correo electrónico ya está en uso.");
             }
 
-            // Actualizar email en Student y en User
+            // Actualizar email en Student
             student.setEmail(dto.getEmail());
         }
 
@@ -172,7 +175,7 @@ public class StudentService {
         return mapStudentToResponseDto(student);
     }
 
-    // Retorna toda la lista de estudiantes (echa por si sirve en algo)
+    // Retorna toda la lista de estudiantes (hecha por si sirve en algo)
     // CONSULTA PESADA
     @Transactional(readOnly = true)
     public List<StudentResponseDto> getAllStudents() {
@@ -207,4 +210,4 @@ public class StudentService {
         }
         studentRepository.delete(student);
     }
-}
+}

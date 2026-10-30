@@ -18,7 +18,8 @@ const AdminStudents = () => {
     run: '', 
     full_name: '', 
     email: '', 
-    career_code: ''
+    career_code: '',
+    password: ''
   });
 
   // estados para el Modal de editar alumno
@@ -58,7 +59,7 @@ const AdminStudents = () => {
   }, []);
 
   const handleOpenCreateModal = () => {
-    setFormCreateData({ run: '', full_name: '', email: '', career_code: ''});
+    setFormCreateData({ run: '', full_name: '', email: '', career_code: '', password: '' });
     fetchCareers();
     setShowCreateModal(true);
   }
@@ -73,7 +74,8 @@ const AdminStudents = () => {
         run: '', 
         full_name: '', 
         email: '', 
-        career_code: ''
+        career_code: '',
+        password: ''
       });
       fetchStudents();
     } catch (err) {
@@ -201,7 +203,7 @@ const AdminStudents = () => {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Correo Electrónico (Keycloak)</Form.Label>
+              <Form.Label>Correo Electrónico</Form.Label>
               <Form.Control 
                 type="email" 
                 name="email" 
@@ -209,6 +211,24 @@ const AdminStudents = () => {
                 onChange={e => setFormCreateData({...formCreateData, email: e.target.value})} 
                 required 
               />
+              <Form.Text className="text-muted">
+                Este correo será el usuario de inicio de sesión en el sistema.
+              </Form.Text>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Contraseña inicial</Form.Label>
+              <Form.Control 
+                type="password" 
+                name="password" 
+                value={formCreateData.password}
+                onChange={e => setFormCreateData({...formCreateData, password: e.target.value})} 
+                required
+                minLength={6}
+                placeholder="Mínimo 6 caracteres"
+              />
+              <Form.Text className="text-muted">
+                El estudiante usará esta contraseña para iniciar sesión.
+              </Form.Text>
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Código de Carrera</Form.Label>

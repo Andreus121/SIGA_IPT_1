@@ -1,8 +1,8 @@
-// El campo password se elimina porque la autenticación se delega a Keycloak
 package cl.siga.siga_ipt.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Data
@@ -24,5 +24,9 @@ public class TeacherCreateDto {
     @NotBlank(message = "El grado académico es obligatorio")
     private String academicDegree;
 
+    // Contraseña inicial asignada por el admin para que el docente pueda iniciar sesión en Keycloak
+    @NotBlank(message = "La contraseña es obligatoria")
+    @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
+    private String password;
 
 }
