@@ -214,12 +214,14 @@ const AdminSections = () => {
               <th>Sección</th>
               <th>Asignatura</th>
               <th>Docente</th>
-              <th>Cupos</th>
+              <th>CuposTotales</th>
+              <th>Horarios</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {sections.length === 0 ? (
-              <tr><td colSpan="4">No hay secciones programadas.</td></tr>
+              <tr><td colSpan="6">No hay secciones programadas.</td></tr>
             ) : (
               sections.map(s => (
                 <tr key={s.id}>
@@ -227,6 +229,21 @@ const AdminSections = () => {
                   <td>{s.course_code}</td>
                   <td>{getTeacherName(s.teacher_id)}</td>
                   <td>{s.capacity}</td>
+                  <td>
+                    {s.schedules && s.schedules.length > 0 ? (
+                      <ul className="list-unstyled mb-0">
+                        {s.schedules.map((schedule, index) => (
+                          <li key={index}>{schedule}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <span className="text-muted">No hay horarios</span>
+                    )}
+                  </td>
+                  <td>
+                    <Button variant="outline-primary" size="sm" className="me-2">Editar</Button>
+                    <Button variant="outline-danger" size="sm">Eliminar</Button>
+                  </td>
                 </tr>
               ))
             )}

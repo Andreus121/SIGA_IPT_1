@@ -203,7 +203,7 @@ const AdminCourses = () => {
           <tbody>
             {courses.length === 0 ? (
               <tr>
-                <td colSpan="6" className="text-center text-muted py-3">
+                <td colSpan="8" className="text-center text-muted py-3">
                   No hay asignaturas registradas.
                 </td>
               </tr>
