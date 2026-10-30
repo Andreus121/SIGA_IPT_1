@@ -8,14 +8,16 @@ const AdminEnrollments = () => {
   const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Cargar períodos académicos al montar el componente
   useEffect(() => {
     const init = async () => {
       try {
         const p = await getPeriods();
+        console.log("Períodos obtenidos:", p);
         setPeriods(p);
         if (p.length > 0) {
           const openPeriod = p.find(period => period.status === 'OPEN') || p[0];
-          setSelectedPeriod(openPeriod.periodCode);
+          setSelectedPeriod(openPeriod.period_code);
         }
       } catch (err) {
         console.error("Error al cargar períodos", err);
@@ -26,6 +28,7 @@ const AdminEnrollments = () => {
     init();
   }, []);
 
+  // Cargar inscripciones cuando cambia el período seleccionado
   useEffect(() => {
     const fetchEnrollments = async () => {
       if (!selectedPeriod) return;
@@ -54,8 +57,8 @@ const AdminEnrollments = () => {
         <Form.Label>Filtrar por Período Académico</Form.Label>
         <Form.Select value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)}>
           {periods.map((p) => (
-            <option key={p.periodCode} value={p.periodCode}>
-              {p.periodCode} ({p.status})
+            <option key={p.period_code} value={p.period_code}>
+              {p.period_code}
             </option>
           ))}
         </Form.Select>

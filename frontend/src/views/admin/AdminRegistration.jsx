@@ -21,7 +21,7 @@ const AdminRegistrations = () => {
         setPeriods(p);
         if (p.length > 0) {
           const openPeriod = p.find(period => period.status === 'OPEN') || p[0];
-          setSelectedPeriod(openPeriod.periodCode);
+          setSelectedPeriod(openPeriod.period_code);
         }
       } catch (err) {
         console.error(err);
@@ -103,7 +103,7 @@ const AdminRegistrations = () => {
             <Form.Label>Período Académico</Form.Label>
             <Form.Select value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)}>
               {periods.map((p) => (
-                <option key={p.periodCode} value={p.periodCode}>{p.periodCode}</option>
+                <option key={p.period_code} value={p.period_code}>{p.period_code}</option>
               ))}
             </Form.Select>
           </Form.Group>
