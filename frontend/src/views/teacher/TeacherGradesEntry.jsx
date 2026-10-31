@@ -26,7 +26,7 @@ const TeacherGradesEntryView = () => {
       // Inicializar el estado de los inputs con las notas actuales
       const initialGrades = {};
       data.forEach(reg => {
-        initialGrades[reg.id] = reg.finalGrade !== null ? reg.finalGrade : '';
+        initialGrades[reg.id] = reg.final_grade ?? '';
       });
       setGradesInput(initialGrades);
     } catch (err) {
@@ -60,8 +60,8 @@ const TeacherGradesEntryView = () => {
     setMessage(null);
     try {
       await updateGrade({
-        registrationId: registrationId,
-        finalGrade: grade
+      registration_id: registrationId,
+      final_grade: grade
       });
       setMessage({ type: 'success', text: 'Calificación guardada correctamente.' });
       await fetchRegistrations(); // Recargar datos para mostrar el estado actualizado
@@ -105,7 +105,7 @@ const TeacherGradesEntryView = () => {
               ) : (
                 registrations.map(reg => (
                   <tr key={reg.id}>
-                    <td className="fw-bold">{reg.studentRun}</td>
+                    <td className="fw-bold">{reg.student_run}</td>
                     <td>
                       <Badge bg={reg.status === 'REGISTERED' ? 'info' : 'secondary'}>
                         {reg.status}
@@ -126,7 +126,11 @@ const TeacherGradesEntryView = () => {
                       <Button 
                         variant="success" 
                         size="sm"
-                        disabled={saving || gradesInput[reg.id] === '' || gradesInput[reg.id] === reg.finalGrade?.toString()}
+                        disabled={
+                          saving ||
+                          gradesInput[reg.id] === '' ||
+                          String(gradesInput[reg.id]) === String(reg.final_grade ?? '')
+                        }
                         onClick={() => handleSaveGrade(reg.id)}
                       >
                         Guardar Nota

@@ -43,6 +43,12 @@ public class TeacherController {
         return new ResponseEntity<>(teacherService.getTeacherById(id), HttpStatus.OK);
     }
 
+    @GetMapping("/email/{email}")
+    @PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
+    public ResponseEntity<TeacherResponseDto> getTeacherByEmail(@PathVariable String email) {
+        return new ResponseEntity<>(teacherService.getTeacherByEmail(email), HttpStatus.OK);
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TeacherResponseDto> updateTeacher(@PathVariable Long id, @Valid @RequestBody TeacherUpdateDto dto) {

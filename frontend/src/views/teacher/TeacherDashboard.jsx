@@ -15,6 +15,7 @@ const TeacherDashboard = () => {
         const userEmail = keycloak.tokenParsed?.email;
         if (userEmail) {
           const data = await getTeacherByEmail(userEmail);
+          console.log("Teacher data fetched:", data);
           setTeacher(data);
         }
       } catch (err) {
@@ -44,16 +45,16 @@ const TeacherDashboard = () => {
             <Card.Body>
               <Row>
                 <Col sm={6} className="mb-3">
-                  <strong>Nombre Completo:</strong> <p className="text-muted">{teacher?.fullName}</p>
+                  <strong>Nombre Completo:</strong> <p className="text-muted">{teacher?.full_name}</p>
                 </Col>
                 <Col sm={6} className="mb-3">
                   <strong>RUN:</strong> <p className="text-muted">{teacher?.run}</p>
                 </Col>
                 <Col sm={6} className="mb-3">
-                  <strong>Título Profesional:</strong> <p className="text-muted">{teacher?.professionalTitle}</p>
+                  <strong>Título Profesional:</strong> <p className="text-muted">{teacher?.professional_title}</p>
                 </Col>
                 <Col sm={6} className="mb-3">
-                  <strong>Grado Académico:</strong> <p className="text-muted">{teacher?.academicDegree}</p>
+                  <strong>Grado Académico:</strong> <p className="text-muted">{teacher?.academic_degree}</p>
                 </Col>
                 <Col sm={12}>
                   <strong>Estado:</strong>{' '}

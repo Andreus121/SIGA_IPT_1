@@ -14,6 +14,14 @@ const StudentGradesView = () => {
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const selectedPeriodData = periods.find((period) => period.period_code === selectedPeriod);
+  const getRegistrationStatus = (registration) => {
+    if (selectedPeriodData?.status === 'CLOSED' && registration.final_grade !== null && registration.final_grade !== undefined) {
+      return registration.final_grade >= 4.0 ? 'APROBADO' : 'REPROBADO';
+    }
+    return registration.status;
+  };
+
   useEffect(() => {
     const init = async () => {
       try {
@@ -26,7 +34,7 @@ const StudentGradesView = () => {
           setPeriods(periodList);
 
           if (periodList.length > 0) {
-            setSelectedPeriod(periodList[0].periodCode);
+            setSelectedPeriod(periodList[0].period_code);
           }
         }
       } catch (err) {
@@ -46,6 +54,7 @@ const StudentGradesView = () => {
       try {
         const data = await getRegistrationsByStudent(student.run, selectedPeriod);
         setRegistrations(data);
+        console.log("Registrations fetched:", data);
       } catch (err) {
         console.error("Error al obtener notas del estudiante", err);
       } finally {
@@ -73,8 +82,8 @@ const StudentGradesView = () => {
         <Form.Label>Seleccionar Período Académico</Form.Label>
         <Form.Select value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)}>
           {periods.map((p) => (
-            <option key={p.periodCode} value={p.periodCode}>
-              {p.periodCode}
+            <option key={p.period_code} value={p.period_code}>
+              {p.period_code}
             </option>
           ))}
         </Form.Select>
@@ -103,21 +112,21 @@ const StudentGradesView = () => {
               ) : (
                 registrations.map((reg) => (
                   <tr key={reg.id}>
-                    <td className="fw-bold">{reg.courseCode}</td>
-                    <td>{reg.sectionCode}</td>
-                    <td>{new Date(reg.registrationDate).toLocaleDateString()}</td>
+                    <td className="fw-bold">{reg.course_code}</td>
+                    <td>{reg.section_code}</td>
+                    <td>{new Date(reg.registration_date).toLocaleDateString()}</td>
                     <td>
-                      <Badge bg={reg.status === 'REGISTERED' ? 'info' : 'secondary'}>
-                        {reg.status}
+                      <Badge bg={getRegistrationStatus(reg) === 'APROBADO' ? 'success' : getRegistrationStatus(reg) === 'REPROBADO' ? 'danger' : 'info'}>
+                        {getRegistrationStatus(reg)}
                       </Badge>
                     </td>
                     <td>
-                      {reg.finalGrade !== null && reg.finalGrade !== undefined ? (
+                      {reg.final_grade !== null && reg.final_grade !== undefined ? (
                         <Badge
-                          bg={reg.finalGrade >= 4.0 ? 'success' : 'danger'}
+                          bg={reg.final_grade >= 4.0 ? 'success' : 'danger'}
                           style={{ fontSize: '1rem' }}
                         >
-                          {reg.finalGrade.toFixed(1)}
+                          {reg.final_grade.toFixed(1)}
                         </Badge>
                       ) : (
                         <span className="text-muted fst-italic">Pendiente</span>

@@ -19,6 +19,14 @@ const AdminRegistrations = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
+  const selectedPeriodData = periods.find((period) => period.period_code === selectedPeriod);
+  const getRegistrationStatus = (registration) => {
+    if (selectedPeriodData?.status === 'CLOSED' && registration.final_grade !== null && registration.final_grade !== undefined) {
+      return registration.final_grade >= 4.0 ? 'APROBADO' : 'REPROBADO';
+    }
+    return registration.status;
+  };
+
   useEffect(() => {
     const initPeriods = async () => {
       try {
@@ -159,8 +167,8 @@ const AdminRegistrations = () => {
                     <td className="fw-bold">{reg.student_run}</td>
                     <td>{new Date(reg.registration_date).toLocaleString()}</td>
                     <td>
-                      <Badge bg={reg.status === 'REGISTERED' ? 'info' : 'secondary'}>
-                        {reg.status}
+                      <Badge bg={getRegistrationStatus(reg) === 'APROBADO' ? 'success' : getRegistrationStatus(reg) === 'REPROBADO' ? 'danger' : 'info'}>
+                        {getRegistrationStatus(reg)}
                       </Badge>
                     </td>
                     <td>{reg.final_grade ?? '-'}</td>

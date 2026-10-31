@@ -24,7 +24,7 @@ const TeacherSectionsView = () => {
           setPeriods(periodList);
           
           const openPeriod = periodList.find(p => p.status === 'OPEN') || periodList[0];
-          if (openPeriod) setSelectedPeriod(openPeriod.periodCode);
+          if (openPeriod) setSelectedPeriod(openPeriod.period_code);
         }
       } catch (err) {
         console.error(err);
@@ -41,8 +41,8 @@ const TeacherSectionsView = () => {
       setLoading(true);
       try {
         const allSections = await getSectionsByPeriod(selectedPeriod);
-        // Filtramos las secciones donde el teacherId coincida con el ID del profesor actual
-        const filtered = allSections.filter(sec => sec.teacherId === teacher.id);
+        // Filtramos las secciones donde el docente coincida con el profesor actual
+        const filtered = allSections.filter(sec => sec.teacher_id === teacher.id);
         setMySections(filtered);
       } catch (err) {
         console.error("Error al obtener secciones", err);
@@ -62,7 +62,7 @@ const TeacherSectionsView = () => {
         <Form.Label>Seleccionar Período Académico</Form.Label>
         <Form.Select value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)}>
           {periods.map(p => (
-            <option key={p.periodCode} value={p.periodCode}>{p.periodCode}</option>
+            <option key={p.period_code} value={p.period_code}>{p.period_code}</option>
           ))}
         </Form.Select>
       </Form.Group>
@@ -86,7 +86,7 @@ const TeacherSectionsView = () => {
                 mySections.map(sec => (
                   <tr key={sec.id}>
                     <td className="fw-bold">{sec.code}</td>
-                    <td>{sec.courseCode}</td>
+                    <td>{sec.course_code}</td>
                     <td>{sec.capacity} alumnos</td>
                     <td>
                       <Button 

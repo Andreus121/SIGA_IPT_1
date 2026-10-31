@@ -90,6 +90,14 @@ public class TeacherService {
         return mapTeacherToDto(teacher);
     }
 
+    // Obtener un docente por su correo
+    @Transactional(readOnly = true)
+    public TeacherResponseDto getTeacherByEmail(String email) {
+        TeacherEntity teacher = teacherRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Docente no encontrado con correo: " + email));
+        return mapTeacherToDto(teacher);
+    }
+
     // Actualizar datos de un profesor
     @Transactional
     public TeacherResponseDto updateTeacher(Long id, TeacherUpdateDto dto) {
