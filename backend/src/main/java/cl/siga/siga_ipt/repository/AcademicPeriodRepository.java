@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface AcademicPeriodRepository extends JpaRepository<AcademicPeriodEntity, Long> {
     Optional<AcademicPeriodEntity> findByPeriodCode(String periodCode);
+    boolean existsByPeriodCode(String periodCode);
+    boolean existsByAcademicPeriod(String academicPeriod);
 }

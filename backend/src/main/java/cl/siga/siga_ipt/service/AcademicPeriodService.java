@@ -19,9 +19,16 @@ public class AcademicPeriodService {
 
     @Transactional
     public AcademicPeriodResponseDto createPeriod(AcademicPeriodCreateDto dto) {
+        if (periodRepository.existsByPeriodCode(dto.getPeriodCode())
+                || periodRepository.existsByAcademicPeriod(dto.getPeriodCode())) {
+            throw new IllegalArgumentException(
+                    "Ya existe un período académico con el código: " + dto.getPeriodCode());
+        }
+
         // Business logic: build entity here, not in controller
         AcademicPeriodEntity entity = AcademicPeriodEntity.builder()
                 .periodCode(dto.getPeriodCode())
+                .academicPeriod(dto.getPeriodCode())
                 .status(dto.getStatus())
                 .build();
         AcademicPeriodEntity saved = periodRepository.save(entity);

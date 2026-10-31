@@ -9,10 +9,6 @@ const AdminPeriods = () => {
   const [saving, setSaving] = useState(false);
   const [year, setYear] = useState(new Date().getFullYear());
   const [semester, setSemester] = useState(1);
-  const [formData, setFormData] = useState({ 
-    period_code: new Date().getFullYear(), 
-    status: 'OPEN'
-  });
 
   const fetchPeriods = async () => {
     setLoading(true);
@@ -31,28 +27,38 @@ const AdminPeriods = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    setFormData({
-      period_code: String(year) + '-' + String(semester),
-      status: 'OPEN'
-    });
+
     // si un período ya es activo, no permitir crear otro
     if(periods.some(p => p.status === 'OPEN')) {
       alert('Ya existe un período activo. Cierre el período actual antes de abrir uno nuevo.');
       setSaving(false);
       return;
     }
-    // si el semestre es 0, no permitir crear
-    if(semester === 0) {
+
+    const numericYear = Number(year);
+    const numericSemester = Number(semester);
+    if(!Number.isInteger(numericYear) || numericYear < 2000 || numericYear > 9999) {
+      alert('Ingrese un año válido.');
+      setSaving(false);
+      return;
+    }
+
+    if(![1, 2].includes(numericSemester)) {
       alert('Seleccione un semestre válido.');
       setSaving(false);
       return;
     }
+
+    const periodCode = `${numericYear}-${numericSemester}`;
     try {
-      await createPeriod(formData);
+      await createPeriod({
+        period_code: periodCode,
+        status: 'OPEN'
+      });
       setShowModal(false);
       fetchPeriods();
     } catch (err) {
-      alert('Error al crear el período');
+      alert(err.response?.data?.message || 'Error al crear el período');
     } finally {
       setSaving(false);
     }
@@ -88,7 +94,7 @@ const AdminPeriods = () => {
           </thead>
           <tbody>
             {periods.map(p => (
-              <tr key={p.id}>
+              <tr key={p.period_code}>
                 <td className="fw-bold">{p.period_code}</td>
                 <td>
                   <Badge bg={p.status === 'OPEN' ? 'success' : 'secondary'}>
@@ -118,9 +124,11 @@ const AdminPeriods = () => {
             <Form.Group className="mb-3">
               <Form.Label>Año</Form.Label>
               <Form.Control 
-                type="text" 
+                type="number"
+                min="2000"
+                max="9999"
                 value={year} 
-                onChange={e => setYear(e.target.value)} 
+                onChange={e => setYear(Number(e.target.value))}
                 required 
               />
             </Form.Group>
@@ -128,7 +136,7 @@ const AdminPeriods = () => {
               <Form.Label>Semestre</Form.Label>
               <Form.Select 
                 value={semester} 
-                onChange={e => setSemester(e.target.value)} 
+                onChange={e => setSemester(Number(e.target.value))}
                 required 
               >
                 <option value={0}>Seleccione un semestre</option>
