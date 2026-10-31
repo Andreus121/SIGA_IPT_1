@@ -4,14 +4,13 @@ on:
   push:
     branches:
       - main
-      - master
   pull_request:
     branches:
       - main
-      - master
 
-permissions:
-  contents: read
+env:
+  BACKEND_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/siga-ipt-backend
+  FRONTEND_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/siga-ipt-frontend
 
 concurrency:
   group: ci-cd-${{ github.ref }}
@@ -36,6 +35,10 @@ jobs:
       - name: Test and compile backend
         working-directory: backend
         run: ./mvnw --batch-mode clean verify
+
+      - name: JaCoCo code coverage report
+        working-directory: backend
+        run: ./mvnw jacoco:report
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -76,7 +79,7 @@ jobs:
         id: backend-meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/siga-ipt-backend
+          images: ${{ env.BACKEND_IMAGE }}
           tags: |
             type=ref,event=branch
             type=sha
@@ -94,7 +97,7 @@ jobs:
         id: frontend-meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/siga-ipt-frontend
+          images: ${{ env.FRONTEND_IMAGE }}
           tags: |
             type=ref,event=branch
             type=sha
