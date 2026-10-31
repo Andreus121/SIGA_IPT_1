@@ -41,11 +41,11 @@ public class SectionController {
         return new ResponseEntity<>(sectionService.getSectionById(id), HttpStatus.OK);
     }
 
-    // Obtener sección por código de sección
-    @GetMapping("/code/{code}")
+    // Obtener sección por código de sección y periodo académico
+    @GetMapping("/{periodCode}/{sectionCode}")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
-    public ResponseEntity<SectionResponseDto> getSectionByCode(@PathVariable String code) {
-        return new ResponseEntity<>(sectionService.getSectionByCode(code), HttpStatus.OK);
+    public ResponseEntity<SectionResponseDto> getSectionByCodeAndPeriod(@PathVariable String sectionCode, @PathVariable String periodCode) {
+        return new ResponseEntity<>(sectionService.getSectionByCodeAndPeriod(sectionCode, periodCode), HttpStatus.OK);
     }
 
     // Obtener todas las secciones de un período académico

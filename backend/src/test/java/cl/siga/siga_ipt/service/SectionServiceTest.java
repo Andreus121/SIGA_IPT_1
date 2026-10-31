@@ -364,11 +364,11 @@ class SectionServiceTest {
         SectionEntity section = SectionEntity.builder().id(1L).code("SEC-1").periodCode("2027-1").build();
 
         when(sectionRepository.findById(1L)).thenReturn(Optional.of(section));
-        when(sectionRepository.findByCode("SEC-1")).thenReturn(Optional.of(section));
+        when(sectionRepository.findByCodeAndPeriodCode("SEC-1", "2027-1")).thenReturn(Optional.of(section));
         when(sectionRepository.findByPeriodCode("2027-1")).thenReturn(List.of(section));
 
         assertThat(sectionService.getSectionById(1L)).isNotNull();
-        assertThat(sectionService.getSectionByCode("SEC-1")).isNotNull();
+        assertThat(sectionService.getSectionByCodeAndPeriod("SEC-1", "2027-1")).isNotNull();
         assertThat(sectionService.getSectionsByPeriod("2027-1")).hasSize(1);
     }
 
@@ -434,11 +434,11 @@ class SectionServiceTest {
     @DisplayName("Should throw exception when section not found by ID or code")
     void sectionQueries_NotFound_ThrowsException() {
         when(sectionRepository.findById(999L)).thenReturn(Optional.empty());
-        when(sectionRepository.findByCode("NON-EXIST")).thenReturn(Optional.empty());
+        when(sectionRepository.findByCodeAndPeriodCode("NON-EXIST", "2027-1")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> sectionService.getSectionById(999L))
                 .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> sectionService.getSectionByCode("NON-EXIST"))
+        assertThatThrownBy(() -> sectionService.getSectionByCodeAndPeriod("NON-EXIST", "2027-1"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

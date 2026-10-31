@@ -55,7 +55,7 @@ public class RegistrationService {
         }
 
         // Sección existente en el periodo
-        SectionEntity section = sectionRepository.findByCode(dto.getSectionCode())
+        SectionEntity section = sectionRepository.findByCodeAndPeriodCode(dto.getSectionCode(), dto.getPeriodCode())
                 .orElseThrow(() -> new IllegalArgumentException("La sección no existe con código: " + dto.getSectionCode()));
 
         if (!section.getPeriodCode().equals(dto.getPeriodCode())) {

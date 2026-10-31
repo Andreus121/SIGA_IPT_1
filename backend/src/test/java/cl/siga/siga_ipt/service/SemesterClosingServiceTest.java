@@ -61,7 +61,6 @@ class SemesterClosingServiceTest {
         period = AcademicPeriodEntity.builder()
                 .id(1L)
                 .periodCode("2027-1")
-                .academicPeriod("2027-1")
                 .status(PeriodStatus.OPEN)
                 .build();
 
@@ -102,7 +101,7 @@ class SemesterClosingServiceTest {
     void testCloseSemester_Success_WithGraduation() {
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(period));
         when(registrationRepository.findByPeriodCode("2027-1")).thenReturn(List.of(registration));
-        when(sectionRepository.findByCode("SEC-01")).thenReturn(Optional.of(section));
+        when(sectionRepository.findByCodeAndPeriodCode("SEC-01", "2027-1")).thenReturn(Optional.of(section));
         when(teacherRepository.findById(1L)).thenReturn(Optional.of(teacher));
         when(studentRepository.findByRun("12345678-9")).thenReturn(Optional.of(student));
 
@@ -137,7 +136,7 @@ class SemesterClosingServiceTest {
 
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(period));
         when(registrationRepository.findByPeriodCode("2027-1")).thenReturn(List.of(registration));
-        when(sectionRepository.findByCode("SEC-01")).thenReturn(Optional.of(section));
+        when(sectionRepository.findByCodeAndPeriodCode("SEC-01", "2027-1")).thenReturn(Optional.of(section));
         when(teacherRepository.findById(1L)).thenReturn(Optional.of(teacher));
         when(studentRepository.findByRun("12345678-9")).thenReturn(Optional.of(student));
 

@@ -60,7 +60,6 @@ class RegistrationServiceTest {
         testPeriod = AcademicPeriodEntity.builder()
                 .id(1L)
                 .periodCode("2027-1")
-                .academicPeriod("2027-1")
                 .status(PeriodStatus.OPEN)
                 .build();
 
@@ -111,7 +110,7 @@ class RegistrationServiceTest {
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(testPeriod));
         when(studentRepository.findByRun("12345678-9")).thenReturn(Optional.of(testStudent));
         when(enrollmentRepository.findByStudentRunAndPeriodCode("12345678-9", "2027-1")).thenReturn(Optional.of(testEnrollment));
-        when(sectionRepository.findByCode("SEC-PROG1-2027-1")).thenReturn(Optional.of(testSection));
+        when(sectionRepository.findByCodeAndPeriodCode("SEC-PROG1-2027-1", "2027-1")).thenReturn(Optional.of(testSection));
         when(courseRepository.findByCodeAndStudyPlanCode("PROG1", "TAP-2024")).thenReturn(Optional.of(testCourse));
         when(registrationRepository.existsByStudentRunAndCourseCodeAndPeriodCode("12345678-9", "PROG1", "2027-1")).thenReturn(false);
         when(academicHistoryRepository.existsByStudentRunAndCourseCodeAndStatus("12345678-9", "PROG1", AcademicStatus.PASSED)).thenReturn(false);
@@ -183,7 +182,7 @@ class RegistrationServiceTest {
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(testPeriod));
         when(studentRepository.findByRun("12345678-9")).thenReturn(Optional.of(testStudent));
         when(enrollmentRepository.findByStudentRunAndPeriodCode("12345678-9", "2027-1")).thenReturn(Optional.of(testEnrollment));
-        when(sectionRepository.findByCode("SEC-PROG1-2027-1")).thenReturn(Optional.of(testSection));
+        when(sectionRepository.findByCodeAndPeriodCode("SEC-PROG1-2027-1", "2027-1")).thenReturn(Optional.of(testSection));
 
         assertThatThrownBy(() -> registrationService.registerCourse(createDto))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -196,7 +195,7 @@ class RegistrationServiceTest {
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(testPeriod));
         when(studentRepository.findByRun("12345678-9")).thenReturn(Optional.of(testStudent));
         when(enrollmentRepository.findByStudentRunAndPeriodCode("12345678-9", "2027-1")).thenReturn(Optional.of(testEnrollment));
-        when(sectionRepository.findByCode("SEC-PROG1-2027-1")).thenReturn(Optional.of(testSection));
+        when(sectionRepository.findByCodeAndPeriodCode("SEC-PROG1-2027-1", "2027-1")).thenReturn(Optional.of(testSection));
         when(courseRepository.findByCodeAndStudyPlanCode("PROG1", "TAP-2024")).thenReturn(Optional.of(testCourse));
         when(registrationRepository.existsByStudentRunAndCourseCodeAndPeriodCode("12345678-9", "PROG1", "2027-1")).thenReturn(false);
         when(academicHistoryRepository.existsByStudentRunAndCourseCodeAndStatus("12345678-9", "PROG1", AcademicStatus.PASSED)).thenReturn(true);
@@ -212,7 +211,7 @@ class RegistrationServiceTest {
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(testPeriod));
         when(studentRepository.findByRun("12345678-9")).thenReturn(Optional.of(testStudent));
         when(enrollmentRepository.findByStudentRunAndPeriodCode("12345678-9", "2027-1")).thenReturn(Optional.of(testEnrollment));
-        when(sectionRepository.findByCode("SEC-PROG1-2027-1")).thenReturn(Optional.of(testSection));
+        when(sectionRepository.findByCodeAndPeriodCode("SEC-PROG1-2027-1", "2027-1")).thenReturn(Optional.of(testSection));
         when(courseRepository.findByCodeAndStudyPlanCode("PROG1", "TAP-2024")).thenReturn(Optional.of(testCourse));
         when(registrationRepository.existsByStudentRunAndCourseCodeAndPeriodCode("12345678-9", "PROG1", "2027-1")).thenReturn(false);
         when(academicHistoryRepository.existsByStudentRunAndCourseCodeAndStatus("12345678-9", "PROG1", AcademicStatus.PASSED)).thenReturn(false);
@@ -236,7 +235,7 @@ class RegistrationServiceTest {
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(testPeriod));
         when(studentRepository.findByRun("12345678-9")).thenReturn(Optional.of(testStudent));
         when(enrollmentRepository.findByStudentRunAndPeriodCode("12345678-9", "2027-1")).thenReturn(Optional.of(testEnrollment));
-        when(sectionRepository.findByCode("SEC-PROG1-2027-1")).thenReturn(Optional.of(testSection));
+        when(sectionRepository.findByCodeAndPeriodCode("SEC-PROG1-2027-1", "2027-1")).thenReturn(Optional.of(testSection));
         when(courseRepository.findByCodeAndStudyPlanCode("PROG1", "TAP-2024")).thenReturn(Optional.of(testCourse));
         when(registrationRepository.existsByStudentRunAndCourseCodeAndPeriodCode("12345678-9", "PROG1", "2027-1")).thenReturn(false);
         when(academicHistoryRepository.existsByStudentRunAndCourseCodeAndStatus("12345678-9", "PROG1", AcademicStatus.PASSED)).thenReturn(false);
@@ -261,7 +260,7 @@ class RegistrationServiceTest {
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(testPeriod));
         when(studentRepository.findByRun("12345678-9")).thenReturn(Optional.of(testStudent));
         when(enrollmentRepository.findByStudentRunAndPeriodCode("12345678-9", "2027-1")).thenReturn(Optional.of(testEnrollment));
-        when(sectionRepository.findByCode("SEC-PROG1-2027-1")).thenReturn(Optional.of(testSection));
+        when(sectionRepository.findByCodeAndPeriodCode("SEC-PROG1-2027-1", "2027-1")).thenReturn(Optional.of(testSection));
         when(courseRepository.findByCodeAndStudyPlanCode("PROG1", "TAP-2024")).thenReturn(Optional.of(testCourse));
         when(registrationRepository.existsByStudentRunAndCourseCodeAndPeriodCode("12345678-9", "PROG1", "2027-1")).thenReturn(false);
         when(academicHistoryRepository.existsByStudentRunAndCourseCodeAndStatus("12345678-9", "PROG1", AcademicStatus.PASSED)).thenReturn(false);
@@ -285,7 +284,7 @@ class RegistrationServiceTest {
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(testPeriod));
         when(studentRepository.findByRun("12345678-9")).thenReturn(Optional.of(testStudent));
         when(enrollmentRepository.findByStudentRunAndPeriodCode("12345678-9", "2027-1")).thenReturn(Optional.of(testEnrollment));
-        when(sectionRepository.findByCode("SEC-PROG1-2027-1")).thenReturn(Optional.of(testSection));
+        when(sectionRepository.findByCodeAndPeriodCode("SEC-PROG1-2027-1", "2027-1")).thenReturn(Optional.of(testSection));
         when(courseRepository.findByCodeAndStudyPlanCode("PROG1", "TAP-2024")).thenReturn(Optional.of(testCourse));
         when(registrationRepository.existsByStudentRunAndCourseCodeAndPeriodCode("12345678-9", "PROG1", "2027-1")).thenReturn(false);
         when(academicHistoryRepository.existsByStudentRunAndCourseCodeAndStatus("12345678-9", "PROG1", AcademicStatus.PASSED)).thenReturn(false);
@@ -305,7 +304,7 @@ class RegistrationServiceTest {
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(testPeriod));
         when(studentRepository.findByRun("12345678-9")).thenReturn(Optional.of(testStudent));
         when(enrollmentRepository.findByStudentRunAndPeriodCode("12345678-9", "2027-1")).thenReturn(Optional.of(testEnrollment));
-        when(sectionRepository.findByCode("SEC-PROG1-2027-1")).thenReturn(Optional.of(testSection));
+        when(sectionRepository.findByCodeAndPeriodCode("SEC-PROG1-2027-1", "2027-1")).thenReturn(Optional.of(testSection));
         when(courseRepository.findByCodeAndStudyPlanCode("PROG1", "TAP-2024")).thenReturn(Optional.of(testCourse));
         when(registrationRepository.existsByStudentRunAndCourseCodeAndPeriodCode("12345678-9", "PROG1", "2027-1")).thenReturn(false);
         when(academicHistoryRepository.existsByStudentRunAndCourseCodeAndStatus("12345678-9", "PROG1", AcademicStatus.PASSED)).thenReturn(false);

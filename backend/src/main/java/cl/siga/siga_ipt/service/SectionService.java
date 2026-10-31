@@ -167,9 +167,9 @@ public class SectionService {
     }
 
     @Transactional(readOnly = true)
-    public SectionResponseDto getSectionByCode(String code) {
-        SectionEntity section = sectionRepository.findByCode(code)
-                .orElseThrow(() -> new IllegalArgumentException("Sección no encontrada con código: " + code));
+    public SectionResponseDto getSectionByCodeAndPeriod(String code, String periodCode) {
+        SectionEntity section = sectionRepository.findByCodeAndPeriodCode(code, periodCode)
+                .orElseThrow(() -> new IllegalArgumentException("Sección no encontrada con código: " + code + " y periodo: " + periodCode));
         return mapToResponseDto(section);
     }
 

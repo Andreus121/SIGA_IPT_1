@@ -97,7 +97,6 @@ class EnrollmentRegistrationIntegrationTest {
         // 1. Período OPEN
         openPeriod = periodRepository.save(AcademicPeriodEntity.builder()
                 .periodCode("2027-1")
-                .academicPeriod("2027-1")
                 .status(PeriodStatus.OPEN)
                 .build());
 

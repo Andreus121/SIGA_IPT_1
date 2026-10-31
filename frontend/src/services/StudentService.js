@@ -42,6 +42,12 @@ const getSectionsByPeriod = async (periodCode) => {
   return response.data;
 };
 
+//obtener secciones por código de sección y período académico
+const getSectionByCodeAndPeriod = async (section_code, period_code) => {
+  const response = await axiosClient.get(`/api/sections/${period_code}/${section_code}`);
+  return response.data;
+};
+
 // Obtener ramos inscritos del estudiante por RUN y período
 const getRegistrationsByStudent = async (studentRun, periodCode) => {
   const response = await axiosClient.get(`/api/registrations/student/${studentRun}`, {
@@ -81,6 +87,7 @@ export {
   createEnrollment,
   getAcademicPeriods,
   getSectionsByPeriod,
+  getSectionByCodeAndPeriod,
   getRegistrationsByStudent,
   createRegistration,
   deleteRegistration,

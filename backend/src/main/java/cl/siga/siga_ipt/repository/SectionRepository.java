@@ -10,7 +10,7 @@ public interface SectionRepository extends JpaRepository<SectionEntity, Long> {
     boolean existsByTeacherIdAndPeriodCode(Long teacherId, String periodCode);
     boolean existsByCourseCodeAndPeriodCode(String courseCode, String periodCode);
     boolean existsByCode(String code);
-    java.util.Optional<SectionEntity> findByCode(String code);
+    java.util.Optional<SectionEntity> findByCodeAndPeriodCode(String code, String periodCode);
     java.util.List<SectionEntity> findByPeriodCode(String periodCode);
     java.util.List<SectionEntity> findByTeacherIdAndPeriodCode(Long teacherId, String periodCode);
 }

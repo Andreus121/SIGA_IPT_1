@@ -59,7 +59,7 @@ public class SemesterClosingService {
         for (RegistrationEntity reg : activeRegistrations) {
             affectedStudentRuns.add(reg.getStudentRun());
 
-            SectionEntity section = sectionRepository.findByCode(reg.getSectionCode())
+            SectionEntity section = sectionRepository.findByCodeAndPeriodCode(reg.getSectionCode(), reg.getPeriodCode())
                     .orElse(null);
 
             String teacherRun = "N/A";

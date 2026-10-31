@@ -5,7 +5,8 @@ import {
   getStudentByEmail,
   getAcademicPeriods,
   getRegistrationsByStudent,
-  getSectionsByPeriod
+  getSectionsByPeriod,
+  getCourseByCodeAndPlan
 } from '../../services/StudentService';
 
 const StudentScheduleView = () => {
@@ -14,6 +15,7 @@ const StudentScheduleView = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('');
   const [scheduleGrid, setScheduleGrid] = useState({});
   const [loading, setLoading] = useState(true);
+  const [sections, setSections] = useState([]);
 
   const days = [
     { code: 'L', name: 'Lunes' },
@@ -38,8 +40,9 @@ const StudentScheduleView = () => {
 
           const openPeriod = periodList.find((p) => p.status === 'OPEN') || periodList[0];
           if (openPeriod) {
-            setSelectedPeriod(openPeriod.periodCode);
+            setSelectedPeriod(openPeriod.period_code);
           }
+
         }
       } catch (err) {
         console.error("Error cargando perfil u horarios", err);
@@ -58,18 +61,47 @@ const StudentScheduleView = () => {
 
       try {
         const registrations = await getRegistrationsByStudent(student.run, selectedPeriod);
-        const sections = await getSectionsByPeriod(selectedPeriod);
+        const periodSections = await getSectionsByPeriod(selectedPeriod);
 
+        const enrolledSections = registrations
+          .map((reg) => {
+            const sectionCode = reg.sectionCode || reg.section_code;
+            return periodSections.find(
+              (section) => (section.code || section.sectionCode) === sectionCode
+            );
+          })
+          .filter(Boolean);
+
+        const sectionsWithCourseNames = await Promise.all(
+          enrolledSections.map(async (section) => {
+            const sectionDetails = await getCourseByCodeAndPlan(
+              section.course_code,
+              student.study_plan_code
+            );
+
+            return {
+              ...section,
+              course_name: sectionDetails.name
+            };
+          })
+        );
+
+        setSections(sectionsWithCourseNames);
         // Mapeo matriz [day-moduleNumber] -> info sección
         const grid = {};
         registrations.forEach((reg) => {
-          const matchedSection = sections.find((s) => s.code === reg.sectionCode);
+          const sectionCode = reg.sectionCode || reg.section_code;
+          const matchedSection = periodSections.find(
+            (section) => (section.code || section.sectionCode) === sectionCode
+          );
           if (matchedSection && matchedSection.schedules) {
             matchedSection.schedules.forEach((sch) => {
-              const key = `${sch.day}-${sch.moduleNumber}`;
+              const day = sch.day || sch.dayCode;
+              const moduleNumber = sch.moduleNumber || sch.module_number;
+              const key = `${day}-${moduleNumber}`;
               grid[key] = {
-                courseCode: matchedSection.courseCode,
-                sectionCode: matchedSection.code
+                courseCode: matchedSection.courseCode || matchedSection.course_code,
+                sectionCode: matchedSection.code || matchedSection.sectionCode
               };
             });
           }
@@ -103,12 +135,51 @@ const StudentScheduleView = () => {
         <Form.Label>Seleccionar Período Académico</Form.Label>
         <Form.Select value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)}>
           {periods.map((p) => (
-            <option key={p.periodCode} value={p.periodCode}>
-              {p.periodCode}
+            <option key={p.period_code} value={p.period_code}>
+              {p.period_code}
             </option>
           ))}
         </Form.Select>
       </Form.Group>
+
+      <Card className="shadow-sm border-0 mb-4">
+        <Card.Body>
+          <Card.Title>Lista de ramos</Card.Title>
+          {sections.length > 0 ? (
+            <Table bordered hover responsive className="mb-0 align-middle">
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Nombre</th>
+                  <th>Horario</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sections.map((section) => {
+                  const schedules = (section.schedules || [])
+                    .map((schedule) => {
+                      const day = schedule.day || schedule.dayCode;
+                      const moduleNumber = schedule.moduleNumber || schedule.module_number;
+                      return day && moduleNumber ? `${day}${moduleNumber}` : null;
+                    })
+                    .filter(Boolean)
+                    .join(' - ');
+
+                  return (
+                    <tr key={section.code || section.sectionCode}>
+                      <td>{section.course_code}</td>
+                      <td>{section.course_name}</td>
+                      <td>{schedules || '-'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+          ) : (
+            <p className="text-muted mb-0">No hay ramos inscritos en este período.</p>
+          )}
+        </Card.Body>
+      </Card>
 
       <Card className="shadow-sm border-0">
         <Card.Body className="p-0">
