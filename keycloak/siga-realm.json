@@ -26,7 +26,7 @@
   "oauth2DeviceCodeLifespan": 600,
   "oauth2DevicePollingInterval": 5,
   "enabled": true,
-  "sslRequired": "external",
+  "sslRequired": "none",
   "registrationAllowed": false,
   "registrationEmailAsUsername": false,
   "rememberMe": false,
@@ -790,10 +790,10 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "http://localhost:5173/*"
+        "http://${PUBLIC_IP}:5173/*"
       ],
       "webOrigins": [
-        "+"
+        "http://${PUBLIC_IP}:5173"
       ],
       "notBefore": 0,
       "bearerOnly": false,
