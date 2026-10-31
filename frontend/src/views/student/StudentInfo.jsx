@@ -14,7 +14,7 @@ const StudentCurriculumView = () => {
         const userEmail = keycloak.tokenParsed?.email;
         if (userEmail) {
           const student = await getStudentByEmail(userEmail);
-          const courseList = await getCoursesByStudyPlan(student.studyPlanCode);
+          const courseList = await getCoursesByStudyPlan(student.study_plan_code);
           setCourses(courseList);
         }
       } catch (err) {
@@ -80,23 +80,14 @@ const StudentCurriculumView = () => {
                           <tr key={course.id}>
                             <td className="fw-bold">{course.code}</td>
                             <td>{course.name}</td>
-                            <td>{course.theoryHours}</td>
-                            <td>{course.exerciseHours}</td>
-                            <td>{course.labHours}</td>
+                            <td>{course.theory_hours}</td>
+                            <td>{course.exercise_hours}</td>
+                            <td>{course.lab_hours}</td>
                             <td>
                               <Badge bg="info">{course.sct} SCT</Badge>
                             </td>
-                            <td>
-                              {course.prerequisites && course.prerequisites.length > 0 ? (
-                                course.prerequisites.map((pre, idx) => (
-                                  <Badge key={idx} bg="dark" className="me-1">
-                                    {pre}
-                                  </Badge>
-                                ))
-                              ) : (
-                                <span className="text-muted small">Sin prerrequisitos</span>
-                              )}
-                            </td>
+                            {/* Si no tiene prerequisitos mostramos un guion */}
+                            <td>{course.prerequisites_codes.length > 0 ? course.prerequisites_codes.join(', ') : '-'}</td>
                           </tr>
                         ))
                       )}

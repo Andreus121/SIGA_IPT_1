@@ -5,9 +5,11 @@ import {
   getStudentByEmail,
   getAcademicPeriods,
   getSectionsByPeriod,
+  getCourseByCodeAndPlan,
   getRegistrationsByStudent,
   createRegistration,
-  deleteRegistration
+  deleteRegistration,
+  getEnrollmentsByStudent
 } from '../../services/StudentService';
 
 const StudentRegistrationView = () => {
@@ -15,10 +17,12 @@ const StudentRegistrationView = () => {
   const [periods, setPeriods] = useState([]);
   const [selectedPeriod, setSelectedPeriod] = useState('');
   const [availableSections, setAvailableSections] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [myRegistrations, setMyRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState(null);
+  const [enrollments, setEnrollments] = useState(null);
 
   useEffect(() => {
     const initData = async () => {
@@ -33,7 +37,7 @@ const StudentRegistrationView = () => {
 
           const openPeriod = periodList.find((p) => p.status === 'OPEN');
           if (openPeriod) {
-            setSelectedPeriod(openPeriod.periodCode);
+            setSelectedPeriod(openPeriod.period_code);
           }
         }
       } catch (err) {
@@ -52,7 +56,16 @@ const StudentRegistrationView = () => {
     try {
       const sections = await getSectionsByPeriod(selectedPeriod);
       setAvailableSections(sections);
-
+      console.log("sections", sections);
+      const planCode = student.study_plan_code;
+      const courseCodes = [...new Set(sections.map((section) => section.course_code))];
+      for (const courseCode of courseCodes) {
+        const course = await getCourseByCodeAndPlan(courseCode, planCode);
+        if (course) {
+          courses.push(course);
+        }
+      }
+      console.log("courses: ", courses);
       const registered = await getRegistrationsByStudent(student.run, selectedPeriod);
       setMyRegistrations(registered);
     } catch (err) {
@@ -66,16 +79,42 @@ const StudentRegistrationView = () => {
     fetchRegistrationsAndSections();
   }, [selectedPeriod, student]);
 
-  const handleRegister = async (sectionCode) => {
+  // Obtener todas las matriculas del estudiante por su rut
+  // y verificar si tiene una matricula en el periodo seleccionado
+  const fetchEnrollments = async () => {
+    try {
+      const enrollmentsStudent = await getEnrollmentsByStudent(student.run);
+      setEnrollments(enrollmentsStudent);
+      return enrollmentsStudent;
+    } catch (err) {
+      setMessage({ type: 'danger', text: 'Error al obtener las matrículas del estudiante.' });
+      return [];
+    }
+  };
+
+  const hasEnrollmentInSelectedPeriod = async (period_code) => {
+    const enrollmentsStudent = await fetchEnrollments();
+    return enrollmentsStudent.some(
+      (enrollment) =>
+        enrollment.period_code === period_code && enrollment.status === 'ACTIVE'
+    );
+  };
+
+  const handleRegister = async (section_code) => {
+    if (!(await hasEnrollmentInSelectedPeriod(selectedPeriod))) {
+      setMessage({ type: 'danger', text: 'No puedes tomar ramos sin matricularte en el periodo academico' });
+      return;
+    }
+
     setActionLoading(true);
     setMessage(null);
     try {
       await createRegistration({
-        studentRun: student.run,
-        sectionCode,
-        periodCode: selectedPeriod
+        student_run: student.run,
+        section_code: section_code,
+        period_code: selectedPeriod
       });
-      setMessage({ type: 'success', text: `Asignatura/Sección ${sectionCode} inscrita correctamente.` });
+      setMessage({ type: 'success', text: `Asignatura/Sección ${section_code} inscrita correctamente.` });
       await fetchRegistrationsAndSections();
     } catch (err) {
       const errorMsg = err.response?.data?.message || 'Error al inscribir la sección.';
@@ -121,8 +160,8 @@ const StudentRegistrationView = () => {
         <Form.Label>Seleccionar Período Académico</Form.Label>
         <Form.Select value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)}>
           {periods.map((p) => (
-            <option key={p.periodCode} value={p.periodCode}>
-              {p.periodCode} ({p.status})
+            <option key={p. period_code} value={p.period_code}>
+              {p. period_code}
             </option>
           ))}
         </Form.Select>
@@ -138,10 +177,8 @@ const StudentRegistrationView = () => {
               <Table responsive hover className="mb-0 text-center align-middle">
                 <thead className="table-light">
                   <tr>
-                    <th>Código Ramo</th>
+                    <th>Asignatura</th>
                     <th>Sección</th>
-                    <th>Fecha Inscripción</th>
-                    <th>Estado</th>
                     <th>Acción</th>
                   </tr>
                 </thead>
@@ -153,14 +190,10 @@ const StudentRegistrationView = () => {
                   ) : (
                     myRegistrations.map((reg) => (
                       <tr key={reg.id}>
-                        <td className="fw-bold">{reg.courseCode}</td>
-                        <td>{reg.sectionCode}</td>
-                        <td>{new Date(reg.registrationDate).toLocaleString()}</td>
-                        <td>
-                          <Badge bg={reg.status === 'REGISTERED' ? 'primary' : 'danger'}>
-                            {reg.status}
-                          </Badge>
+                        <td className="fw-bold">
+                          {courses.find((course) => course.code === reg.course_code)?.name || "error"}
                         </td>
+                        <td>{reg.section_code}</td>
                         <td>
                           <Button
                             variant="outline-danger"
@@ -189,8 +222,8 @@ const StudentRegistrationView = () => {
               <Table responsive hover className="mb-0 text-center align-middle">
                 <thead className="table-light">
                   <tr>
-                    <th>Sección</th>
                     <th>Asignatura</th>
+                    <th>Sección</th>
                     <th>Capacidad</th>
                     <th>Horarios</th>
                     <th>Acción</th>
@@ -206,8 +239,10 @@ const StudentRegistrationView = () => {
                       const isAlreadyRegistered = myRegistrations.some((r) => r.sectionCode === sec.code);
                       return (
                         <tr key={sec.id}>
-                          <td className="fw-bold">{sec.code}</td>
-                          <td>{sec.courseCode}</td>
+                          <td className="fw-bold">
+                            {courses.find((course) => course.code === sec.course_code)?.name || "error"}
+                          </td>
+                          <td>{sec.code}</td>
                           <td>{sec.capacity} cupos</td>
                           <td>
                             {sec.schedules.map((sch, i) => (

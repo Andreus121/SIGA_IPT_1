@@ -12,6 +12,12 @@ const getCoursesByStudyPlan = async (studyPlanCode) => {
   return response.data;
 };
 
+// Obtener una asignataura por su código y plan de estudio
+const getCourseByCodeAndPlan = async (courseCode, studyPlanCode) => {
+  const response = await axiosClient.get(`/api/courses/${studyPlanCode}/${courseCode}`);
+  return response.data;
+};
+
 // Obtener historial de matrículas del estudiante por RUN
 const getEnrollmentsByStudent = async (studentRun) => {
   const response = await axiosClient.get(`/api/enrollments/student/${studentRun}`);
@@ -70,6 +76,7 @@ const enrollStudent = async (student_run, period_code) => {
 export {
   getStudentByEmail,
   getCoursesByStudyPlan,
+  getCourseByCodeAndPlan,
   getEnrollmentsByStudent,
   createEnrollment,
   getAcademicPeriods,

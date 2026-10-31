@@ -112,7 +112,6 @@ const StudentEnrollmentView = () => {
           <Table responsive hover className="mb-0 text-center align-middle">
             <thead className="table-light">
               <tr>
-                <th>ID</th>
                 <th>Período</th>
                 <th>Fecha de Matrícula</th>
               </tr>
@@ -125,7 +124,6 @@ const StudentEnrollmentView = () => {
               ) : (
                 enrollments.map((enr) => (
                   <tr key={enr.id}>
-                    <td>{enr.id}</td>
                     <td className="fw-bold">{enr.period_code}</td>
                     <td>{enr.enrollment_date}</td>
                   </tr>
