@@ -203,6 +203,20 @@ const deleteSection = async (sectionId) => {
 
 // ================ matriculas ==================
 
+// obtener las tomas de ramos de una sección en un periodo
+const getRegistrationsBySection = async (sectionCode, periodCode) => {
+  const response = await axiosClient.get(`/api/registrations/section/${sectionCode}`, {
+    params: { periodCode }
+  });
+  return response.data;
+};
+
+// eliminar una toma de ramo por ID (solo admin)
+const deleteRegistration = async (registrationId) => {
+  const response = await axiosClient.delete(`/api/registrations/${registrationId}`);
+  return response.data;
+};
+
 // obtener todas las matriculas de un periodo
 const getEnrollmentsByPeriod = async (periodCode) => {
   const response = await axiosClient.get(`/api/enrollments/period/${periodCode}`);
@@ -260,6 +274,8 @@ export {
   deleteSection,
 
   // matriculas
+  getRegistrationsBySection,
+  deleteRegistration,
   getEnrollmentsByPeriod,
   deleteEnrollment
 };

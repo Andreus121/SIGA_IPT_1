@@ -1,7 +1,11 @@
-/**
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Form, Spinner, Button, Row, Col, Badge, Alert } from 'react-bootstrap';
-import { getPeriods, getSections, getRegistrationsBySection,   } from '../../services/AdminService';
+import {
+  getPeriods,
+  getSections,
+  getRegistrationsBySection,
+  deleteRegistration
+} from '../../services/AdminService';
 
 const AdminRegistrations = () => {
   const [periods, setPeriods] = useState([]);
@@ -60,7 +64,7 @@ const AdminRegistrations = () => {
       const data = await getRegistrationsBySection(selectedSection, selectedPeriod);
       setRegistrations(data);
     } catch (err) {
-      console.error(err);
+      setMessage({ type: 'danger', text: 'Error al cargar las tomas de ramos.' });
     } finally {
       setLoading(false);
     }
@@ -78,11 +82,11 @@ const AdminRegistrations = () => {
     setActionLoading(true);
     setMessage(null);
     try {
-      await  (registrationId);
-      setMessage({ type: 'success', text: 'Inscripción anulada correctamente.' });
+      await deleteRegistration(registrationId);
+      setMessage({ type: 'success', text: 'Toma de ramo eliminada correctamente.' });
       await fetchRegistrations();
     } catch (err) {
-      setMessage({ type: 'danger', text: 'Error al intentar anular la inscripción.' });
+      setMessage({ type: 'danger', text: 'Error al intentar eliminar la toma de ramo.' });
     } finally {
       setActionLoading(false);
     }
@@ -121,7 +125,7 @@ const AdminRegistrations = () => {
                 <option value="">Sin secciones programadas</option>
               ) : (
                 sections.map((s) => (
-                  <option key={s.id} value={s.code}>{s.code} ({s.courseCode})</option>
+                  <option key={s.id} value={s.code}>{s.code} ({s.course_code})</option>
                 ))
               )}
             </Form.Select>
@@ -152,22 +156,22 @@ const AdminRegistrations = () => {
               ) : (
                 registrations.map((reg) => (
                   <tr key={reg.id}>
-                    <td className="fw-bold">{reg.studentRun}</td>
-                    <td>{new Date(reg.registrationDate).toLocaleString()}</td>
+                    <td className="fw-bold">{reg.student_run}</td>
+                    <td>{new Date(reg.registration_date).toLocaleString()}</td>
                     <td>
                       <Badge bg={reg.status === 'REGISTERED' ? 'info' : 'secondary'}>
                         {reg.status}
                       </Badge>
                     </td>
-                    <td>{reg.finalGrade ? reg.finalGrade : '-'}</td>
+                    <td>{reg.final_grade ?? '-'}</td>
                     <td>
                       <Button 
                         variant="outline-danger" 
                         size="sm"
                         disabled={actionLoading}
-                        onClick={() => handleForceDelete(reg.id, reg.studentRun)}
+                        onClick={() => handleForceDelete(reg.id, reg.student_run)}
                       >
-                        Forzar Anulación
+                        Eliminar
                       </Button>
                     </td>
                   </tr>

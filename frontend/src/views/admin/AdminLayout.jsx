@@ -62,7 +62,7 @@ const AdminLayout = () => {
 
               <NavDropdown title="Registros" id="nav-dropdown-records">
                 <NavDropdown.Item as={NavLink} to="/admin/enrollments">Matrículas</NavDropdown.Item>
-                <NavDropdown.Item as={NavLink} to="/admin/">Toma de Ramos</NavDropdown.Item>
+                <NavDropdown.Item as={NavLink} to="/admin/registrations">Toma de Ramos</NavDropdown.Item>
               </NavDropdown>
             </Nav>
 
