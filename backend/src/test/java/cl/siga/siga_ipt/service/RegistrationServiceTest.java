@@ -152,6 +152,27 @@ class RegistrationServiceTest {
     }
 
     @Test
+    @DisplayName("Falla si el período no existe")
+    void testRegisterCourse_PeriodNotFound() {
+        when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> registrationService.registerCourse(createDto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("período académico no existe");
+    }
+
+    @Test
+    @DisplayName("Falla si el estudiante no existe")
+    void testRegisterCourse_StudentNotFound() {
+        when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(testPeriod));
+        when(studentRepository.findByRun("12345678-9")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> registrationService.registerCourse(createDto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Estudiante no encontrado");
+    }
+
+    @Test
     @DisplayName("Falla si el estudiante no está REGULAR")
     void testRegisterCourse_StudentNotRegular() {
         testStudent.setStatus(StudentStatus.POSTPONEMENT);
@@ -176,6 +197,20 @@ class RegistrationServiceTest {
     }
 
     @Test
+    @DisplayName("Falla si la matrícula no está activa")
+    void testRegisterCourse_EnrollmentInactive() {
+        testEnrollment.setStatus(EnrollmentStatus.CANCELED);
+        when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(testPeriod));
+        when(studentRepository.findByRun("12345678-9")).thenReturn(Optional.of(testStudent));
+        when(enrollmentRepository.findByStudentRunAndPeriodCode("12345678-9", "2027-1"))
+                .thenReturn(Optional.of(testEnrollment));
+
+        assertThatThrownBy(() -> registrationService.registerCourse(createDto))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("matrícula del estudiante no se encuentra activa");
+    }
+
+    @Test
     @DisplayName("Falla si la sección no corresponde al período")
     void testRegisterCourse_SectionPeriodMismatch() {
         testSection.setPeriodCode("2026-2");
@@ -187,6 +222,38 @@ class RegistrationServiceTest {
         assertThatThrownBy(() -> registrationService.registerCourse(createDto))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("no corresponde al período académico indicado");
+    }
+
+    @Test
+    @DisplayName("Falla si la sección no existe")
+    void testRegisterCourse_SectionNotFound() {
+        when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(testPeriod));
+        when(studentRepository.findByRun("12345678-9")).thenReturn(Optional.of(testStudent));
+        when(enrollmentRepository.findByStudentRunAndPeriodCode("12345678-9", "2027-1"))
+                .thenReturn(Optional.of(testEnrollment));
+        when(sectionRepository.findByCodeAndPeriodCode("SEC-PROG1-2027-1", "2027-1"))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> registrationService.registerCourse(createDto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("La sección no existe");
+    }
+
+    @Test
+    @DisplayName("Falla si la asignatura no pertenece al plan del estudiante")
+    void testRegisterCourse_CourseNotInStudyPlan() {
+        when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(testPeriod));
+        when(studentRepository.findByRun("12345678-9")).thenReturn(Optional.of(testStudent));
+        when(enrollmentRepository.findByStudentRunAndPeriodCode("12345678-9", "2027-1"))
+                .thenReturn(Optional.of(testEnrollment));
+        when(sectionRepository.findByCodeAndPeriodCode("SEC-PROG1-2027-1", "2027-1"))
+                .thenReturn(Optional.of(testSection));
+        when(courseRepository.findByCodeAndStudyPlanCode("PROG1", "TAP-2024"))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> registrationService.registerCourse(createDto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("no pertenece al plan");
     }
 
     @Test
@@ -203,6 +270,25 @@ class RegistrationServiceTest {
         assertThatThrownBy(() -> registrationService.registerCourse(createDto))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("ya fue aprobada");
+    }
+
+    @Test
+    @DisplayName("Falla si la asignatura ya está inscrita en el período")
+    void testRegisterCourse_AlreadyRegistered() {
+        when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(testPeriod));
+        when(studentRepository.findByRun("12345678-9")).thenReturn(Optional.of(testStudent));
+        when(enrollmentRepository.findByStudentRunAndPeriodCode("12345678-9", "2027-1"))
+                .thenReturn(Optional.of(testEnrollment));
+        when(sectionRepository.findByCodeAndPeriodCode("SEC-PROG1-2027-1", "2027-1"))
+                .thenReturn(Optional.of(testSection));
+        when(courseRepository.findByCodeAndStudyPlanCode("PROG1", "TAP-2024"))
+                .thenReturn(Optional.of(testCourse));
+        when(registrationRepository.existsByStudentRunAndCourseCodeAndPeriodCode(
+                "12345678-9", "PROG1", "2027-1")).thenReturn(true);
+
+        assertThatThrownBy(() -> registrationService.registerCourse(createDto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("ya tiene inscrita");
     }
 
     @Test
@@ -369,6 +455,31 @@ class RegistrationServiceTest {
         assertThatThrownBy(() -> registrationService.dropCourse(50L))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("mientras el período académico se encuentre ABIERTO");
+    }
+
+    @Test
+    @DisplayName("Falla al anular una inscripción inexistente")
+    void testDropCourse_NotFound() {
+        when(registrationRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> registrationService.dropCourse(999L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Inscripción no encontrada");
+    }
+
+    @Test
+    @DisplayName("Falla al anular si el período no existe")
+    void testDropCourse_PeriodNotFound() {
+        RegistrationEntity reg = RegistrationEntity.builder()
+                .id(50L)
+                .periodCode("2027-1")
+                .build();
+        when(registrationRepository.findById(50L)).thenReturn(Optional.of(reg));
+        when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> registrationService.dropCourse(50L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Período no encontrado");
     }
 
     @Test

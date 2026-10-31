@@ -23,7 +23,7 @@ public class AcademicPeriodEntity {
 
     // Deprecated field kept for backward compatibility (to be removed later)
     @Deprecated
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String academicPeriod; // example: 2027-2 or 2025-1
 
     @Enumerated(EnumType.STRING)

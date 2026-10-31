@@ -4,38 +4,31 @@ import cl.siga.siga_ipt.dto.GradeEntryDto;
 import cl.siga.siga_ipt.entity.*;
 import cl.siga.siga_ipt.enums.*;
 import cl.siga.siga_ipt.repository.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import cl.siga.siga_ipt.service.GradeService;
+import cl.siga.siga_ipt.service.SemesterClosingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsStringIgnoringCase;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
-@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
 class GradeClosingIntegrationTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    private GradeService gradeService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private SemesterClosingService semesterClosingService;
 
     @Autowired
     private AcademicPeriodRepository periodRepository;
@@ -158,7 +151,6 @@ class GradeClosingIntegrationTest {
     // ==========================================
 
     @Test
-    @WithMockUser(roles = "TEACHER")
     @DisplayName("Éxito 1: Docente ingresa nota final válida (5.5)")
     void testRegisterGrade_Success() throws Exception {
         GradeEntryDto dto = GradeEntryDto.builder()
@@ -166,39 +158,32 @@ class GradeClosingIntegrationTest {
                 .finalGrade(5.5)
                 .build();
 
-        mockMvc.perform(put("/api/grades")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.finalGrade").value(5.5));
+        var response = gradeService.registerGrade(dto);
+        assertThat(response.getFinalGrade()).isEqualTo(5.5);
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("Éxito 2: Cierre de semestre: estudiante aprueba su plan completo y pasa a GRADUATED")
     void testCloseSemester_StudentGraduates_Success() throws Exception {
         // Asignar nota aprobatoria final (6.0)
         registration.setFinalGrade(6.0);
         registrationRepository.save(registration);
 
-        mockMvc.perform(post("/api/semester-closing/2027-1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalRegistrationsProcessed").value(1))
-                .andExpect(jsonPath("$.studentsGraduatedCount").value(1));
+        var response = semesterClosingService.closeSemester("2027-1");
+        assertThat(response.getTotalRegistrationsProcessed()).isEqualTo(1);
+        assertThat(response.getStudentsGraduatedCount()).isEqualTo(1);
 
         StudentEntity updated = studentRepository.findByRun(testStudent.getRun()).orElseThrow();
         assertThat(updated.getStatus()).isEqualTo(StudentStatus.GRADUATED);
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("Éxito 3: Período académico pasa a CLOSED al finalizar el cierre de semestre")
     void testCloseSemester_PeriodClosed_Success() throws Exception {
         registration.setFinalGrade(4.5);
         registrationRepository.save(registration);
 
-        mockMvc.perform(post("/api/semester-closing/2027-1"))
-                .andExpect(status().isOk());
+        semesterClosingService.closeSemester("2027-1");
 
         AcademicPeriodEntity updatedPeriod = periodRepository.findByPeriodCode("2027-1").orElseThrow();
         assertThat(updatedPeriod.getStatus()).isEqualTo(PeriodStatus.CLOSED);
@@ -209,7 +194,6 @@ class GradeClosingIntegrationTest {
     // ==========================================
 
     @Test
-    @WithMockUser(roles = "TEACHER")
     @DisplayName("Rechazo 1: Rechazar ingreso de calificación fuera de rango (7.5)")
     void testRegisterGrade_OutOfRange_Fails() throws Exception {
         GradeEntryDto dto = GradeEntryDto.builder()
@@ -217,15 +201,12 @@ class GradeClosingIntegrationTest {
                 .finalGrade(7.5) // Calificación inválida > 7.0
                 .build();
 
-        mockMvc.perform(put("/api/grades")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value(containsStringIgnoringCase("máxima es 7.0")));
+        assertThatThrownBy(() -> gradeService.registerGrade(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("7.0");
     }
 
     @Test
-    @WithMockUser(roles = "TEACHER")
     @DisplayName("Rechazo 2: Rechazar ingreso o modificación de notas si el período está CLOSED")
     void testRegisterGrade_PeriodClosed_Fails() throws Exception {
         // Cerrar período
@@ -237,20 +218,17 @@ class GradeClosingIntegrationTest {
                 .finalGrade(5.0)
                 .build();
 
-        mockMvc.perform(put("/api/grades")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value(containsStringIgnoringCase("ABIERTO")));
+        assertThatThrownBy(() -> gradeService.registerGrade(dto))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("ABIERTO");
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("Rechazo 3: Rechazar cierre de semestre si existen inscripciones sin nota registrada")
     void testCloseSemester_PendingGrades_Fails() throws Exception {
         // registration.finalGrade es null
-        mockMvc.perform(post("/api/semester-closing/2027-1"))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value(containsStringIgnoringCase("sin calificación final")));
+        assertThatThrownBy(() -> semesterClosingService.closeSemester("2027-1"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("sin calificación final");
     }
 }

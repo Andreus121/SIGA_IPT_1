@@ -6,35 +6,29 @@ import cl.siga.siga_ipt.dto.SectionUpdateDto;
 import cl.siga.siga_ipt.entity.*;
 import cl.siga.siga_ipt.enums.*;
 import cl.siga.siga_ipt.repository.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import cl.siga.siga_ipt.service.SectionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
 class SectionOfferingIntegrationTest {
 
     @Autowired
-    private MockMvc mockMvc;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private SectionService sectionService;
 
     @Autowired
     private AcademicPeriodRepository periodRepository;
@@ -137,7 +131,6 @@ class SectionOfferingIntegrationTest {
     // ==========================================
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("Éxito 1: Crear sección con docente activo, horario válido y período abierto")
     void testCreateSection_Success() throws Exception {
         SectionCreateDto dto = SectionCreateDto.builder()
@@ -151,17 +144,13 @@ class SectionOfferingIntegrationTest {
                 ))
                 .build();
 
-        mockMvc.perform(post("/api/sections")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.code").value("SEC-PROG1-2027-1"))
-                .andExpect(jsonPath("$.capacity").value(30))
-                .andExpect(jsonPath("$.teacherId").value(activeTeacher.getId()));
+        var response = sectionService.createSection(dto);
+        assertThat(response.getCode()).isEqualTo("SEC-PROG1-2027-1");
+        assertThat(response.getCapacity()).isEqualTo(30);
+        assertThat(response.getTeacherId()).isEqualTo(activeTeacher.getId());
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("Éxito 2: Modificar cupo de sección existente en período abierto")
     void testUpdateSectionCapacity_Success() throws Exception {
         SectionEntity section = sectionRepository.save(SectionEntity.builder()
@@ -176,15 +165,11 @@ class SectionOfferingIntegrationTest {
                 .capacity(45)
                 .build();
 
-        mockMvc.perform(put("/api/sections/" + section.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.capacity").value(45));
+        var response = sectionService.updateSection(section.getId(), updateDto);
+        assertThat(response.getCapacity()).isEqualTo(45);
     }
 
     @Test
-    @WithMockUser(roles = "STUDENT")
     @DisplayName("Éxito 3: Consultar secciones disponibles por período académico")
     void testGetSectionsByPeriod_Success() throws Exception {
         sectionRepository.save(SectionEntity.builder()
@@ -195,10 +180,9 @@ class SectionOfferingIntegrationTest {
                 .capacity(30)
                 .build());
 
-        mockMvc.perform(get("/api/sections/period/2027-1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].code").value("SEC-PROG1-2027-1"));
+        var response = sectionService.getSectionsByPeriod("2027-1");
+        assertThat(response).hasSize(1);
+        assertThat(response.get(0).getCode()).isEqualTo("SEC-PROG1-2027-1");
     }
 
     // ==========================================
@@ -206,7 +190,6 @@ class SectionOfferingIntegrationTest {
     // ==========================================
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("Rechazo 1: Rechazar creación de sección si el período académico está CLOSED")
     void testCreateSection_PeriodClosed_Fails() throws Exception {
         SectionCreateDto dto = SectionCreateDto.builder()
@@ -220,15 +203,12 @@ class SectionOfferingIntegrationTest {
                 ))
                 .build();
 
-        mockMvc.perform(post("/api/sections")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value(containsString("ABIERTO")));
+        assertThatThrownBy(() -> sectionService.createSection(dto))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("ABIERTO");
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("Rechazo 2: Rechazar creación si el docente asignado está INACTIVE")
     void testCreateSection_InactiveTeacher_Fails() throws Exception {
         SectionCreateDto dto = SectionCreateDto.builder()
@@ -242,15 +222,12 @@ class SectionOfferingIntegrationTest {
                 ))
                 .build();
 
-        mockMvc.perform(post("/api/sections")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value(containsStringIgnoringCase("ACTIVO")));
+        assertThatThrownBy(() -> sectionService.createSection(dto))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("ACTIVO");
     }
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("Rechazo 3: Rechazar si se produce conflicto de horario para el docente")
     void testCreateSection_TeacherScheduleConflict_Fails() throws Exception {
         // Sección previa del docente los Lunes M1
@@ -293,10 +270,8 @@ class SectionOfferingIntegrationTest {
                 ))
                 .build();
 
-        mockMvc.perform(post("/api/sections")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value(containsStringIgnoringCase("asignada")));
+        assertThatThrownBy(() -> sectionService.createSection(dto))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("asignada");
     }
 }

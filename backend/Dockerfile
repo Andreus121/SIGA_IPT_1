@@ -14,7 +14,10 @@ RUN ./mvnw -B dependency:go-offline || true
 COPY src ./src
 
 # Compilar omitiendo tests
-RUN ./mvnw -B clean package -DskipTests
+# RUN ./mvnw -B clean package -DskipTests
+
+# Compilar ejecutando test
+RUN ./mvnw -B clean verify
 
 ### Runtime stage
 FROM eclipse-temurin:21-jre-alpine

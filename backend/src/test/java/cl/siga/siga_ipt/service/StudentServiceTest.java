@@ -43,6 +43,9 @@ class StudentServiceTest {
     @Mock
     private AcademicHistoryRepository academicHistoryRepository;
 
+    @Mock
+    private KeycloakAdminService keycloakAdminService;
+
     @InjectMocks
     private StudentService studentService;
 

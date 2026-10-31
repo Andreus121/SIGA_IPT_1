@@ -185,4 +185,26 @@ class EnrollmentServiceTest {
         assertThat(list).hasSize(1);
         assertThat(list.get(0).getPeriodCode()).isEqualTo("2027-1");
     }
+
+    @Test
+    @DisplayName("Debe eliminar una matrícula existente")
+    void testDeleteEnrollment_Success() {
+        when(enrollmentRepository.existsById(10L)).thenReturn(true);
+
+        enrollmentService.deleteEnrollment(10L);
+
+        verify(enrollmentRepository).deleteById(10L);
+    }
+
+    @Test
+    @DisplayName("Debe fallar al eliminar una matrícula inexistente")
+    void testDeleteEnrollment_NotFound() {
+        when(enrollmentRepository.existsById(99L)).thenReturn(false);
+
+        assertThatThrownBy(() -> enrollmentService.deleteEnrollment(99L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Matrícula no encontrada");
+
+        verify(enrollmentRepository, never()).deleteById(anyLong());
+    }
 }

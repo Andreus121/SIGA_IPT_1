@@ -18,6 +18,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -53,6 +54,22 @@ class AcademicPeriodServiceTest {
         assertThat(response.getPeriodCode()).isEqualTo("2027-1");
         assertThat(response.getStatus()).isEqualTo(PeriodStatus.OPEN);
         verify(periodRepository).save(any(AcademicPeriodEntity.class));
+    }
+
+    @Test
+    @DisplayName("Debe rechazar un período con código duplicado")
+    void createPeriod_DuplicateCode() {
+        AcademicPeriodCreateDto createDto = AcademicPeriodCreateDto.builder()
+                .periodCode("2027-1")
+                .status(PeriodStatus.OPEN)
+                .build();
+        when(periodRepository.existsByPeriodCode("2027-1")).thenReturn(true);
+
+        assertThatThrownBy(() -> periodService.createPeriod(createDto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Ya existe un período académico");
+
+        verify(periodRepository, never()).save(any(AcademicPeriodEntity.class));
     }
 
     @Test

@@ -160,7 +160,7 @@ const AdminStudents = () => {
                     <Badge bg={st.status === 'REGULAR' ? 'success' : 'secondary'}>
                       {st.status==='REGULAR' ? 'Activo' : 
                       st.status==='TEMPORARY_WITHDRAWAL' ? 'Retiro Temporal' 
-                      : 'Retirado'}
+                      : 'ELIMINADO'}
                     </Badge>
                   </td>
                   <td>

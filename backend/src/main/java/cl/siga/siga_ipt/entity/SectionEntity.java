@@ -5,7 +5,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "sections", uniqueConstraints = {@UniqueConstraint(name = "uk_section_course_period", columnNames = {"course_code", "period_code"})})
+@Table(name = "sections", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_section_code_period", columnNames = {"code", "period_code"}),
+        @UniqueConstraint(name = "uk_section_course_period", columnNames = {"course_code", "period_code"})
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

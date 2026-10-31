@@ -194,6 +194,35 @@ class StudyPlanServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw exception when setting a non-existent plan as current")
+    void setPlanAsCurrent_NotFound_ThrowsException() {
+        when(studyPlanRepository.findByCode("MISSING")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> studyPlanService.setPlanAsCurrent("MISSING"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("El plan de estudios no existe");
+    }
+
+    @Test
+    @DisplayName("Should set a plan as current when no previous current plan exists")
+    void setPlanAsCurrent_WithoutPreviousCurrent_Success() {
+        StudyPlanEntity plan = StudyPlanEntity.builder()
+                .code("PLAN-TAP-2025")
+                .careerCode("TAP")
+                .status(StudyPlanStatus.NOT_CURRENT)
+                .build();
+
+        when(studyPlanRepository.findByCode("PLAN-TAP-2025")).thenReturn(Optional.of(plan));
+        when(studyPlanRepository.findByCareerCodeAndStatus("TAP", StudyPlanStatus.CURRENT))
+                .thenReturn(Optional.empty());
+
+        StudyPlanResponseDto response = studyPlanService.setPlanAsCurrent("PLAN-TAP-2025");
+
+        assertThat(response.getStatus()).isEqualTo(StudyPlanStatus.CURRENT);
+        verify(studyPlanRepository).save(plan);
+    }
+
+    @Test
     @DisplayName("Should delete study plan when no students or courses are associated")
     void deleteStudyPlan_Success() {
         StudyPlanEntity plan = StudyPlanEntity.builder().code("PLAN-TEST").build();
@@ -239,6 +268,16 @@ class StudyPlanServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw exception when deleting a non-existent study plan")
+    void deleteStudyPlan_NotFound_ThrowsException() {
+        when(studyPlanRepository.findByCode("MISSING")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> studyPlanService.deleteStudyPlan("MISSING"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("El plan de estudios no existe");
+    }
+
+    @Test
     @DisplayName("Should get plans by career code")
     void getPlansByCareer_Success() {
         StudyPlanEntity p1 = StudyPlanEntity.builder().code("PLAN-1").careerCode("TAP").build();
@@ -251,6 +290,23 @@ class StudyPlanServiceTest {
     }
 
     @Test
+    @DisplayName("Should return all study plans")
+    void getAllStudyPlans_Success() {
+        StudyPlanEntity plan = StudyPlanEntity.builder()
+                .code("PLAN-1")
+                .careerCode("TAP")
+                .name("Plan 2024")
+                .status(StudyPlanStatus.CURRENT)
+                .build();
+        when(studyPlanRepository.findAll()).thenReturn(List.of(plan));
+
+        List<StudyPlanResponseDto> result = studyPlanService.getAllStudyPlans();
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getCode()).isEqualTo("PLAN-1");
+    }
+
+    @Test
     @DisplayName("Should get plan by code successfully")
     void getPlanByCode_Success() {
         StudyPlanEntity p1 = StudyPlanEntity.builder().code("PLAN-1").build();
@@ -260,5 +316,15 @@ class StudyPlanServiceTest {
 
         assertThat(res).isNotNull();
         assertThat(res.getCode()).isEqualTo("PLAN-1");
+    }
+
+    @Test
+    @DisplayName("Should throw exception when study plan code is not found")
+    void getPlanByCode_NotFound_ThrowsException() {
+        when(studyPlanRepository.findByCode("MISSING")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> studyPlanService.getPlanByCode("MISSING"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Plan de estudios no encontrado");
     }
 }

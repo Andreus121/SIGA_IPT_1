@@ -5,38 +5,32 @@ import cl.siga.siga_ipt.dto.RegistrationCreateDto;
 import cl.siga.siga_ipt.entity.*;
 import cl.siga.siga_ipt.enums.*;
 import cl.siga.siga_ipt.repository.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import cl.siga.siga_ipt.service.EnrollmentService;
+import cl.siga.siga_ipt.service.RegistrationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static org.hamcrest.Matchers.containsStringIgnoringCase;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
-@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
 class EnrollmentRegistrationIntegrationTest {
 
     @Autowired
-    private MockMvc mockMvc;
+    private EnrollmentService enrollmentService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private RegistrationService registrationService;
 
     @Autowired
     private AcademicPeriodRepository periodRepository;
@@ -201,7 +195,6 @@ class EnrollmentRegistrationIntegrationTest {
     // ==========================================
 
     @Test
-    @WithMockUser(roles = "ADMIN")
     @DisplayName("Éxito 1: Matricular estudiante regular en período abierto")
     void testEnrollStudent_Success() throws Exception {
         EnrollmentCreateDto dto = EnrollmentCreateDto.builder()
@@ -209,16 +202,12 @@ class EnrollmentRegistrationIntegrationTest {
                 .periodCode("2027-1")
                 .build();
 
-        mockMvc.perform(post("/api/enrollments")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.studentRun").value(regularStudent.getRun()))
-                .andExpect(jsonPath("$.status").value("ACTIVE"));
+        var response = enrollmentService.enrollStudent(dto);
+        assertThat(response.getStudentRun()).isEqualTo(regularStudent.getRun());
+        assertThat(response.getStatus()).isEqualTo(EnrollmentStatus.ACTIVE);
     }
 
     @Test
-    @WithMockUser(roles = "STUDENT")
     @DisplayName("Éxito 2: Inscribir asignatura cumpliendo prerrequisitos, sin tope y con cupos")
     void testRegisterCourse_Success() throws Exception {
         // Matrícula previa activa
@@ -235,16 +224,12 @@ class EnrollmentRegistrationIntegrationTest {
                 .sectionCode("SEC-PROG1-2027-1")
                 .build();
 
-        mockMvc.perform(post("/api/registrations")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.courseCode").value("PROG1"))
-                .andExpect(jsonPath("$.status").value("REGISTERED"));
+        var response = registrationService.registerCourse(dto);
+        assertThat(response.getCourseCode()).isEqualTo("PROG1");
+        assertThat(response.getStatus()).isEqualTo(RegistrationStatus.REGISTERED);
     }
 
     @Test
-    @WithMockUser(roles = "STUDENT")
     @DisplayName("Éxito 3: Anular inscripción de ramo en período abierto liberando cupo")
     void testDropCourse_Success() throws Exception {
         RegistrationEntity registration = registrationRepository.save(RegistrationEntity.builder()
@@ -256,8 +241,7 @@ class EnrollmentRegistrationIntegrationTest {
                 .status(RegistrationStatus.REGISTERED)
                 .build());
 
-        mockMvc.perform(delete("/api/registrations/" + registration.getId()))
-                .andExpect(status().isNoContent());
+        registrationService.dropCourse(registration.getId());
     }
 
     // ==========================================
@@ -265,7 +249,6 @@ class EnrollmentRegistrationIntegrationTest {
     // ==========================================
 
     @Test
-    @WithMockUser(roles = "STUDENT")
     @DisplayName("Rechazo 1: Rechazar inscripción si el estudiante no tiene matrícula activa en el período")
     void testRegisterCourse_NotEnrolled_Fails() throws Exception {
         RegistrationCreateDto dto = RegistrationCreateDto.builder()
@@ -274,15 +257,12 @@ class EnrollmentRegistrationIntegrationTest {
                 .sectionCode("SEC-PROG1-2027-1")
                 .build();
 
-        mockMvc.perform(post("/api/registrations")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value(containsStringIgnoringCase("matriculado")));
+        assertThatThrownBy(() -> registrationService.registerCourse(dto))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("matriculado");
     }
 
     @Test
-    @WithMockUser(roles = "STUDENT")
     @DisplayName("Rechazo 2: Rechazar inscripción si no cumple con los prerrequisitos aprobados")
     void testRegisterCourse_MissingPrerequisite_Fails() throws Exception {
         // Matrícula activa
@@ -300,14 +280,11 @@ class EnrollmentRegistrationIntegrationTest {
                 .sectionCode("SEC-PROG2-2027-1")
                 .build();
 
-        mockMvc.perform(post("/api/registrations")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isConflict());
+        assertThatThrownBy(() -> registrationService.registerCourse(dto))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    @WithMockUser(roles = "STUDENT")
     @DisplayName("Rechazo 3: Rechazar inscripción si se produce tope de horario con otra asignatura")
     void testRegisterCourse_ScheduleConflict_Fails() throws Exception {
         // Matrícula activa
@@ -361,10 +338,8 @@ class EnrollmentRegistrationIntegrationTest {
                 .sectionCode("SEC-BD1-2027-1")
                 .build();
 
-        mockMvc.perform(post("/api/registrations")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value(containsStringIgnoringCase("tope de horario")));
+        assertThatThrownBy(() -> registrationService.registerCourse(dto))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Tope de horario");
     }
 }

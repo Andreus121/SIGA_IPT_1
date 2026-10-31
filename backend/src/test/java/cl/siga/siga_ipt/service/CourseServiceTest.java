@@ -231,6 +231,24 @@ class CourseServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw exception when prerequisite does not exist")
+    void createCourse_PrerequisiteNotFound_ThrowsException() {
+        CourseCreateDto dto = buildValidCreateDto();
+        dto.setSemester(2);
+        dto.setPrerequisitesCodes(Set.of("MISSING"));
+
+        when(studyPlanRepository.existsByCode("PLAN-2024")).thenReturn(true);
+        when(courseRepository.existsByCodeAndStudyPlanCode("INF-101", "PLAN-2024")).thenReturn(false);
+        when(courseRepository.findByCodeAndStudyPlanCode("MISSING", "PLAN-2024"))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> courseService.createCourse(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("MISSING")
+                .hasMessageContaining("no existe");
+    }
+
+    @Test
     @DisplayName("Should update course fields and validate new semester rules")
     void updateCourse_Success() {
         CourseEntity course = CourseEntity.builder()
@@ -259,6 +277,51 @@ class CourseServiceTest {
         assertThat(res.getName()).isEqualTo("Programación Avanzada");
         assertThat(res.getTheoryHours()).isEqualTo(3);
         assertThat(res.getSct()).isEqualTo(6);
+    }
+
+    @Test
+    @DisplayName("Should reject updating a non-existent course")
+    void updateCourse_NotFound_ThrowsException() {
+        when(courseRepository.findByCodeAndStudyPlanCode("MISSING", "PLAN-2024"))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> courseService.updateCourse(
+                "PLAN-2024", "MISSING", new CourseUpdateDto()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("no existe");
+    }
+
+    @Test
+    @DisplayName("Should reject moving a course after one of its prerequisites")
+    void updateCourse_PrerequisiteSemesterViolation_ThrowsException() {
+        CourseEntity course = CourseEntity.builder()
+                .code("INF-201")
+                .studyPlanCode("PLAN-2024")
+                .semester(2)
+                .theoryHours(2)
+                .exerciseHours(2)
+                .labHours(2)
+                .sct(4)
+                .build();
+        PrerequisiteEntity prerequisite = PrerequisiteEntity.builder()
+                .courseCode("INF-201")
+                .studyPlanCode("PLAN-2024")
+                .prerequisiteCourseCode("INF-101")
+                .build();
+        CourseUpdateDto updateDto = new CourseUpdateDto();
+        updateDto.setSemester(1);
+
+        when(courseRepository.findByCodeAndStudyPlanCode("INF-201", "PLAN-2024"))
+                .thenReturn(Optional.of(course));
+        when(prerequisiteRepository.findByCourseCodeAndStudyPlanCode("INF-201", "PLAN-2024"))
+                .thenReturn(List.of(prerequisite));
+        when(courseRepository.findByCodeAndStudyPlanCode("INF-101", "PLAN-2024"))
+                .thenReturn(Optional.of(CourseEntity.builder().semester(2).build()));
+
+        assertThatThrownBy(() -> courseService.updateCourse(
+                "PLAN-2024", "INF-201", updateDto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("estrictamente posterior");
     }
 
     @Test
@@ -346,6 +409,17 @@ class CourseServiceTest {
     }
 
     @Test
+    @DisplayName("Should reject deleting a non-existent course")
+    void deleteCourse_NotFound_ThrowsException() {
+        when(courseRepository.findByCodeAndStudyPlanCode("MISSING", "PLAN-2024"))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> courseService.deleteCourse("PLAN-2024", "MISSING"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("no existe");
+    }
+
+    @Test
     @DisplayName("Should get courses by study plan code")
     void getCoursesByPlan_Success() {
         CourseEntity c1 = CourseEntity.builder().code("INF-101").studyPlanCode("PLAN-2024").build();
@@ -367,6 +441,24 @@ class CourseServiceTest {
         assertThatThrownBy(() -> courseService.getCoursesByPlan("NON_EXIST"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("no existe");
+    }
+
+    @Test
+    @DisplayName("Should return all courses")
+    void getAllCourses_Success() {
+        CourseEntity course = CourseEntity.builder()
+                .code("INF-101")
+                .studyPlanCode("PLAN-2024")
+                .name("Programación")
+                .build();
+        when(courseRepository.findAll()).thenReturn(List.of(course));
+        when(prerequisiteRepository.findByCourseCodeAndStudyPlanCode("INF-101", "PLAN-2024"))
+                .thenReturn(Collections.emptyList());
+
+        List<CourseResponseDto> result = courseService.getAllCourses();
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getCode()).isEqualTo("INF-101");
     }
 
     @Test

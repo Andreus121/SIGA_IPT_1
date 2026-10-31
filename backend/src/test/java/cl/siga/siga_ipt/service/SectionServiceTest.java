@@ -84,7 +84,7 @@ class SectionServiceTest {
         CourseEntity course = buildCourseEntity(2, 2, 0); // 4 TEL hours = 2 blocks
         TeacherEntity teacher = TeacherEntity.builder().id(10L).status(TeacherStatus.ACTIVE).build();
 
-        when(sectionRepository.existsByCode("INF101-SEC1")).thenReturn(false);
+        when(sectionRepository.existsByCodeAndPeriodCode("INF101-SEC1", "2027-1")).thenReturn(false);
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(period));
         when(courseRepository.findFirstByCode("INF-101")).thenReturn(Optional.of(course));
         when(sectionRepository.existsByCourseCodeAndPeriodCode("INF-101", "2027-1")).thenReturn(false);
@@ -114,7 +114,7 @@ class SectionServiceTest {
     @DisplayName("Should throw exception when section code already exists")
     void createSection_DuplicateCode_ThrowsException() {
         SectionCreateDto dto = buildValidSectionCreateDto();
-        when(sectionRepository.existsByCode("INF101-SEC1")).thenReturn(true);
+        when(sectionRepository.existsByCodeAndPeriodCode("INF101-SEC1", "2027-1")).thenReturn(true);
 
         assertThatThrownBy(() -> sectionService.createSection(dto))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -125,7 +125,7 @@ class SectionServiceTest {
     @DisplayName("Should throw exception when academic period does not exist")
     void createSection_PeriodNotFound_ThrowsException() {
         SectionCreateDto dto = buildValidSectionCreateDto();
-        when(sectionRepository.existsByCode("INF101-SEC1")).thenReturn(false);
+        when(sectionRepository.existsByCodeAndPeriodCode("INF101-SEC1", "2027-1")).thenReturn(false);
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> sectionService.createSection(dto))
@@ -139,7 +139,7 @@ class SectionServiceTest {
         SectionCreateDto dto = buildValidSectionCreateDto();
         AcademicPeriodEntity closedPeriod = AcademicPeriodEntity.builder().periodCode("2027-1").status(PeriodStatus.CLOSED).build();
 
-        when(sectionRepository.existsByCode("INF101-SEC1")).thenReturn(false);
+        when(sectionRepository.existsByCodeAndPeriodCode("INF101-SEC1", "2027-1")).thenReturn(false);
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(closedPeriod));
 
         assertThatThrownBy(() -> sectionService.createSection(dto))
@@ -154,7 +154,7 @@ class SectionServiceTest {
         AcademicPeriodEntity period = AcademicPeriodEntity.builder().periodCode("2027-1").status(PeriodStatus.OPEN).build();
         CourseEntity course = buildCourseEntity(2, 2, 0);
 
-        when(sectionRepository.existsByCode("INF101-SEC1")).thenReturn(false);
+        when(sectionRepository.existsByCodeAndPeriodCode("INF101-SEC1", "2027-1")).thenReturn(false);
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(period));
         when(courseRepository.findFirstByCode("INF-101")).thenReturn(Optional.of(course));
         when(sectionRepository.existsByCourseCodeAndPeriodCode("INF-101", "2027-1")).thenReturn(true);
@@ -172,7 +172,7 @@ class SectionServiceTest {
         CourseEntity course = buildCourseEntity(2, 2, 0);
         TeacherEntity inactiveTeacher = TeacherEntity.builder().id(10L).status(TeacherStatus.INACTIVE).build();
 
-        when(sectionRepository.existsByCode("INF101-SEC1")).thenReturn(false);
+        when(sectionRepository.existsByCodeAndPeriodCode("INF101-SEC1", "2027-1")).thenReturn(false);
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(period));
         when(courseRepository.findFirstByCode("INF-101")).thenReturn(Optional.of(course));
         when(sectionRepository.existsByCourseCodeAndPeriodCode("INF-101", "2027-1")).thenReturn(false);
@@ -193,7 +193,7 @@ class SectionServiceTest {
         CourseEntity course = buildCourseEntity(2, 2, 0);
         TeacherEntity teacher = TeacherEntity.builder().id(10L).status(TeacherStatus.ACTIVE).build();
 
-        when(sectionRepository.existsByCode("INF101-SEC1")).thenReturn(false);
+        when(sectionRepository.existsByCodeAndPeriodCode("INF101-SEC1", "2027-1")).thenReturn(false);
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(period));
         when(courseRepository.findFirstByCode("INF-101")).thenReturn(Optional.of(course));
         when(sectionRepository.existsByCourseCodeAndPeriodCode("INF-101", "2027-1")).thenReturn(false);
@@ -213,7 +213,7 @@ class SectionServiceTest {
         AcademicPeriodEntity period = AcademicPeriodEntity.builder().periodCode("2027-1").status(PeriodStatus.OPEN).build();
         TeacherEntity teacher = TeacherEntity.builder().id(10L).status(TeacherStatus.ACTIVE).build();
 
-        when(sectionRepository.existsByCode("INF101-SEC1")).thenReturn(false);
+        when(sectionRepository.existsByCodeAndPeriodCode("INF101-SEC1", "2027-1")).thenReturn(false);
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(period));
         when(courseRepository.findFirstByCode("INF-101")).thenReturn(Optional.of(course));
         when(sectionRepository.existsByCourseCodeAndPeriodCode("INF-101", "2027-1")).thenReturn(false);
@@ -237,7 +237,7 @@ class SectionServiceTest {
         AcademicPeriodEntity period = AcademicPeriodEntity.builder().periodCode("2027-1").status(PeriodStatus.OPEN).build();
         TeacherEntity teacher = TeacherEntity.builder().id(10L).status(TeacherStatus.ACTIVE).build();
 
-        when(sectionRepository.existsByCode("INF101-SEC1")).thenReturn(false);
+        when(sectionRepository.existsByCodeAndPeriodCode("INF101-SEC1", "2027-1")).thenReturn(false);
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(period));
         when(courseRepository.findFirstByCode("INF-101")).thenReturn(Optional.of(course));
         when(sectionRepository.existsByCourseCodeAndPeriodCode("INF-101", "2027-1")).thenReturn(false);
@@ -265,7 +265,7 @@ class SectionServiceTest {
                 .moduleNumber(1) // conflict with proposed L-1
                 .build();
 
-        when(sectionRepository.existsByCode("INF101-SEC1")).thenReturn(false);
+        when(sectionRepository.existsByCodeAndPeriodCode("INF101-SEC1", "2027-1")).thenReturn(false);
         when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(period));
         when(courseRepository.findFirstByCode("INF-101")).thenReturn(Optional.of(course));
         when(sectionRepository.existsByCourseCodeAndPeriodCode("INF-101", "2027-1")).thenReturn(false);

@@ -36,9 +36,10 @@ public class SectionService {
 
     @Transactional
     public SectionResponseDto createSection(SectionCreateDto dto) {
-        // Unicidad del código de sección
-        if (sectionRepository.existsByCode(dto.getCode())) {
-            throw new IllegalArgumentException("Ya existe una sección con el código: " + dto.getCode());
+        // El código de sección es único dentro del período académico
+        if (sectionRepository.existsByCodeAndPeriodCode(dto.getCode(), dto.getPeriodCode())) {
+            throw new IllegalArgumentException("Ya existe una sección con el código '" + dto.getCode() +
+                    "' en el período académico '" + dto.getPeriodCode() + "'.");
         }
 
         // Validar que el período académico exista y esté ABIERTO
