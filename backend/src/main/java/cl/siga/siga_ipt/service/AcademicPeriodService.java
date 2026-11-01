@@ -25,7 +25,7 @@ public class AcademicPeriodService {
                     "Ya existe un período académico con el código: " + dto.getPeriodCode());
         }
 
-        // Business logic: build entity here, not in controller
+        // Business logic: build entity here
         AcademicPeriodEntity entity = AcademicPeriodEntity.builder()
                 .periodCode(dto.getPeriodCode())
                 .academicPeriod(dto.getPeriodCode())
