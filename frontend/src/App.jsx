@@ -40,7 +40,11 @@ const App = () => {
 
   useEffect(() => {
     // 'login-required' fuerza el login si no hay sesión activa
-    keycloak.init({ onLoad: 'login-required', checkLoginIframe: false })
+    keycloak.init({ 
+      onLoad: 'login-required', 
+      pkceMethod: false,
+      checkLoginIframe: false 
+    })
       .then((authenticated) => {
         if (authenticated) {
           setIsInitialized(true);
