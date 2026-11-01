@@ -42,8 +42,10 @@ const App = () => {
     // 'login-required' fuerza el login si no hay sesión activa
     keycloak.init({ 
       onLoad: 'login-required', 
-      pkceMethod: false,
-      checkLoginIframe: false 
+      // PKCE usa crypto.subtle, solo disponible en HTTPS o localhost; por HTTP plano se desactiva
+      pkceMethod: window.isSecureContext ? 'S256' : false,
+      // el iframe de comprobación usa cookies Secure y por HTTP nunca responde
+      checkLoginIframe: window.isSecureContext
     })
       .then((authenticated) => {
         if (authenticated) {
