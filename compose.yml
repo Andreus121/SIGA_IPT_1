@@ -8,6 +8,11 @@ services:
       POSTGRES_DB: ${DB_NAME:-siga_ipt}
       POSTGRES_USER: ${DB_USERNAME:-siga_ipt_username}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-siga_ipt_pass}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-siga_ipt_username} -d ${DB_NAME:-siga_ipt}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     ports:
       - "${DB_PORT:-5432}:5432"  
     volumes:
@@ -28,13 +33,20 @@ services:
       KC_HOSTNAME_URL: ${KEYCLOAK_PUBLIC_URL:-http://localhost:8090}
       KC_HOSTNAME_STRICT: false       # permite acceso con localhost
       KEYCLOAK_FRONT_URL: ${KEYCLOAK_FRONT_URL:-http://localhost:5173}
+      KC_HEALTH_ENABLED: true
     ports:
       - "${KEYCLOAK_PORT:-8090}:8080" # Keycloak UI en http://localhost:8090
     volumes:
       - ./keycloak/siga-realm.json:/opt/keycloak/data/import/siga-realm.json:ro
     command: start-dev --import-realm
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080'"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
   backend:
@@ -42,8 +54,10 @@ services:
     env_file:
       - .env
     depends_on:
-      - postgres
-      - keycloak
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-siga_ipt}?sslmode=disable
       SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-siga_ipt_username}

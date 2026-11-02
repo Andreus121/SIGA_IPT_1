@@ -8,10 +8,12 @@ package cl.siga.siga_ipt.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.web.client.RestClientException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,12 @@ public class KeycloakAdminService {
     @Value("${keycloak.admin.password}")
     private String adminPassword;
 
+    @Value("${keycloak.admin.max-attempts:12}")
+    private int maxAttempts;
+
+    @Value("${keycloak.admin.retry-delay-ms:5000}")
+    private long retryDelayMs;
+
     private final RestClient restClient = RestClient.create();
 
     /**
@@ -47,22 +55,39 @@ public class KeycloakAdminService {
      * @param roleName Rol de realm a asignar: "STUDENT" o "TEACHER"
      */
     public void createUser(String email, String fullName, String password, String roleName) {
+        RuntimeException lastFailure = null;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                String adminToken = obtenerTokenAdmin();
+                String userId = buscarUsuario(adminToken, email);
+                if (userId == null) {
+                    userId = crearUsuarioEnKeycloak(adminToken, email, fullName, password);
+                }
+                asignarRol(adminToken, userId, roleName);
+                log.info("Usuario Keycloak listo: {} con rol {}", email, roleName);
+                return;
+            } catch (RestClientException | IllegalStateException e) {
+                lastFailure = new RuntimeException(e.getMessage(), e);
+                log.warn("Keycloak no está listo para {} (intento {}/{}): {}",
+                        email, attempt, maxAttempts, e.getMessage());
+                if (attempt < maxAttempts) {
+                    esperarReintento();
+                }
+            } catch (RuntimeException e) {
+                log.error("Error no recuperable al crear usuario Keycloak para {}: {}", email, e.getMessage());
+                throw new RuntimeException("No se pudo crear el usuario en Keycloak: " + e.getMessage(), e);
+            }
+        }
+        throw new RuntimeException("Keycloak no estuvo disponible después de " + maxAttempts
+                + " intentos para crear/verificar " + email, lastFailure);
+    }
+
+    private void esperarReintento() {
         try {
-            // 1. Obtener token de admin del realm master
-            String adminToken = obtenerTokenAdmin();
-
-            // 2. Crear el usuario en Keycloak
-            String userId = crearUsuarioEnKeycloak(adminToken, email, fullName, password);
-
-            // 3. Asignar el rol de realm correspondiente
-            asignarRol(adminToken, userId, roleName);
-
-            log.info("Usuario Keycloak creado correctamente: {} con rol {}", email, roleName);
-
-        } catch (Exception e) {
-            log.error("Error al crear usuario en Keycloak para {}: {}", email, e.getMessage());
-            // Se lanza la excepción para que el servicio que llama pueda revertir la transacción DB
-            throw new RuntimeException("No se pudo crear el usuario en Keycloak: " + e.getMessage(), e);
+            Thread.sleep(retryDelayMs);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("El reintento contra Keycloak fue interrumpido", e);
         }
     }
 
@@ -134,6 +159,29 @@ public class KeycloakAdminService {
 
         String path = location.getPath();
         return path.substring(path.lastIndexOf('/') + 1);
+    }
+
+    private String buscarUsuario(String adminToken, String email) {
+        String usersUrl = UriComponentsBuilder
+                .fromUriString(keycloakInternalUrl + "/admin/realms/" + realm + "/users")
+                .queryParam("email", email)
+                .queryParam("exact", true)
+                .toUriString();
+
+        List<?> users = restClient.get()
+                .uri(usersUrl)
+                .header("Authorization", "Bearer " + adminToken)
+                .retrieve()
+                .body(List.class);
+
+        if (users == null || users.isEmpty()) {
+            return null;
+        }
+        Object id = ((Map<?, ?>) users.get(0)).get("id");
+        if (!(id instanceof String userId) || userId.isBlank()) {
+            throw new IllegalStateException("Keycloak retornó un usuario sin ID para " + email);
+        }
+        return userId;
     }
 
     /**

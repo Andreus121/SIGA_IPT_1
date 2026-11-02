@@ -177,6 +177,7 @@
 								<exclude>**/controller/**</exclude>
 								<exclude>**/exception/**</exclude>
 								<exclude>**/KeycloakAdminService.class</exclude>
+								<exclude>**/SeedDataService.class</exclude>
 								<exclude>**/SigaIptApplication.class</exclude>
 							</excludes>
 						</configuration>
@@ -197,6 +198,7 @@
 								<exclude>**/controller/**</exclude>
 								<exclude>**/exception/**</exclude>
 								<exclude>**/KeycloakAdminService.class</exclude>
+								<exclude>**/SeedDataService.class</exclude>
 								<exclude>**/SigaIptApplication.class</exclude>
 							</excludes>
 							<rules>
