@@ -50,7 +50,7 @@ services:
     restart: unless-stopped
 
   backend:
-    build: ./backend
+    image: ${DOCKERHUB_USERNAME:?DOCKERHUB_USERNAME es obligatorio}/siga-ipt-backend:${IMAGE_TAG:-latest}
     env_file:
       - .env
     depends_on:
@@ -84,14 +84,7 @@ services:
     restart: unless-stopped
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_KEYCLOAK_URL: ${VITE_KEYCLOAK_URL:-http://localhost:8090}
-        VITE_KEYCLOAK_REALM: ${VITE_KEYCLOAK_REALM:-siga-realm}
-        VITE_KEYCLOAK_CLIENT_ID: ${VITE_KEYCLOAK_CLIENT_ID:-siga-frontend}
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:80}
+    image: ${DOCKERHUB_USERNAME:?DOCKERHUB_USERNAME es obligatorio}/siga-ipt-frontend:${IMAGE_TAG:-latest}
     env_file:
       - .env
     expose:

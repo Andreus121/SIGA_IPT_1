@@ -115,7 +115,36 @@ Con el sistema levantado mediante Docker, abre en el navegador:
 ssh root@ip_publica_droplet
 ```
 
-3. Descargar docker
+3. copiar archivos de interés al servidor (terminal local)
+```
+scp -r compose.yml keycloak/ nginx.conf .env root@ip_publica_servidor:~/
+
+```
+
+4. Descargar Docker e iniciar sesión en Docker Hub
 ```
 sudo apt install docker-compose-v2
+docker login
 ```
+
+5. Crear `.env` en el servidor a partir de `.env.example` y configurar:
+
+- `PUBLIC_IP` con la IP pública del servidor.
+
+6. Abrir los puertos en el panel de DigitalOcean
+    1. Nerwork -> firewall
+    2. crear un firewall para el droplet
+    3. crear inbound rules
+        - Tipo: HTTP, Puerto: 80, Fuente: All IPv4, All IPv6
+        - Tipo: Custom TCP, Puerto: 8090, Fuente: All IPv4, All IPv6
+        - Tipo: Custom TCP, Puerto: 5173, Fuente: All IPv4, All IPv6
+    4. guardar firewall
+
+
+7. Descargar las imágenes y levantar el sistema:
+```
+docker compose pull
+docker compose up -d
+```
+
+8. Ingresar a keycloak y cambiar las url de redireccionamiento del cliente del frontend
