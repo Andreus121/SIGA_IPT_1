@@ -109,9 +109,9 @@ jobs:
           context: ./frontend
           push: true
           build-args: |
-            VITE_KEYCLOAK_URL=${{ vars.VITE_KEYCLOAK_URL || 'http://localhost:8090' }}
+            VITE_KEYCLOAK_URL=${{ vars.VITE_KEYCLOAK_URL || 'http://165.227.23.12:8090' }}
             VITE_KEYCLOAK_REALM=${{ vars.VITE_KEYCLOAK_REALM || 'siga-realm' }}
             VITE_KEYCLOAK_CLIENT_ID=${{ vars.VITE_KEYCLOAK_CLIENT_ID || 'siga-frontend' }}
-            VITE_API_URL=${{ vars.VITE_API_URL || 'http://localhost:80' }}
+            VITE_API_URL=${{ vars.VITE_API_URL || 'http://165.227.23.12:80' }}
           tags: ${{ steps.frontend-meta.outputs.tags }}
           labels: ${{ steps.frontend-meta.outputs.labels }}

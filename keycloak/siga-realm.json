@@ -791,10 +791,12 @@
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
         "http://localhost:5173/*",
+        "http://165.227.23.12:5173/*",
         "${KEYCLOAK_FRONT_URL}/*"
       ],
       "webOrigins": [
         "http://localhost:5173",
+        "http://165.227.23.12:5173",
         "${KEYCLOAK_FRONT_URL}"
       ],
       "notBefore": 0,
