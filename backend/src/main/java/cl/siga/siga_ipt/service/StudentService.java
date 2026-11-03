@@ -32,6 +32,7 @@ public class StudentService {
     private final StudyPlanRepository studyPlanRepository;
     private final RegistrationRepository registrationRepository;
     private final AcademicHistoryRepository academicHistoryRepository;
+    private final TeacherRepository teacherRepository;
     // Servicio para crear el usuario en Keycloak al momento de registrar al estudiante
     private final KeycloakAdminService keycloakAdminService;
 
@@ -42,6 +43,9 @@ public class StudentService {
         // 1. Validar unicidad de RUN y Email
         if (studentRepository.existsByRun(dto.getRun())) {
             throw new IllegalArgumentException("El RUN ya se encuentra registrado.");
+        }
+        if (teacherRepository.existsByRun(dto.getRun())) {
+            throw new IllegalArgumentException("El RUN ya se encuentra registrado como docente.");
         }
         if (studentRepository.existsByEmail(dto.getEmail())) {
             throw new IllegalArgumentException("El correo electrónico ya se encuentra registrado.");

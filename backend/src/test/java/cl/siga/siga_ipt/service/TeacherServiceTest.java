@@ -9,6 +9,7 @@ import cl.siga.siga_ipt.enums.TeacherStatus;
 import cl.siga.siga_ipt.repository.AcademicHistoryRepository;
 import cl.siga.siga_ipt.repository.AcademicPeriodRepository;
 import cl.siga.siga_ipt.repository.SectionRepository;
+import cl.siga.siga_ipt.repository.StudentRepository;
 import cl.siga.siga_ipt.repository.TeacherRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,9 @@ class TeacherServiceTest {
 
     @Mock
     private TeacherRepository teacherRepository;
+
+    @Mock
+    private StudentRepository studentRepository;
 
     @Mock
     private SectionRepository sectionRepository;
@@ -84,6 +88,18 @@ class TeacherServiceTest {
         assertThatThrownBy(() -> teacherService.createTeacher(dto))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Ya existe un docente registrado con el RUN");
+    }
+
+    @Test
+    @DisplayName("Should reject a RUN already used by a student")
+    void createTeacher_RunUsedByStudent_ThrowsException() {
+        TeacherCreateDto dto = buildValidTeacherCreateDto();
+        when(teacherRepository.existsByRun("11111111-1")).thenReturn(false);
+        when(studentRepository.existsByRun("11111111-1")).thenReturn(true);
+
+        assertThatThrownBy(() -> teacherService.createTeacher(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("registrado como estudiante");
     }
 
     @Test

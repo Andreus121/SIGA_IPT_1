@@ -441,4 +441,166 @@ class SectionServiceTest {
         assertThatThrownBy(() -> sectionService.getSectionByCodeAndPeriod("NON-EXIST", "2027-1"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    @DisplayName("Should reject section when course or teacher does not exist")
+    void createSection_MissingCourseOrTeacher_ThrowsException() {
+        SectionCreateDto dto = buildValidSectionCreateDto();
+        AcademicPeriodEntity period = AcademicPeriodEntity.builder()
+                .periodCode("2027-1").status(PeriodStatus.OPEN).build();
+
+        when(sectionRepository.existsByCodeAndPeriodCode(dto.getCode(), dto.getPeriodCode())).thenReturn(false);
+        when(periodRepository.findByPeriodCode(dto.getPeriodCode())).thenReturn(Optional.of(period));
+        when(courseRepository.findFirstByCode(dto.getCourseCode())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> sectionService.createSection(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("La asignatura");
+
+        CourseEntity course = buildCourseEntity(2, 2, 0);
+        when(courseRepository.findFirstByCode(dto.getCourseCode())).thenReturn(Optional.of(course));
+        when(sectionRepository.existsByCourseCodeAndPeriodCode(dto.getCourseCode(), dto.getPeriodCode())).thenReturn(false);
+        when(teacherRepository.findById(dto.getTeacherId())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> sectionService.createSection(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("El docente");
+    }
+
+    @Test
+    @DisplayName("Should reject null, empty, invalid and duplicate schedules")
+    void createSection_InvalidSchedules_ThrowsException() {
+        SectionCreateDto dto = buildValidSectionCreateDto();
+        AcademicPeriodEntity period = AcademicPeriodEntity.builder()
+                .periodCode("2027-1").status(PeriodStatus.OPEN).build();
+        CourseEntity course = buildCourseEntity(2, 2, 0);
+        TeacherEntity teacher = TeacherEntity.builder().id(10L).status(TeacherStatus.ACTIVE).build();
+
+        when(sectionRepository.existsByCodeAndPeriodCode(dto.getCode(), dto.getPeriodCode())).thenReturn(false);
+        when(periodRepository.findByPeriodCode(dto.getPeriodCode())).thenReturn(Optional.of(period));
+        when(courseRepository.findFirstByCode(dto.getCourseCode())).thenReturn(Optional.of(course));
+        when(sectionRepository.existsByCourseCodeAndPeriodCode(dto.getCourseCode(), dto.getPeriodCode())).thenReturn(false);
+        when(teacherRepository.findById(dto.getTeacherId())).thenReturn(Optional.of(teacher));
+
+        dto.setSchedules(List.of());
+        assertThatThrownBy(() -> sectionService.createSection(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Debe asignar horarios");
+
+        dto.setSchedules(List.of(new SectionScheduleDto(null, 1), new SectionScheduleDto("W", 2)));
+        assertThatThrownBy(() -> sectionService.createSection(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Día de horario inválido");
+
+        dto.setSchedules(List.of(new SectionScheduleDto("X", 1), new SectionScheduleDto("W", 2)));
+        assertThatThrownBy(() -> sectionService.createSection(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Día de horario inválido");
+
+        dto.setSchedules(List.of(new SectionScheduleDto("L", null), new SectionScheduleDto("W", 2)));
+        assertThatThrownBy(() -> sectionService.createSection(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Módulo inválido");
+
+        dto.setSchedules(List.of(new SectionScheduleDto("L", 0), new SectionScheduleDto("W", 2)));
+        assertThatThrownBy(() -> sectionService.createSection(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Módulo inválido");
+
+        dto.setSchedules(List.of(new SectionScheduleDto("L", 1), new SectionScheduleDto("L", 1)));
+        assertThatThrownBy(() -> sectionService.createSection(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("duplicados");
+    }
+
+    @Test
+    @DisplayName("Should reject update when section, period or course does not exist")
+    void updateSection_MissingData_ThrowsException() {
+        SectionUpdateDto dto = SectionUpdateDto.builder().capacity(30).build();
+        when(sectionRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> sectionService.updateSection(99L, dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("no encontrada");
+
+        SectionEntity section = SectionEntity.builder().id(1L).periodCode("2027-1").build();
+        when(sectionRepository.findById(1L)).thenReturn(Optional.of(section));
+        when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> sectionService.updateSection(1L, dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("período");
+
+        when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(
+                AcademicPeriodEntity.builder().periodCode("2027-1").status(PeriodStatus.OPEN).build()));
+        when(courseRepository.findFirstByCode(null)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> sectionService.updateSection(1L, dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("asociada");
+    }
+
+    @Test
+    @DisplayName("Should reject update with missing teacher or teacher schedule conflict")
+    void updateSection_TeacherValidation_ThrowsException() {
+        SectionEntity section = SectionEntity.builder()
+                .id(1L).code("SEC-1").courseCode("INF-101").periodCode("2027-1").teacherId(10L).build();
+        AcademicPeriodEntity period = AcademicPeriodEntity.builder()
+                .periodCode("2027-1").status(PeriodStatus.OPEN).build();
+        CourseEntity course = buildCourseEntity(2, 2, 0);
+        SectionUpdateDto dto = SectionUpdateDto.builder().teacherId(20L).build();
+
+        when(sectionRepository.findById(1L)).thenReturn(Optional.of(section));
+        when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(period));
+        when(courseRepository.findFirstByCode("INF-101")).thenReturn(Optional.of(course));
+        when(teacherRepository.findById(20L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> sectionService.updateSection(1L, dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("El docente");
+
+        TeacherEntity teacher = TeacherEntity.builder().id(20L).status(TeacherStatus.ACTIVE).build();
+        SectionEntity otherSection = SectionEntity.builder().code("OTHER").periodCode("2027-1").build();
+        when(teacherRepository.findById(20L)).thenReturn(Optional.of(teacher));
+        when(sectionRepository.findByTeacherIdAndPeriodCode(20L, "2027-1")).thenReturn(List.of(otherSection));
+        when(scheduleRepository.findBySectionCodeAndPeriodCode("SEC-1", "2027-1"))
+                .thenReturn(List.of(new SectionScheduleEntity(1L, "SEC-1", "2027-1", "L", 1)));
+        when(scheduleRepository.findBySectionCodeAndPeriodCode("OTHER", "2027-1"))
+                .thenReturn(List.of(new SectionScheduleEntity(2L, "OTHER", "2027-1", "L", 1)));
+
+        assertThatThrownBy(() -> sectionService.updateSection(1L, dto))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("ya tiene asignada");
+    }
+
+    @Test
+    @DisplayName("Should reject update when the new schedule is invalid")
+    void updateSection_InvalidSchedules_ThrowsException() {
+        SectionEntity section = SectionEntity.builder()
+                .id(1L).code("SEC-1").courseCode("INF-101").periodCode("2027-1").teacherId(10L).build();
+        when(sectionRepository.findById(1L)).thenReturn(Optional.of(section));
+        when(periodRepository.findByPeriodCode("2027-1")).thenReturn(Optional.of(
+                AcademicPeriodEntity.builder().periodCode("2027-1").status(PeriodStatus.OPEN).build()));
+        when(courseRepository.findFirstByCode("INF-101")).thenReturn(Optional.of(buildCourseEntity(2, 2, 0)));
+
+        SectionUpdateDto dto = SectionUpdateDto.builder()
+                .schedules(List.of(new SectionScheduleDto("L", 1))).build();
+
+        assertThatThrownBy(() -> sectionService.updateSection(1L, dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("no coincide");
+    }
+
+    @Test
+    @DisplayName("Should reject delete when a registration exists in another registration lookup")
+    void deleteSection_WithHistoricalRegistration_ThrowsException() {
+        SectionEntity section = SectionEntity.builder().id(1L).code("SEC-1").periodCode("2027-1").build();
+        when(sectionRepository.findById(1L)).thenReturn(Optional.of(section));
+        when(registrationRepository.existsBySectionCodeAndPeriodCode("SEC-1", "2027-1")).thenReturn(false);
+        when(registrationRepository.existsBySectionCode("SEC-1")).thenReturn(true);
+
+        assertThatThrownBy(() -> sectionService.deleteSection(1L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("estudiantes inscritos");
+    }
 }

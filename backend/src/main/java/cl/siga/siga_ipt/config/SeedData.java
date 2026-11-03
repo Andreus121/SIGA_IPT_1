@@ -620,6 +620,11 @@ public class SeedData {
                         new AcademicPeriodSeed(
                                 "2026-2",
                                 "2026-2",
+                                PeriodStatus.CLOSED
+                        ),
+                        new AcademicPeriodSeed(
+                                "2027-1",
+                                "2027-1",
                                 PeriodStatus.OPEN
                         )
                 ),
@@ -627,33 +632,33 @@ public class SeedData {
                 List.of(
                         new TeacherSeed(
                                 "12.345.678-9",
-                                "Ana Profesora Ejemplo",
-                                "ana.ejemplo@siga.cl",
+                                "docente1",
+                                "docente1@siga.cl",
                                 "Ingeniera Informática",
                                 "Magíster en Computación",
                                 TeacherStatus.ACTIVE,
-                                "PasswordTemporal123!"
+                                "123456"
                         )
                 ),
                 // Alumnos
                 List.of(
                         new StudentSeed(
                                 "21.345.678-9",
-                                "Pedro Reprobación Ejemplo",
-                                "pedro.reprobacion@siga.cl",
+                                "estudiante1",
+                                "estudiante1@siga.cl",
                                 "10450",
                                 "2021.3",
                                 StudentStatus.REGULAR,
-                                "PasswordTemporal123!"
+                                "123456"
                         ),
                         new StudentSeed(
                                 "22.345.678-9",
-                                "María Primer Semestre Ejemplo",
-                                "maria.primersemestre@siga.cl",
+                                "estudiante2",
+                                "estudiante2@siga.cl",
                                 "10450",
                                 "2021.3",
                                 StudentStatus.REGULAR,
-                                "PasswordTemporal123!"
+                                "123456"
                         )
                 ),
                 // Secciones
@@ -741,6 +746,90 @@ public class SeedData {
                                 "2026-2",
                                 "12.345.678-9",
                                 30
+                        ),
+                        new SectionSeed(
+                                "TAP101-A",
+                                "TAP101",
+                                "2027-1",
+                                "12.345.678-9",
+                                30
+                        ),
+                        new SectionSeed(
+                                "TAP102-A",
+                                "TAP102",
+                                "2027-1",
+                                "12.345.678-9",
+                                30
+                        ),
+                        new SectionSeed(
+                                "TAP103-A",
+                                "TAP103",
+                                "2027-1",
+                                "12.345.678-9",
+                                30
+                        ),
+                        new SectionSeed(
+                                "TAP104-A",
+                                "TAP104",
+                                "2027-1",
+                                "12.345.678-9",
+                                30
+                        ),
+                        new SectionSeed(
+                                "TAP105-A",
+                                "TAP105",
+                                "2027-1",
+                                "12.345.678-9",
+                                30
+                        ),
+                        new SectionSeed(
+                                "TAP106-A",
+                                "TAP106",
+                                "2027-1",
+                                "12.345.678-9",
+                                30
+                        ),
+                        new SectionSeed(
+                                "TAP201-A",
+                                "TAP201",
+                                "2027-1",
+                                "12.345.678-9",
+                                30
+                        ),
+                        new SectionSeed(
+                                "TAP202-A",
+                                "TAP202",
+                                "2027-1",
+                                "12.345.678-9",
+                                30
+                        ),
+                        new SectionSeed(
+                                "TAP203-A",
+                                "TAP203",
+                                "2027-1",
+                                "12.345.678-9",
+                                30
+                        ),
+                        new SectionSeed(
+                                "TAP204-A",
+                                "TAP204",
+                                "2027-1",
+                                "12.345.678-9",
+                                30
+                        ),
+                        new SectionSeed(
+                                "TAP205-A",
+                                "TAP205",
+                                "2027-1",
+                                "12.345.678-9",
+                                30
+                        ),
+                        new SectionSeed(
+                                "TAP206-A",
+                                "TAP206",
+                                "2027-1",
+                                "12.345.678-9",
+                                30
                         )
                 ),
                 // Horarios de secciones
@@ -766,7 +855,19 @@ public class SeedData {
                         new SectionScheduleSeed("TAP203-A", "2026-2", "J", 4),
                         new SectionScheduleSeed("TAP204-A", "2026-2", "V", 4),
                         new SectionScheduleSeed("TAP205-A", "2026-2", "L", 5),
-                        new SectionScheduleSeed("TAP206-A", "2026-2", "M", 5)
+                        new SectionScheduleSeed("TAP206-A", "2026-2", "M", 5),
+                        new SectionScheduleSeed("TAP101-A", "2027-1", "L", 1),
+                        new SectionScheduleSeed("TAP102-A", "2027-1", "M", 2),
+                        new SectionScheduleSeed("TAP103-A", "2027-1", "W", 1),
+                        new SectionScheduleSeed("TAP104-A", "2027-1", "J", 2),
+                        new SectionScheduleSeed("TAP105-A", "2027-1", "V", 1),
+                        new SectionScheduleSeed("TAP106-A", "2027-1", "L", 3),
+                        new SectionScheduleSeed("TAP201-A", "2027-1", "M", 4),
+                        new SectionScheduleSeed("TAP202-A", "2027-1", "W", 4),
+                        new SectionScheduleSeed("TAP203-A", "2027-1", "J", 4),
+                        new SectionScheduleSeed("TAP204-A", "2027-1", "V", 4),
+                        new SectionScheduleSeed("TAP205-A", "2027-1", "L", 5),
+                        new SectionScheduleSeed("TAP206-A", "2027-1", "M", 5)
                 ),
                 // Matrículas académicas
                 List.of(
@@ -781,6 +882,18 @@ public class SeedData {
                                 "2026-2",
                                 LocalDate.of(2026, 8, 1),
                                 EnrollmentStatus.ACTIVE
+                        ),
+                        new EnrollmentSeed(
+                                "21.345.678-9",
+                                "2027-1",
+                                LocalDate.of(2027, 3, 1),
+                                EnrollmentStatus.ACTIVE
+                        ),
+                        new EnrollmentSeed(
+                                "22.345.678-9",
+                                "2027-1",
+                                LocalDate.of(2027, 3, 1),
+                                EnrollmentStatus.ACTIVE
                         )
                 ),
                 // Inscripciones de asignaturas
@@ -791,6 +904,132 @@ public class SeedData {
                                 "TAP101-A",
                                 "2026-2",
                                 LocalDateTime.of(2026, 8, 2, 9, 0),
+                                3.5,
+                                RegistrationStatus.REGISTERED
+                        ),
+                        new RegistrationSeed(
+                                "21.345.678-9",
+                                "TAP102",
+                                "TAP102-A",
+                                "2026-2",
+                                LocalDateTime.of(2026, 8, 2, 9, 5),
+                                5.0,
+                                RegistrationStatus.REGISTERED
+                        ),
+                        new RegistrationSeed(
+                                "21.345.678-9",
+                                "TAP103",
+                                "TAP103-A",
+                                "2026-2",
+                                LocalDateTime.of(2026, 8, 2, 9, 10),
+                                6.0,
+                                RegistrationStatus.REGISTERED
+                        ),
+                        new RegistrationSeed(
+                                "22.345.678-9",
+                                "TAP101",
+                                "TAP101-A",
+                                "2026-2",
+                                LocalDateTime.of(2026, 8, 2, 9, 15),
+                                5.5,
+                                RegistrationStatus.REGISTERED
+                        ),
+                        new RegistrationSeed(
+                                "22.345.678-9",
+                                "TAP102",
+                                "TAP102-A",
+                                "2026-2",
+                                LocalDateTime.of(2026, 8, 2, 9, 20),
+                                5.0,
+                                RegistrationStatus.REGISTERED
+                        ),
+                        new RegistrationSeed(
+                                "22.345.678-9",
+                                "TAP103",
+                                "TAP103-A",
+                                "2026-2",
+                                LocalDateTime.of(2026, 8, 2, 9, 25),
+                                6.0,
+                                RegistrationStatus.REGISTERED
+                        ),
+                        new RegistrationSeed(
+                                "22.345.678-9",
+                                "TAP104",
+                                "TAP104-A",
+                                "2026-2",
+                                LocalDateTime.of(2026, 8, 2, 9, 30),
+                                5.0,
+                                RegistrationStatus.REGISTERED
+                        ),
+                        new RegistrationSeed(
+                                "22.345.678-9",
+                                "TAP105",
+                                "TAP105-A",
+                                "2026-2",
+                                LocalDateTime.of(2026, 8, 2, 9, 35),
+                                5.5,
+                                RegistrationStatus.REGISTERED
+                        ),
+                        new RegistrationSeed(
+                                "22.345.678-9",
+                                "TAP106",
+                                "TAP106-A",
+                                "2026-2",
+                                LocalDateTime.of(2026, 8, 2, 9, 40),
+                                5.0,
+                                RegistrationStatus.REGISTERED
+                        ),
+                        new RegistrationSeed(
+                                "22.345.678-9",
+                                "TAP201",
+                                "TAP201-A",
+                                "2027-1",
+                                LocalDateTime.of(2027, 3, 2, 9, 0),
+                                null,
+                                RegistrationStatus.REGISTERED
+                        ),
+                        new RegistrationSeed(
+                                "22.345.678-9",
+                                "TAP202",
+                                "TAP202-A",
+                                "2027-1",
+                                LocalDateTime.of(2027, 3, 2, 9, 5),
+                                null,
+                                RegistrationStatus.REGISTERED
+                        ),
+                        new RegistrationSeed(
+                                "22.345.678-9",
+                                "TAP203",
+                                "TAP203-A",
+                                "2027-1",
+                                LocalDateTime.of(2027, 3, 2, 9, 10),
+                                null,
+                                RegistrationStatus.REGISTERED
+                        ),
+                        new RegistrationSeed(
+                                "22.345.678-9",
+                                "TAP204",
+                                "TAP204-A",
+                                "2027-1",
+                                LocalDateTime.of(2027, 3, 2, 9, 15),
+                                null,
+                                RegistrationStatus.REGISTERED
+                        ),
+                        new RegistrationSeed(
+                                "22.345.678-9",
+                                "TAP205",
+                                "TAP205-A",
+                                "2027-1",
+                                LocalDateTime.of(2027, 3, 2, 9, 20),
+                                null,
+                                RegistrationStatus.REGISTERED
+                        ),
+                        new RegistrationSeed(
+                                "22.345.678-9",
+                                "TAP206",
+                                "TAP206-A",
+                                "2027-1",
+                                LocalDateTime.of(2027, 3, 2, 9, 25),
                                 null,
                                 RegistrationStatus.REGISTERED
                         )
@@ -806,6 +1045,26 @@ public class SeedData {
                                 "2026-2",
                                 3.5,
                                 AcademicStatus.FAILED
+                        ),
+                        new AcademicHistorySeed(
+                                "21.345.678-9",
+                                "TAP102",
+                                "2021.3",
+                                "TAP102-A",
+                                "12.345.678-9",
+                                "2026-2",
+                                5.0,
+                                AcademicStatus.PASSED
+                        ),
+                        new AcademicHistorySeed(
+                                "21.345.678-9",
+                                "TAP103",
+                                "2021.3",
+                                "TAP103-A",
+                                "12.345.678-9",
+                                "2026-2",
+                                6.0,
+                                AcademicStatus.PASSED
                         ),
                         new AcademicHistorySeed(
                                 "22.345.678-9",

@@ -88,3 +88,34 @@ npm install
 npm run dev
 ```
 La aplicación correrá en [http://localhost:5173](http://localhost:5173).
+
+## 6. Porcentaje de cobertura jacoco
+
+1. ingresar a la carpeta del backend
+2. ejecutar el comando de pruebas
+```
+./mvnw clean test
+```
+3. ingresar a la carpeta target/site/jacoco
+4. abrir archivo index.html
+
+## 7. APIs swagger
+
+Con el sistema levantado mediante Docker, abre en el navegador:
+
+- [Swagger UI](http://localhost/swagger-ui.html)
+
+
+## 8. Despliegue en DigitalOcean (usando dockerHub)
+
+1. Crear droplet
+
+2. Conectarse al droplet via terminal
+```
+ssh root@ip_publica_droplet
+```
+
+3. Descargar docker
+```
+sudo apt install docker-compose-v2
+```

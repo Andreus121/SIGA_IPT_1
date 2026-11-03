@@ -69,8 +69,6 @@ services:
     scale: 3 # quitar # cuando se quieran usar las 3 copias
     restart: unless-stopped  
 
-  # para levantar docker y eliminar las otras 2 copias usar
-  # docker compose up -d --remove-orphans
   
   nginx:
     image: nginx:latest
@@ -105,3 +103,4 @@ services:
 
 volumes:
   postgres_data:
+  maven_cache:

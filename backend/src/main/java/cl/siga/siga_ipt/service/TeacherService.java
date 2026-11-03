@@ -14,6 +14,7 @@ import cl.siga.siga_ipt.enums.TeacherStatus;
 import cl.siga.siga_ipt.repository.AcademicHistoryRepository;
 import cl.siga.siga_ipt.repository.AcademicPeriodRepository;
 import cl.siga.siga_ipt.repository.SectionRepository;
+import cl.siga.siga_ipt.repository.StudentRepository;
 import cl.siga.siga_ipt.repository.TeacherRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import java.util.List;
 public class TeacherService {
 
     private final TeacherRepository teacherRepository;
+    private final StudentRepository studentRepository;
     private final SectionRepository sectionRepository;
     private final AcademicPeriodRepository periodRepository;
     private final AcademicHistoryRepository academicHistoryRepository;
@@ -38,6 +40,9 @@ public class TeacherService {
         // Verificar RUN único
         if (teacherRepository.existsByRun(dto.getRun())) {
             throw new IllegalArgumentException("Ya existe un docente registrado con el RUN: " + dto.getRun());
+        }
+        if (studentRepository.existsByRun(dto.getRun())) {
+            throw new IllegalArgumentException("El RUN ya se encuentra registrado como estudiante.");
         }
         // Verificar email único
         if (teacherRepository.existsByEmail(dto.getEmail())) {
@@ -186,7 +191,6 @@ public class TeacherService {
         if (academicHistoryRepository.existsByTeacherRun(teacher.getRun())) {
             throw new IllegalStateException("No se puede eliminar el docente porque registra historial académico en el sistema.");
         }
-
         teacherRepository.delete(teacher);
     }
 

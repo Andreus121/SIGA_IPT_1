@@ -44,6 +44,9 @@ class StudentServiceTest {
     private AcademicHistoryRepository academicHistoryRepository;
 
     @Mock
+    private TeacherRepository teacherRepository;
+
+    @Mock
     private KeycloakAdminService keycloakAdminService;
 
     @InjectMocks
@@ -98,6 +101,18 @@ class StudentServiceTest {
         assertThatThrownBy(() -> studentService.createStudent(dto))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("El RUN ya se encuentra registrado");
+    }
+
+    @Test
+    @DisplayName("Should reject a RUN already used by a teacher")
+    void createStudent_RunUsedByTeacher_ThrowsException() {
+        StudentCreateDto dto = buildValidStudentCreateDto();
+        when(studentRepository.existsByRun("12345678-9")).thenReturn(false);
+        when(teacherRepository.existsByRun("12345678-9")).thenReturn(true);
+
+        assertThatThrownBy(() -> studentService.createStudent(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("registrado como docente");
     }
 
     @Test
