@@ -40,7 +40,7 @@ public class StudentService {
     @Transactional
     public StudentResponseDto createStudent(StudentCreateDto dto) {
 
-        // 1. Validar unicidad de RUN y Email
+        // Validar unicidad de RUN y Email
         if (studentRepository.existsByRun(dto.getRun())) {
             throw new IllegalArgumentException("El RUN ya se encuentra registrado.");
         }
@@ -51,7 +51,7 @@ public class StudentService {
             throw new IllegalArgumentException("El correo electrónico ya se encuentra registrado.");
         }
 
-        // 2. Validar que la carrera exista y esté ACTIVA
+        // Validar que la carrera exista y esté ACTIVA
         CareerEntity career = careerRepository.findByCode(dto.getCareerCode())
                 .orElseThrow(() -> new IllegalArgumentException("La carrera especificada no existe."));
 
@@ -59,11 +59,11 @@ public class StudentService {
             throw new IllegalStateException("No se pueden registrar estudiantes en una carrera INACTIVA.");
         }
 
-        // 3. Obtener el plan de estudio VIGENTE de la carrera
+        // Obtener el plan de estudio VIGENTE de la carrera
         StudyPlanEntity studyPlan = studyPlanRepository.findByCareerCodeAndStatus(career.getCode(), StudyPlanStatus.CURRENT)
                 .orElseThrow(() -> new IllegalStateException("La carrera no tiene un plan de estudios vigente asignado."));
 
-        // 4. Crear el estudiante con sus datos
+        // Crear el estudiante con sus datos
         StudentEntity student = StudentEntity.builder()
                 .run(dto.getRun())
                 .fullName(dto.getFullName())
@@ -73,10 +73,10 @@ public class StudentService {
                 .status(StudentStatus.REGULAR)
                 .build();
 
-        // 5. Guardar en la base de datos
+        // Guardar en la base de datos
         studentRepository.save(student);
 
-        // 6. Crear el usuario en Keycloak con rol STUDENT para que pueda iniciar sesión
+        // Crear el usuario en Keycloak con rol STUDENT para que pueda iniciar sesión
         keycloakAdminService.createUser(dto.getEmail(), dto.getFullName(), dto.getPassword(), "STUDENT");
 
         return mapStudentToResponseDto(student);

@@ -44,6 +44,7 @@ public class SecurityConfig {
     @Value("${cors.allowed-origins:http://localhost:5173}")
     private String allowedOrigins;
 
+    // Define las reglas de acceso, CORS, CSRF y validación de tokens JWT.
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -64,6 +65,7 @@ public class SecurityConfig {
         return http.build();
     }
 
+    // Crea el decodificador que obtiene y valida las claves públicas de Keycloak.
     @Bean
     public JwtDecoder jwtDecoder() {
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
@@ -74,6 +76,7 @@ public class SecurityConfig {
         return decoder;
     }
 
+    // Configura qué orígenes, métodos y cabeceras acepta la API.
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();

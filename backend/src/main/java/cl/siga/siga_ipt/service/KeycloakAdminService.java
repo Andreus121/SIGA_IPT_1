@@ -45,15 +45,8 @@ public class KeycloakAdminService {
 
     private final RestClient restClient = RestClient.create();
 
-    /**
-     * Crea un usuario en Keycloak con el email como username, le asigna la contraseña
-     * dada por el admin y le asigna el rol de realm (STUDENT o TEACHER).
-     *
-     * @param email    Correo del nuevo usuario (también es el username en Keycloak)
-     * @param fullName Nombre completo del usuario
-     * @param password Contraseña inicial asignada por el admin
-     * @param roleName Rol de realm a asignar: "STUDENT" o "TEACHER"
-     */
+    // Crea un usuario en Keycloak con el email como username, le asigna la contraseña
+    // dada por el admin y le asigna el rol de realm (STUDENT o TEACHER).
     public void createUser(String email, String fullName, String password, String roleName) {
         RuntimeException lastFailure = null;
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {

@@ -26,6 +26,7 @@ public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, Abstra
 
     private final JwtGrantedAuthoritiesConverter defaultGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
 
+    // Convierte el JWT en un usuario autenticado con sus permisos.
     @Override
     public AbstractAuthenticationToken convert(Jwt jwt) {
         Collection<GrantedAuthority> authorities = Stream.concat(
@@ -36,6 +37,7 @@ public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, Abstra
         return new JwtAuthenticationToken(jwt, authorities, getPrincipalClaimName(jwt));
     }
 
+    // Lee los roles propios del realm de Keycloak y los adapta a Spring Security.
     private Collection<GrantedAuthority> extractRealmRoles(Jwt jwt) {
         Map<String, Object> realmAccess = jwt.getClaim("realm_access");
         if (realmAccess == null || realmAccess.isEmpty()) {
@@ -53,6 +55,7 @@ public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, Abstra
                 .collect(Collectors.toList());
     }
 
+    // Usa el nombre de usuario del token o, si no existe, su subject.
     private String getPrincipalClaimName(Jwt jwt) {
         String claimName = jwt.getClaimAsString("preferred_username");
         return claimName != null ? claimName : jwt.getSubject();
