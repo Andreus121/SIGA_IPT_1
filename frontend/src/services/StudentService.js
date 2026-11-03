@@ -62,6 +62,11 @@ const createRegistration = async(registrationData) => {
   return response.data;
 };
 
+const createBatchRegistration = async (registrationData) => {
+  const response = await axiosClient.post('/api/registrations/batch', registrationData);
+  return response.data;
+};
+
 // Anular la inscripción de un ramo
 const deleteRegistration = async(registrationId) => {
   await axiosClient.delete(`/api/registrations/${registrationId}`);
@@ -90,6 +95,7 @@ export {
   getSectionByCodeAndPeriod,
   getRegistrationsByStudent,
   createRegistration,
+  createBatchRegistration,
   deleteRegistration,
   getCareerByCode,
   enrollStudent

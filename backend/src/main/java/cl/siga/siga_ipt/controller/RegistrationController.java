@@ -1,5 +1,6 @@
 package cl.siga.siga_ipt.controller;
 
+import cl.siga.siga_ipt.dto.BatchRegistrationCreateDto;
 import cl.siga.siga_ipt.dto.RegistrationCreateDto;
 import cl.siga.siga_ipt.dto.RegistrationResponseDto;
 import cl.siga.siga_ipt.service.RegistrationService;
@@ -24,6 +25,13 @@ public class RegistrationController {
     @PreAuthorize("hasAnyRole('ADMIN', 'STUDENT')")
     public ResponseEntity<RegistrationResponseDto> registerCourse(@Valid @RequestBody RegistrationCreateDto dto) {
         return new ResponseEntity<>(registrationService.registerCourse(dto), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/batch")
+    @PreAuthorize("hasAnyRole('ADMIN', 'STUDENT')")
+    public ResponseEntity<List<RegistrationResponseDto>> registerCourses(
+            @Valid @RequestBody BatchRegistrationCreateDto dto) {
+        return new ResponseEntity<>(registrationService.registerCourses(dto), HttpStatus.CREATED);
     }
 
     // Solo el admin y el estudiante pueden desinscribir ramos

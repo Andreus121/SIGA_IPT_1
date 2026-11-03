@@ -7,7 +7,7 @@ import {
   getSectionsByPeriod,
   getCourseByCodeAndPlan,
   getRegistrationsByStudent,
-  createRegistration,
+  createBatchRegistration,
   deleteRegistration,
   getEnrollmentsByStudent
 } from '../../services/StudentService';
@@ -22,7 +22,7 @@ const StudentRegistrationView = () => {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState(null);
-  const [enrollments, setEnrollments] = useState(null);
+  const [selectedSections, setSelectedSections] = useState([]);
 
   useEffect(() => {
     const initData = async () => {
@@ -56,18 +56,15 @@ const StudentRegistrationView = () => {
     try {
       const sections = await getSectionsByPeriod(selectedPeriod);
       setAvailableSections(sections);
-      console.log("sections", sections);
       const planCode = student.study_plan_code;
       const courseCodes = [...new Set(sections.map((section) => section.course_code))];
-      for (const courseCode of courseCodes) {
-        const course = await getCourseByCodeAndPlan(courseCode, planCode);
-        if (course) {
-          courses.push(course);
-        }
-      }
-      console.log("courses: ", courses);
+      const availableCourses = await Promise.all(
+        courseCodes.map((courseCode) => getCourseByCodeAndPlan(courseCode, planCode))
+      );
+      setCourses(availableCourses.filter(Boolean));
       const registered = await getRegistrationsByStudent(student.run, selectedPeriod);
       setMyRegistrations(registered);
+      setSelectedSections([]);
     } catch (err) {
       setMessage({ type: 'danger', text: 'Error al obtener oferta de secciones o ramos inscritos.' });
     } finally {
@@ -79,12 +76,9 @@ const StudentRegistrationView = () => {
     fetchRegistrationsAndSections();
   }, [selectedPeriod, student]);
 
-  // Obtener todas las matriculas del estudiante por su rut
-  // y verificar si tiene una matricula en el periodo seleccionado
   const fetchEnrollments = async () => {
     try {
       const enrollmentsStudent = await getEnrollmentsByStudent(student.run);
-      setEnrollments(enrollmentsStudent);
       return enrollmentsStudent;
     } catch (err) {
       setMessage({ type: 'danger', text: 'Error al obtener las matrículas del estudiante.' });
@@ -100,7 +94,20 @@ const StudentRegistrationView = () => {
     );
   };
 
-  const handleRegister = async (section_code) => {
+  const toggleSection = (sectionCode) => {
+    setSelectedSections((current) =>
+      current.includes(sectionCode)
+        ? current.filter((code) => code !== sectionCode)
+        : [...current, sectionCode]
+    );
+  };
+
+  const handleRegister = async () => {
+    if (selectedSections.length === 0) {
+      setMessage({ type: 'warning', text: 'Selecciona al menos una sección.' });
+      return;
+    }
+
     if (!(await hasEnrollmentInSelectedPeriod(selectedPeriod))) {
       setMessage({ type: 'danger', text: 'No puedes tomar ramos sin matricularte en el periodo academico' });
       return;
@@ -109,12 +116,12 @@ const StudentRegistrationView = () => {
     setActionLoading(true);
     setMessage(null);
     try {
-      await createRegistration({
+      await createBatchRegistration({
         student_run: student.run,
-        section_code: section_code,
-        period_code: selectedPeriod
+        period_code: selectedPeriod,
+        section_codes: selectedSections
       });
-      setMessage({ type: 'success', text: `Asignatura/Sección ${section_code} inscrita correctamente.` });
+      setMessage({ type: 'success', text: 'Las asignaturas seleccionadas fueron inscritas correctamente.' });
       await fetchRegistrationsAndSections();
     } catch (err) {
       const errorMsg = err.response?.data?.message || 'Error al inscribir la sección.';
@@ -167,6 +174,17 @@ const StudentRegistrationView = () => {
         </Form.Select>
       </Form.Group>
 
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <span>Secciones seleccionadas: {selectedSections.length}</span>
+        <Button
+          variant="primary"
+          disabled={actionLoading || selectedSections.length === 0}
+          onClick={handleRegister}
+        >
+          {actionLoading ? 'Procesando...' : 'Solicitar inscripción'}
+        </Button>
+      </div>
+
       <Row>
         <Col md={12} className="mb-4">
           <Card className="shadow-sm border-0">
@@ -185,7 +203,7 @@ const StudentRegistrationView = () => {
                 <tbody>
                   {myRegistrations.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="text-muted">No has inscrito ramos en este período.</td>
+                      <td colSpan="3" className="text-muted">No has inscrito ramos en este período.</td>
                     </tr>
                   ) : (
                     myRegistrations.map((reg) => (
@@ -216,12 +234,13 @@ const StudentRegistrationView = () => {
         <Col md={12}>
           <Card className="shadow-sm border-0">
             <Card.Header className="bg-dark text-white fw-bold">
-              Oferta de Secciones Disponibles ({selectedPeriod})
+              Oferta de Secciones Disponibles ({selectedPeriod}) 
             </Card.Header>
             <Card.Body className="p-0">
               <Table responsive hover className="mb-0 text-center align-middle">
                 <thead className="table-light">
                   <tr>
+                    <th>Seleccionar</th>
                     <th>Asignatura</th>
                     <th>Sección</th>
                     <th>Capacidad</th>
@@ -232,13 +251,28 @@ const StudentRegistrationView = () => {
                 <tbody>
                   {availableSections.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="text-muted">No hay secciones ofertadas en este período.</td>
+                      <td colSpan="6" className="text-muted">No hay secciones ofertadas en este período.</td>
                     </tr>
                   ) : (
                     availableSections.map((sec) => {
-                      const isAlreadyRegistered = myRegistrations.some((r) => r.sectionCode === sec.code);
+                      const isAlreadyRegistered = myRegistrations.some((r) => r.section_code === sec.code);
+                      const isSelected = selectedSections.includes(sec.code);
+                      const isAnotherSectionSelected = selectedSections.some(
+                        (sectionCode) =>
+                          sectionCode !== sec.code &&
+                          availableSections.find((section) => section.code === sectionCode)?.course_code === sec.course_code
+                      );
                       return (
                         <tr key={sec.id}>
+                          <td>
+                            <Form.Check
+                              type="checkbox"
+                              checked={isSelected}
+                              disabled={actionLoading || isAlreadyRegistered || isAnotherSectionSelected}
+                              onChange={() => toggleSection(sec.code)}
+                              aria-label={`Seleccionar ${sec.code}`}
+                            />
+                          </td>
                           <td className="fw-bold">
                             {courses.find((course) => course.code === sec.course_code)?.name || "error"}
                           </td>
@@ -252,14 +286,7 @@ const StudentRegistrationView = () => {
                             ))}
                           </td>
                           <td>
-                            <Button
-                              variant="primary"
-                              size="sm"
-                              disabled={actionLoading || isAlreadyRegistered}
-                              onClick={() => handleRegister(sec.code)}
-                            >
-                              {isAlreadyRegistered ? 'Inscrito' : 'Inscribir'}
-                            </Button>
+                            {isAlreadyRegistered ? 'Inscrito' : isSelected ? 'Seleccionado' : 'Disponible'}
                           </td>
                         </tr>
                       );

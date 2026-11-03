@@ -36,7 +36,7 @@ const TeacherLayout = () => {
 
   return (
     <>
-      <Navbar bg="primary" variant="dark" expand="lg" className="shadow-sm mb-4">
+      <Navbar bg="dark" variant="dark" expand="lg" className="shadow-sm mb-4">
         <Container>
           <Navbar.Brand as={NavLink} to="/teacher" end className="fw-bold">
             SIGA - Docentes
@@ -54,7 +54,7 @@ const TeacherLayout = () => {
             <div className="d-flex align-items-center gap-3">
               {userProfile && (
                 <span className="navbar-text text-light small">
-                  Prof. {userProfile.lastName}
+                  Prof. {userProfile.first_name}
                 </span>
               )}
               <Button variant="outline-light" size="sm" onClick={handleLogout}>

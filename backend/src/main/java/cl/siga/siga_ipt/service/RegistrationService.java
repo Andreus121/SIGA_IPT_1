@@ -2,6 +2,7 @@ package cl.siga.siga_ipt.service;
 
 import cl.siga.siga_ipt.dto.RegistrationCreateDto;
 import cl.siga.siga_ipt.dto.RegistrationResponseDto;
+import cl.siga.siga_ipt.dto.BatchRegistrationCreateDto;
 import cl.siga.siga_ipt.entity.*;
 import cl.siga.siga_ipt.enums.*;
 import cl.siga.siga_ipt.repository.*;
@@ -30,6 +31,53 @@ public class RegistrationService {
     // Hace la toma de un ramo de un alumno en un periodo
     @Transactional
     public RegistrationResponseDto registerCourse(RegistrationCreateDto dto) {
+        return registerCourseInternal(dto, true);
+    }
+
+    // Inscribe el conjunto completo de ramos de una solicitud de forma atómica.
+    @Transactional
+    public List<RegistrationResponseDto> registerCourses(BatchRegistrationCreateDto dto) {
+        if (new HashSet<>(dto.getSectionCodes()).size() != dto.getSectionCodes().size()) {
+            throw new IllegalArgumentException("No puede seleccionar la misma sección más de una vez.");
+        }
+
+        StudentEntity student = studentRepository.findByRun(dto.getStudentRun())
+                .orElseThrow(() -> new IllegalArgumentException("Estudiante no encontrado con RUN: " + dto.getStudentRun()));
+        long currentRegistrations = registrationRepository.countByStudentRunAndPeriodCode(
+                dto.getStudentRun(), dto.getPeriodCode());
+        long finalRegistrationCount = currentRegistrations + dto.getSectionCodes().size();
+
+        validateMinimumCourseRule(student, dto.getPeriodCode(), finalRegistrationCount);
+
+        List<SectionEntity> sections = dto.getSectionCodes().stream()
+                .map(sectionCode -> sectionRepository.findByCodeAndPeriodCode(sectionCode, dto.getPeriodCode())
+                        .orElseThrow(() -> new IllegalArgumentException("La sección no existe con código: " + sectionCode)))
+                .sorted(Comparator.comparing(section -> courseRepository
+                        .findByCodeAndStudyPlanCode(section.getCourseCode(), student.getStudyPlanCode())
+                        .map(CourseEntity::getSemester)
+                        .orElse(Integer.MAX_VALUE)))
+                .toList();
+
+        long distinctCourses = sections.stream()
+                .map(SectionEntity::getCourseCode)
+                .distinct()
+                .count();
+        if (distinctCourses != sections.size()) {
+            throw new IllegalArgumentException("Solo puede seleccionar una sección por asignatura.");
+        }
+
+        List<RegistrationResponseDto> registrations = new ArrayList<>();
+        for (SectionEntity section : sections) {
+            registrations.add(registerCourseInternal(RegistrationCreateDto.builder()
+                    .studentRun(dto.getStudentRun())
+                    .periodCode(dto.getPeriodCode())
+                    .sectionCode(section.getCode())
+                    .build(), false));
+        }
+        return registrations;
+    }
+
+    private RegistrationResponseDto registerCourseInternal(RegistrationCreateDto dto, boolean enforceMinimumCourseRule) {
         // Periodo académico existente y ABIERTO
         AcademicPeriodEntity period = periodRepository.findByPeriodCode(dto.getPeriodCode())
                 .orElseThrow(() -> new IllegalArgumentException("El período académico no existe: " + dto.getPeriodCode()));
@@ -92,6 +140,10 @@ public class RegistrationService {
             throw new IllegalStateException("El estudiante ha alcanzado el límite máximo de 6 asignaturas para el período.");
         }
 
+        if (enforceMinimumCourseRule) {
+            validateMinimumCourseRule(student, dto.getPeriodCode(), currentRegistrationsCount + 1);
+        }
+
         // Función auxiliar
         // Verificar que pasó todos los ramos de semestres anteriores al ramo que se quiere tomar
         validateLowerSemesterPriority(student, course, dto.getPeriodCode());
@@ -118,6 +170,48 @@ public class RegistrationService {
 
         RegistrationEntity saved = registrationRepository.save(registration);
         return mapToDto(saved);
+    }
+
+    private void validateMinimumCourseRule(StudentEntity student, String periodCode, long finalRegistrationCount) {
+        if (finalRegistrationCount >= 3) {
+            return;
+        }
+
+        List<CourseEntity> planCourses = courseRepository.findByStudyPlanCode(student.getStudyPlanCode());
+        long pendingCourses = planCourses.stream()
+                .filter(course -> !academicHistoryRepository.existsByStudentRunAndCourseCodeAndStatus(
+                        student.getRun(), course.getCode(), AcademicStatus.PASSED))
+                .count();
+
+        if (pendingCourses < 3) {
+            return;
+        }
+
+        long availableCourses = planCourses.stream()
+                .filter(course -> !academicHistoryRepository.existsByStudentRunAndCourseCodeAndStatus(
+                        student.getRun(), course.getCode(), AcademicStatus.PASSED))
+                .filter(course -> !registrationRepository.existsByStudentRunAndCourseCodeAndPeriodCode(
+                        student.getRun(), course.getCode(), periodCode))
+                .filter(course -> sectionRepository.existsByCourseCodeAndPeriodCode(course.getCode(), periodCode))
+                .filter(course -> prerequisiteRepository.findByCourseCodeAndStudyPlanCode(
+                                course.getCode(), student.getStudyPlanCode()).stream()
+                        .allMatch(prerequisite -> academicHistoryRepository
+                                .existsByStudentRunAndCourseCodeAndStatus(
+                                        student.getRun(),
+                                        prerequisite.getPrerequisiteCourseCode(),
+                                        AcademicStatus.PASSED)))
+                .filter(course -> sectionRepository.findByPeriodCode(periodCode).stream()
+                        .filter(section -> section.getCourseCode().equals(course.getCode()))
+                        .anyMatch(section -> registrationRepository.countBySectionCodeAndPeriodCode(
+                                section.getCode(), periodCode) < section.getCapacity()))
+                .count();
+
+        if (availableCourses >= 3) {
+            throw new IllegalStateException(
+                    "Debe inscribir al menos 3 asignaturas por período. " +
+                    "Solo puede inscribir menos si le quedan menos de 3 asignaturas para graduarse " +
+                    "o hay menos de 3 asignaturas disponibles para cursar.");
+        }
     }
 
     // Desinscribir un ramo

@@ -7,6 +7,7 @@ import cl.siga.siga_ipt.enums.*;
 import cl.siga.siga_ipt.repository.*;
 import cl.siga.siga_ipt.service.EnrollmentService;
 import cl.siga.siga_ipt.service.RegistrationService;
+import cl.siga.siga_ipt.dto.BatchRegistrationCreateDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -227,6 +228,54 @@ class EnrollmentRegistrationIntegrationTest {
         var response = registrationService.registerCourse(dto);
         assertThat(response.getCourseCode()).isEqualTo("PROG1");
         assertThat(response.getStatus()).isEqualTo(RegistrationStatus.REGISTERED);
+    }
+
+    @Test
+    @DisplayName("Éxito: Inscribir un conjunto de ramos de forma atómica")
+    void testRegisterCoursesBatch_Success() {
+        enrollmentRepository.save(EnrollmentEntity.builder()
+                .studentRun(regularStudent.getRun())
+                .periodCode("2027-1")
+                .enrollmentDate(LocalDate.now())
+                .status(EnrollmentStatus.ACTIVE)
+                .build());
+
+        BatchRegistrationCreateDto dto = BatchRegistrationCreateDto.builder()
+                .studentRun(regularStudent.getRun())
+                .periodCode("2027-1")
+                .sectionCodes(java.util.List.of("SEC-PROG1-2027-1"))
+                .build();
+
+        var response = registrationService.registerCourses(dto);
+
+        assertThat(response).hasSize(1);
+        assertThat(registrationRepository.countByStudentRunAndPeriodCode(
+                regularStudent.getRun(), "2027-1")).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Rechazo: La inscripción batch no guarda ramos si una sección no existe")
+    void testRegisterCoursesBatch_RollsBackBeforeSaving() {
+        enrollmentRepository.save(EnrollmentEntity.builder()
+                .studentRun(regularStudent.getRun())
+                .periodCode("2027-1")
+                .enrollmentDate(LocalDate.now())
+                .status(EnrollmentStatus.ACTIVE)
+                .build());
+
+        BatchRegistrationCreateDto dto = BatchRegistrationCreateDto.builder()
+                .studentRun(regularStudent.getRun())
+                .periodCode("2027-1")
+                .sectionCodes(java.util.List.of(
+                        "SEC-PROG1-2027-1",
+                        "SEC-NO-EXISTE-2027-1"))
+                .build();
+
+        assertThatThrownBy(() -> registrationService.registerCourses(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("La sección no existe");
+        assertThat(registrationRepository.countByStudentRunAndPeriodCode(
+                regularStudent.getRun(), "2027-1")).isZero();
     }
 
     @Test
